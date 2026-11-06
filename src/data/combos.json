@@ -37,6 +37,12 @@
       "name": "Diagnostics neighbors",
       "blurb": "Related, not interchangeable -- each answers a different \"what's going on\" question (the editor, the program, the codebase, over time).",
       "members": ["dap", "debugging", "insights", "runtime-analysis", "lsp"]
+    },
+    {
+      "id": "work-list",
+      "name": "Work list",
+      "blurb": "One list of open work, fed from three sides: tasks.nvim keeps it, the findings of a rules.nvim check become tasks, and a task can carry the state of testing.nvim's test sheets.",
+      "members": ["tasks", "rules", "testing"]
     }
   ]
 }

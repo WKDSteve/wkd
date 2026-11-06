@@ -7,11 +7,43 @@ import {
   installSnippet,
   isPngIcon,
   latestVersionTag,
+  leadingQuote,
   mentionsRolling,
   statusParagraph,
 } from '../src/lib/app-facts.ts';
 
 const md = (...lines: string[]): string => lines.join('\n');
+
+test('the quote a README opens with is its status, lines joined', () => {
+  assert.equal(
+    leadingQuote(md('> **Beta stage.** Past its first shape', '> and in active use.', '', '# x')),
+    '**Beta stage.** Past its first shape and in active use.',
+  );
+});
+
+test('the icon and blank lines may stand before the opening quote', () => {
+  const readme = md(
+    '![tasks-nvim](assets/icons/tasks-nvim/png/tasks-nvim-128.png)',
+    '',
+    '> **Alpha, not released yet.** The engine is built.',
+    '',
+    '# tasks.nvim',
+  );
+  assert.equal(leadingQuote(readme), '**Alpha, not released yet.** The engine is built.');
+});
+
+test('a quote after a heading, a paragraph or a badge line is prose, not the opening quote', () => {
+  assert.equal(leadingQuote(md('# x', '', '> a remark')), null);
+  assert.equal(leadingQuote(md('A plugin.', '', '> a remark')), null);
+  assert.equal(leadingQuote(md('[![b](https://img/x)](https://x)', '> a remark')), null);
+  assert.equal(leadingQuote(md('![icon](a.png) and text', '> a remark')), null);
+  assert.equal(leadingQuote(''), null);
+});
+
+test('the opening quote ends at the first line that is no quote', () => {
+  assert.equal(leadingQuote(md('> one', '', '> two')), 'one');
+  assert.equal(leadingQuote(md('> one', 'two')), 'one');
+});
 
 test('the English paragraph of a German README is found, without its marker', () => {
   const readme = md(
@@ -185,6 +217,9 @@ test('tech is read from the build files: language first, then the toolkit', () =
     'C++',
   ]);
   assert.deepEqual(detectTech({ paths: ['src/Launcher/Launcher.csproj'], cargoManifests: [] }), [
+    'C#',
+  ]);
+  assert.deepEqual(detectTech({ paths: ['build.ps1', 'src/Chooser.cs'], cargoManifests: [] }), [
     'C#',
   ]);
 });

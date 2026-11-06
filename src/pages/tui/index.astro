@@ -9,6 +9,9 @@ import Shell from '../../skins/tui/Shell.astro';
 const plugins = (await getCollection('plugins')).sort((a, b) =>
   a.data.name.localeCompare(b.data.name),
 );
+// The list below is every entry of the registry; the headline counts what it
+// names, the plugins. (The apps get an area of their own, then this list is plugins only.)
+const pluginCount = plugins.filter((p) => p.data.kind === 'plugin').length;
 const activity = (await getCollection('activity')).sort(byDateDesc).slice(0, 8);
 const features = plugins.reduce((n, p) => n + p.data.featureCount, 0);
 const counts: Record<string, number> = {};
@@ -23,9 +26,9 @@ const banner = [
 ].join('\n');
 ---
 
-<Shell page="" title="wkd — a family of Neovim plugins" description={`${plugins.length} Neovim plugins, one family.`} cmd="ls">
+<Shell page="" title="wkd — a family of Neovim plugins" description={`${pluginCount} Neovim plugins, one family.`} cmd="ls">
   <pre class="banner" aria-hidden="true" tabindex="-1">{banner}</pre>
-  <h1 class="tui-h1">{plugins.length} plugins · {approx(features)} features · one family</h1>
+  <h1 class="tui-h1">{pluginCount} plugins · {approx(features)} features · one family</h1>
   <p class="tui-p tui-dim">
     Generated from the repositories. Taglines, status and commits are read from source at build time.
   </p>

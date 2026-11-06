@@ -43,6 +43,7 @@
     { "name": "spotlight.nvim", "category": "inspect" },
     { "name": "cmdlog.nvim", "category": "inspect" },
     { "name": "rules.nvim", "category": "inspect", "family": "rules" },
+    { "name": "testing.nvim", "category": "inspect", "family": "testing" },
 
     { "name": "sandbox.nvim", "category": "project" },
     { "name": "github_stats.nvim", "category": "project" },
@@ -50,6 +51,7 @@
     { "name": "docmap.nvim", "category": "project", "family": "docmap" },
     { "name": "gitsuite.nvim", "category": "project" },
     { "name": "terminal.nvim", "category": "project" },
+    { "name": "tasks.nvim", "category": "project", "family": "tasks" },
 
     { "name": "ui.nvim", "category": "view" },
     { "name": "color_my_ascii.nvim", "category": "view" },
@@ -60,10 +62,52 @@
 
     { "name": "lib.nvim", "category": "foundation" },
 
-    { "name": "ai-desktop", "kind": "app", "category": "tooling", "family": "ai" },
-    { "name": "docmap-desktop", "kind": "app", "category": "tooling", "family": "docmap" },
-    { "name": "rules-desktop", "kind": "app", "category": "tooling", "family": "rules" },
-    { "name": "tasks-desktop", "kind": "app", "category": "tooling", "family": "tasks" },
-    { "name": "testing-desktop", "kind": "app", "category": "tooling", "family": "testing" }
+    { "name": "pult", "kind": "app", "category": "media", "platforms": ["windows"] },
+    { "name": "streamtap", "kind": "app", "category": "media", "platforms": ["windows"] },
+    { "name": "takt", "kind": "app", "category": "media", "platforms": ["windows"] },
+
+    {
+      "name": "ai-desktop",
+      "kind": "app",
+      "category": "tooling",
+      "family": "ai",
+      "platforms": ["windows", "linux", "macos"]
+    },
+    {
+      "name": "docmap-desktop",
+      "kind": "app",
+      "category": "tooling",
+      "family": "docmap",
+      "platforms": ["windows"]
+    },
+    {
+      "name": "rules-desktop",
+      "kind": "app",
+      "category": "tooling",
+      "family": "rules",
+      "platforms": ["windows"]
+    },
+    {
+      "name": "tasks-desktop",
+      "kind": "app",
+      "category": "tooling",
+      "family": "tasks",
+      "platforms": ["windows"]
+    },
+    {
+      "name": "testing-desktop",
+      "kind": "app",
+      "category": "tooling",
+      "family": "testing",
+      "platforms": ["windows"]
+    },
+    { "name": "hub-desktop", "kind": "app", "category": "tooling", "platforms": ["windows"] },
+
+    { "name": "tasks-web", "kind": "web", "variantOf": "tasks-desktop", "family": "tasks" },
+    { "name": "testing-web", "kind": "web", "variantOf": "testing-desktop", "family": "testing" },
+
+    { "name": "openinnvim", "kind": "app", "category": "system", "platforms": ["windows"] },
+
+    { "name": "appkit", "kind": "kit", "category": "tooling" }
   ]
 }

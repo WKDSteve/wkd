@@ -29,8 +29,11 @@ const testFiles = plugins.reduce((n, p) => n + p.data.testFiles, 0);
 const helpTags = plugins.reduce((n, p) => n + p.data.helpTagCount, 0);
 const counts: Record<string, number> = {};
 for (const p of plugins) counts[p.data.category] = (counts[p.data.category] ?? 0) + 1;
+// The roster below is every entry of the registry; the headline counts what it
+// names, the plugins. (The apps get an area of their own, then this roster is plugins only.)
+const pluginCount = plugins.filter((p) => p.data.kind === 'plugin').length;
 const title = 'wkd — a family of Neovim plugins';
-const description = `${plugins.length} Neovim plugins from one workshop: AI, editing, navigation, debugging, project tooling — one command each, one shared foundation.`;
+const description = `${pluginCount} Neovim plugins from one workshop: AI, editing, navigation, debugging, project tooling — one command each, one shared foundation.`;
 
 // T5: a pool of metrics the client rotates through, a slot at a time -- all
 // derived from data already loaded above, nothing new to fetch. The first
@@ -42,7 +45,7 @@ const countWhere = (f: (p: (typeof plugins)[number]) => boolean) => plugins.filt
 // re-filtering COMBOS for the same slug up to three times per plugin.
 const combosByPlugin = new Map(plugins.map((p) => [p.id, combosFor(p.id)]));
 const statsPool = [
-  { label: 'plugins', value: String(plugins.length) },
+  { label: 'plugins', value: String(pluginCount) },
   { label: 'features', value: approx(features) },
   { label: 'help topics', value: approx(helpTags) },
   { label: 'test files', value: approx(testFiles) },
@@ -75,7 +78,7 @@ const statsPool = [
       github.com/{registry.owner} · <b>{plugins.length} repositories</b>
     </p>
     <h1 class="display" data-kinetic>
-      {plugins.length} plugins.<br />One <b>family</b>.
+      {pluginCount} plugins.<br />One <b>family</b>.
     </h1>
     <p class="m-lede">
       Neovim plugins that share one rule — one command, one concern — and one tested foundation.

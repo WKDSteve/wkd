@@ -32,6 +32,25 @@ export function englishParagraph(md: string): string | null {
 }
 
 /**
+ * The blockquote a README opens with, its lines joined, or null. This is where
+ * the plugins keep their status. Blank lines and the icon (a line that is one
+ * image and nothing else) may come before it; anything else first means the
+ * README has no opening quote, and a quote further down is prose. Markdown is
+ * left in; the caller strips it.
+ */
+export function leadingQuote(md: string): string | null {
+  const quote: string[] = [];
+  for (const raw of md.split(/\r?\n/)) {
+    if (raw.startsWith('>')) quote.push(raw.replace(/^>\s?/, ''));
+    else if (quote.length)
+      break; // the first line that is no quote ends it
+    else if (raw.trim() && !/^!\[[^\]]*\]\([^)]*\)$/.test(raw.trim())) break;
+  }
+  const text = quote.join(' ').trim();
+  return text || null;
+}
+
+/**
  * The status paragraph of an app README: the first paragraph or blockquote
  * that opens with a bold `Status`, e.g. `> **Status: first milestone.** ...`
  * or `**Status (2026-10-31): Phase 0.** ...`. The plugins put a status quote
@@ -155,7 +174,8 @@ export function detectTech({ paths, cargoManifests }: TechInput): string[] {
   const tech: string[] = [];
   if (has((n) => n === 'Cargo.toml')) tech.push('Rust');
   if (has((n) => n === 'CMakeLists.txt')) tech.push('C++');
-  if (has((n) => n.endsWith('.csproj'))) tech.push('C#');
+  // A small C# tool may be built by a script, without a project file.
+  if (has((n) => n.endsWith('.csproj') || n.endsWith('.cs'))) tech.push('C#');
   if (has((n) => n === 'tauri.conf.json') || dep(/^\s*tauri\s*=/m)) tech.push('Tauri');
   if (dep(/^\s*(eframe|egui)\s*=/m)) tech.push('egui');
   return tech;

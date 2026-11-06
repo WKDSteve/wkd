@@ -20,6 +20,7 @@ import {
   installSnippet,
   isPngIcon,
   latestVersionTag,
+  leadingQuote,
   mentionsRolling,
   statusParagraph,
 } from '../lib/app-facts';
@@ -443,8 +444,8 @@ interface ReadmeFacts {
  *   First paragraph = pitch.
  * Nothing here is guessed from a fixed line number; each part is located by
  * its own marker so a README that drops one part still parses. The status
- * quote must be the first non-blank content, though: a quote further down is
- * prose, not status.
+ * quote must be the first non-blank content, though (only the icon, a lone
+ * image line, may stand before it): a quote further down is prose, not status.
  *
  * The app READMEs differ in two marked ways, read by src/lib/app-facts.ts: the
  * status is a paragraph or quote that opens with a bold `Status` (the icon
@@ -454,13 +455,8 @@ interface ReadmeFacts {
 export function parseReadme(md: string): ReadmeFacts {
   const lines = md.split(/\r?\n/);
 
-  const quote: string[] = [];
-  for (const l of lines) {
-    if (l.startsWith('>')) quote.push(l.replace(/^>\s?/, ''));
-    else if (l.trim() || quote.length) break; // first blank line ends the quote
-  }
-  const marked = quote.length ? null : statusParagraph(md);
-  const statusNote = quote.length ? plain(quote.join(' ')) : marked ? plain(marked) : null;
+  const statusText = leadingQuote(md) ?? statusParagraph(md);
+  const statusNote = statusText ? plain(statusText) : null;
   let status: PluginData['status'] = 'unknown';
   if (statusNote) {
     if (/\balpha\b/i.test(statusNote)) status = 'alpha';

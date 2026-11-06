@@ -24,6 +24,7 @@
     --combo-statusline-segments: #d946ef;
     --combo-git-family: #6366f1;
     --combo-diagnostics: #0ea5e9;
+    --combo-work-list: #2563eb;
     /* Focus rings: acid is 1.03:1 on light paper, so use ink there. */
     --focus: light-dark(#0b0b0c, #c6ff3d);
     --line: 1px solid var(--ink);
@@ -831,6 +832,9 @@
   }
   .m-combo-dot[data-combo="diagnostics"] {
     background: var(--combo-diagnostics);
+  }
+  .m-combo-dot[data-combo="work-list"] {
+    background: var(--combo-work-list);
   }
   .m-status {
     font-family: var(--font-mono), monospace;
