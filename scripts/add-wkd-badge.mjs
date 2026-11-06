@@ -64,7 +64,9 @@ const only = process.argv.find((a) => a.startsWith('--only='))?.slice('--only='.
 
 const results = [];
 for (const entry of registry.plugins) {
-  if (entry.kind === 'desktop') continue; // scope: Neovim plugins only, see T1
+  // Scope: Neovim plugins only, see T1. Everything else the registry knows
+  // (app, web, kit) has a README of another shape and a page of its own kind.
+  if ((entry.kind ?? 'plugin') !== 'plugin') continue;
   const slug = entry.name.replace(/\.nvim$/, '');
   if (only && slug !== only) continue;
   const readmePath = resolve(PLUGINS_DIR, entry.name, 'README.md');

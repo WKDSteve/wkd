@@ -568,7 +568,11 @@ function copyIcon(dir: string, entry: Entry, logger: Logger): string | null {
   }
   const outDir = resolve('public/app-icons');
   mkdirSync(outDir, { recursive: true });
-  writeFileSync(join(outDir, `${entry.slug}.png`), bytes);
+  const out = join(outDir, `${entry.slug}.png`);
+  // Written only when it differs: every content sync comes through here, and
+  // in `astro dev` a write into public/ is a change the dev server reacts to.
+  const old = lstatSync(out, { throwIfNoEntry: false })?.isFile() ? readFileSync(out) : null;
+  if (!old?.equals(bytes)) writeFileSync(out, bytes);
   return `app-icons/${entry.slug}.png`;
 }
 
