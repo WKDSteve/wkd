@@ -68,9 +68,21 @@ const nameOf = (slug: string): string => allPlugins.find((p) => p.id === slug)?.
 
     <div class="m-cols">
       <section data-pagefind-ignore>
-        <h2 class="m-h2">Install</h2>
-        <pre class="code"><code>{lazySnippet(d.owner, d.name)}</code></pre>
+        {
+          /* The lazy.nvim spec is for plugins. An app shows the install block
+             of its own README where it has one; until the apps have a page of
+             their own kind, this page is theirs too. */
+        }
+        <h2 class="m-h2">{d.kind === 'plugin' || d.install ? 'Install' : 'Status'}</h2>
+        {
+          d.kind === 'plugin' ? (
+            <pre class="code"><code>{lazySnippet(d.owner, d.name)}</code></pre>
+          ) : d.install ? (
+            <pre class="code"><code>{d.install}</code></pre>
+          ) : null
+        }
         {d.statusNote ? <p class="m-kicker">{d.statusNote}</p> : null}
+        {d.kind !== 'plugin' && !d.install && !d.statusNote ? <p class="m-kicker">See the README.</p> : null}
       </section>
       <section>
         <h2 class="m-h2">Documentation</h2>
