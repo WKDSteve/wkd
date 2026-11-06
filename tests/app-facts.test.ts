@@ -10,6 +10,7 @@ import {
   leadingQuote,
   mentionsRolling,
   plainMarkdown,
+  shownStatusNote,
   statusParagraph,
 } from '../src/lib/app-facts.ts';
 
@@ -28,6 +29,14 @@ test('stars in code spans stay: they are no emphasis', () => {
   );
   assert.equal(plainMarkdown('**Status: see `a*b*c`.** More'), 'Status: see a*b*c. More');
   assert.equal(plainMarkdown('[`latest`](https://x) build'), 'latest build');
+});
+
+test('a README in another language shows no status, an English one shows its own', () => {
+  const german = md('# pult', '', '> **Status: Stufe 2 fertig.**', '', '**English.** A mixer.');
+  assert.equal(shownStatusNote(german, 'Status: Stufe 2 fertig.'), null);
+  const english = md('> **Beta stage.** In use.', '', '# x', '', 'A plugin.');
+  assert.equal(shownStatusNote(english, 'Beta stage. In use.'), 'Beta stage. In use.');
+  assert.equal(shownStatusNote(english, null), null);
 });
 
 test('text that looks like a placeholder stays what it is', () => {

@@ -23,6 +23,7 @@ import {
   leadingQuote,
   mentionsRolling,
   plainMarkdown as plain,
+  shownStatusNote,
   statusParagraph,
 } from '../lib/app-facts';
 import {
@@ -454,12 +455,13 @@ export function parseReadme(md: string): ReadmeFacts {
   const lines = md.split(/\r?\n/);
 
   const statusText = leadingQuote(md) ?? statusParagraph(md);
-  const statusNote = statusText ? plain(statusText) : null;
+  const statusRaw = statusText ? plain(statusText) : null;
+  const statusNote = shownStatusNote(md, statusRaw);
   let status: PluginData['status'] = 'unknown';
-  if (statusNote) {
-    if (/\balpha\b/i.test(statusNote)) status = 'alpha';
-    else if (/\bbeta\b/i.test(statusNote)) status = 'beta';
-    else if (/\bstable\b/i.test(statusNote)) status = 'stable';
+  if (statusRaw) {
+    if (/\balpha\b/i.test(statusRaw)) status = 'alpha';
+    else if (/\bbeta\b/i.test(statusRaw)) status = 'beta';
+    else if (/\bstable\b/i.test(statusRaw)) status = 'stable';
   }
 
   let banner: string | null = null;

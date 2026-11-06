@@ -67,7 +67,8 @@ An entry of kind `app` is read for a few things more, located by convention like
 ```
 
 A README written in German (pult, takt) carries one paragraph `**English.** …`; where there is
-one, it is the pitch on this site, for every kind.
+one, it is the pitch on this site, for every kind, and the status paragraph of that README is
+not shown (it is in German, this site is English).
 
 - `src/data/registry.json` — the only hand-maintained list. Adding a plugin is one line here.
   Per entry:

@@ -73,6 +73,16 @@ export function leadingQuote(md: string): string | null {
 }
 
 /**
+ * The status text a page may show, given the one found in the README. A README
+ * with an `**English.**` paragraph is written in another language, so its
+ * status is too, and this site is English: it shows none rather than a German
+ * paragraph. The status word (alpha, beta) is read from the raw text regardless.
+ */
+export function shownStatusNote(md: string, statusText: string | null): string | null {
+  return englishParagraph(md) ? null : statusText;
+}
+
+/**
  * The status paragraph of an app README: the first paragraph or blockquote
  * that opens with a bold `Status`, e.g. `> **Status: first milestone.** ...`
  * or `**Status (2026-10-31): Phase 0.** ...`. The plugins put a status quote
