@@ -17,14 +17,16 @@ for (const id of Object.keys(CATEGORIES)) {
 
 interface Props {
   counts: Record<string, number>;
+  /** what a screen reader announces for the group */
+  legend?: string;
 }
-const { counts } = Astro.props;
+const { counts, legend = 'Filter plugins by category' } = Astro.props;
 const total = Object.values(counts).reduce((n, c) => n + c, 0);
 const cats = Object.entries(CATEGORIES).filter(([id]) => (counts[id] ?? 0) > 0);
 ---
 
 <fieldset class="filter">
-  <legend class="visually-hidden">Filter plugins by category</legend>
+  <legend class="visually-hidden">{legend}</legend>
   <input class="visually-hidden" type="radio" name="cat" id="cat-all" checked />
   <label for="cat-all">all <span class="filter-n">{total}</span></label>
   {

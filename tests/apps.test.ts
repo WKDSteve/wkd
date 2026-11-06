@@ -102,6 +102,13 @@ test('every stage has a section, and every app of the real registry is in one', 
   assert.deepEqual([...listed].sort(), [...apps].sort());
 });
 
+test('the filter of the apps pages does not announce itself as a filter of plugins', () => {
+  for (const page of ['apps/index.astro', 'tui/apps/index.astro']) {
+    const src = readFileSync(new URL(`../src/pages/${page}`, import.meta.url), 'utf8');
+    assert.match(src, /<CategoryFilter [^>]*legend="Filter apps by category"/, page);
+  }
+});
+
 test('filter.css hides a section the chosen category leaves empty, for every app category', () => {
   const real = JSON.parse(
     readFileSync(new URL('../src/data/registry.json', import.meta.url), 'utf8'),
