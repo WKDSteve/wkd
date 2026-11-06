@@ -56,6 +56,10 @@
 
     { "name": "lib.nvim", "category": "foundation" },
 
-    { "name": "docmap-desktop", "category": "desktop", "kind": "desktop" }
+    { "name": "ai-desktop", "category": "desktop", "kind": "desktop" },
+    { "name": "docmap-desktop", "category": "desktop", "kind": "desktop" },
+    { "name": "rules-desktop", "category": "desktop", "kind": "desktop" },
+    { "name": "tasks-desktop", "category": "desktop", "kind": "desktop" },
+    { "name": "testing-desktop", "category": "desktop", "kind": "desktop" }
   ]
 }
