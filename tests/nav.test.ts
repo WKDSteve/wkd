@@ -55,9 +55,12 @@ function build(files: Record<string, string>): Pick<RouteCheck, 'exists' | 'read
   };
 }
 
-const moved = (url: string): string =>
+// The page at an old address: it sends on to `url` (the page of its own skin)
+// and names the address of the modern skin as canonical, as every page does.
+const CANONICAL = 'https://example.invalid/wkd/nvim/stack/';
+const moved = (url: string, canonical = CANONICAL): string =>
   `<!doctype html><html><head><meta http-equiv="refresh" content="0; url=${url}">` +
-  `<link rel="canonical" href="https://example.invalid${url}"></head><body></body></html>`;
+  `<link rel="canonical" href="${canonical}"></head><body></body></html>`;
 
 const goodFiles = (): Record<string, string> => ({
   'index.html': '',
@@ -121,8 +124,39 @@ test('a moved address must still answer, send on to the right skin and name a ca
 
 test('a page that only links to the new address does not count as sending on', () => {
   const files = goodFiles();
-  files['stack/index.html'] = '<link rel="canonical" href="x"><a href="/wkd/nvim/stack/">moved</a>';
+  files['stack/index.html'] =
+    `<link rel="canonical" href="${CANONICAL}"><a href="/wkd/nvim/stack/">moved</a>`;
   assert.deepEqual(check(files), ['stack/index.html does not send on to /wkd/nvim/stack/']);
+});
+
+test('the refresh is read whatever the order and the quoting of its attributes', () => {
+  const link = `<link href="${CANONICAL}" rel=canonical>`;
+  for (const meta of [
+    '<meta content="0; url=/wkd/nvim/stack/" http-equiv="refresh">',
+    "<meta http-equiv=refresh content='0;url=/wkd/nvim/stack/'>",
+    '<META HTTP-EQUIV="Refresh" CONTENT="0; URL=/wkd/nvim/stack/">',
+  ]) {
+    const files = goodFiles();
+    files['stack/index.html'] = `<head>${meta}${link}</head>`;
+    assert.deepEqual(check(files), [], meta);
+  }
+});
+
+test('a delayed refresh, or one to another address, does not send the visitor on', () => {
+  for (const content of ['5; url=/wkd/nvim/stack/', '0; url=/wkd/nvim/', '0']) {
+    const files = goodFiles();
+    files['stack/index.html'] =
+      `<meta http-equiv="refresh" content="${content}"><link rel="canonical" href="${CANONICAL}">`;
+    assert.deepEqual(check(files), ['stack/index.html does not send on to /wkd/nvim/stack/']);
+  }
+});
+
+test('the canonical address of a moved page is the new one', () => {
+  const files = goodFiles();
+  files['stack/index.html'] = moved('/wkd/nvim/stack/', 'https://example.invalid/wkd/stack/');
+  assert.deepEqual(check(files), [
+    'stack/index.html names https://example.invalid/wkd/stack/ as canonical, not /wkd/nvim/stack/',
+  ]);
 });
 
 // ---- the real source tree ----------------------------------------------------

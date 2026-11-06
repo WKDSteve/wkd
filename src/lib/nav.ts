@@ -102,20 +102,38 @@ export function routeProblems(c: RouteCheck): string[] {
         continue;
       }
       const html = c.read(f);
+      // The refresh goes to the page of the same skin; the canonical address
+      // is the one of the modern skin, as on every page.
       const url = `${c.base}${skin}${to}/`;
-      const refresh = new RegExp(
-        `<meta[^>]+http-equiv=["']?refresh["']?[^>]+content=["']0;\\s*url=${escapeRe(url)}["']`,
-        'i',
+      const sendsOn = tags(html, 'meta').some(
+        (t) =>
+          /^refresh$/i.test(attr(t, 'http-equiv') ?? '') && refreshUrl(attr(t, 'content')) === url,
       );
-      if (!refresh.test(html)) problems.push(`${f} does not send on to ${url}`);
-      if (!/<link[^>]+rel=["']?canonical["']?/i.test(html)) {
-        problems.push(`${f} names no canonical address`);
+      if (!sendsOn) problems.push(`${f} does not send on to ${url}`);
+      const canonical = tags(html, 'link')
+        .filter((t) => /^canonical$/i.test(attr(t, 'rel') ?? ''))
+        .map((t) => attr(t, 'href') ?? '');
+      if (canonical.length === 0) problems.push(`${f} names no canonical address`);
+      else if (!canonical.some((h) => h.endsWith(`${c.base}${to}/`))) {
+        problems.push(`${f} names ${canonical[0]} as canonical, not ${c.base}${to}/`);
       }
     }
   }
   return problems;
 }
 
-function escapeRe(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
+/** Every `<name ...>` tag of a document, as written. */
+function tags(html: string, name: string): string[] {
+  return html.match(new RegExp(`<${name}\\b[^>]*>`, 'gi')) ?? [];
+}
+
+/** The value of an attribute of a tag, quoted or not, whatever the order of the attributes. */
+function attr(tag: string, name: string): string | null {
+  const m = tag.match(new RegExp(`\\s${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s>]+))`, 'i'));
+  return m ? (m[1] ?? m[2] ?? m[3] ?? '') : null;
+}
+
+/** The address of an immediate refresh (`0; url=/x/`), or null for a delayed or an empty one. */
+function refreshUrl(content: string | null): string | null {
+  return content?.match(/^\s*0\s*;\s*url=(.+?)\s*$/i)?.[1] ?? null;
 }
