@@ -5,6 +5,7 @@ import Search from '../../components/Search.astro';
 import '../../styles/tui.css';
 import '../../styles/themes.css';
 import { CATEGORIES } from '../../lib/format';
+import { builtAreas } from '../../lib/nav';
 import { href, THEMES } from '../../lib/site';
 
 interface Props {
@@ -17,12 +18,20 @@ interface Props {
 const { page, title, description, mode = 'NORMAL', cmd = '' } = Astro.props;
 const modernHref = href(page, 'modern');
 
+// Every entry is in the sidebar (the command line completes from it); the
+// plugin categories come first, the categories of the apps after them.
 const plugins = (await getCollection('plugins')).sort((a, b) =>
   a.data.name.localeCompare(b.data.name),
 );
+const pluginCount = plugins.filter((p) => p.data.kind === 'plugin').length;
 const groups = Object.entries(CATEGORIES)
   .map(([id, label]) => ({ id, label, items: plugins.filter((p) => p.data.category === id) }))
   .filter((g) => g.items.length > 0);
+// The areas that have a page file, minus the ones the sidebar places itself
+// (the root, the plugin area, the activity log). Only the keys are used.
+const moreAreas = builtAreas(Object.keys(import.meta.glob('../../pages/**/*.astro'))).filter(
+  (a) => !['', 'nvim', 'activity'].includes(a.page),
+);
 const current = page.startsWith('p/') ? page.slice(2) : null;
 const file = page ? `~/wkd/${page}` : '~/wkd';
 ---
@@ -49,8 +58,11 @@ const file = page ? `~/wkd/${page}` : '~/wkd';
       <button type="button" data-skin-keep>:set skin=tui</button> --
     </div>
     <div class="tui-body">
-      <nav class="tui-side" aria-label="Plugins">
+      <nav class="tui-side" aria-label="Site">
         <a class="root" href={href('', 'tui')} data-nav="">~/wkd/</a>
+        <a class="grp-h" href={href('nvim', 'tui')} data-nav="nvim">
+          <span aria-hidden="true">▸ </span>nvim/
+        </a>
         {
           groups.map((g) => (
             <div class="grp">
@@ -72,10 +84,18 @@ const file = page ? `~/wkd/${page}` : '~/wkd';
             </div>
           ))
         }
+        {
+          moreAreas.map((a) => (
+            <a class="grp-h" href={href(a.page, 'tui')} data-nav={a.page}>
+              <span aria-hidden="true">▸ </span>
+              {a.tui}
+            </a>
+          ))
+        }
         <a class="grp-h" href={href('activity', 'tui')} data-nav="activity">
           <span aria-hidden="true">▸ </span>activity.log
         </a>
-        <a class="grp-h" href={href('stack', 'tui')} data-nav="stack">
+        <a class="grp-h" href={href('nvim/stack', 'tui')} data-nav="nvim/stack">
           <span aria-hidden="true">▸ </span>stack.txt
         </a>
       </nav>
@@ -85,7 +105,7 @@ const file = page ? `~/wkd/${page}` : '~/wkd';
       <Search placeholder={cmd} />
       <span class="pos">
         {/* `?` is handled by src/scripts/vim.ts; hidden without scripting (tui.css). */}
-        <span class="pos-keys"><kbd>?</kbd> keys · </span>{plugins.length} plugins
+        <span class="pos-keys"><kbd>?</kbd> keys · </span>{pluginCount} plugins
       </span>
     </footer>
   </div>

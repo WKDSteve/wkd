@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { defineConfig, fontProviders } from 'astro/config';
 import { pagefindIntegration } from './src/integrations/pagefind';
+import { routesIntegration } from './src/integrations/routes';
 import { BOOT } from './src/lib/boot';
 import { fightPickCss } from './src/lib/fightCss';
 
@@ -30,7 +31,8 @@ export default defineConfig({
   prefetch: { prefetchAll: false, defaultStrategy: 'hover' },
   // No markdown is rendered yet; Shiki's inline styles would break the hashed CSP.
   markdown: { syntaxHighlight: false },
-  integrations: [pagefindIntegration()],
+  // routesIntegration fails a build that misses an address linked from outside.
+  integrations: [pagefindIntegration(), routesIntegration()],
   security: {
     // Static output: Astro emits a hashed <meta http-equiv> CSP. GitHub Pages
     // cannot send headers, so this is the only CSP we can ship there.

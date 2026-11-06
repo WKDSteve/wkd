@@ -1,0 +1,35 @@
+---
+import { BASE, href, type Skin } from '../lib/site';
+
+// A page whose address moved. GitHub Pages cannot answer with a redirect
+// status, so the old address serves this: a document that sends the visitor
+// on at once (meta refresh), names the new address as canonical and keeps a
+// plain link for a browser that does not follow the refresh. It brings no
+// script and no stylesheet of its own (Astro still adds the CSP meta and its
+// prefetch module, as to every page); the refresh needs neither.
+// Every pair is listed in MOVED (src/lib/nav.ts), which the build check reads.
+interface Props {
+  /** site-relative page the visitor is sent to, e.g. "nvim/stack" */
+  to: string;
+  skin: Skin;
+}
+const { to, skin } = Astro.props;
+const target = href(to, skin);
+const canonical = new URL(href(to), Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Moved — wkd</title>
+    <meta name="robots" content="noindex" />
+    <meta http-equiv="refresh" content={`0; url=${target}`} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href={`${BASE}favicon.svg`} type="image/svg+xml" />
+  </head>
+  <body>
+    <p>This page moved to <a href={target}>{target}</a>.</p>
+  </body>
+</html>

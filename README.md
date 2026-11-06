@@ -17,6 +17,29 @@ Both skins are built statically from the same collections. The switcher is a pla
 the same page in the other skin; `src/scripts/prefs.ts` remembers the choice in
 `localStorage` and rewrites internal links on later visits (no redirects, no flash).
 
+## Areas and addresses
+
+| Area | Address | What is there |
+|---|---|---|
+| Start | `/wkd/` | the way in: the plugin area and, until they have their own, the apps as a list |
+| Neovim plugins | `/wkd/nvim/` | the roster with its category filter, Tree, Orbit and the fight; the stack at `/wkd/nvim/stack/` |
+| A plugin or an app | `/wkd/p/<slug>/` | its page; the help of a plugin at `/wkd/p/<slug>/help/` |
+| Activity | `/wkd/activity/` | every recent commit |
+
+Every page exists in both skins (`tests/nav.test.ts` holds each modern page to a twin under
+`src/pages/tui/`). The areas are listed in `src/lib/nav.ts` (`AREAS`); the header of the modern
+skin and the sidebar of the TUI skin show the ones that have a page file, so a planned area
+(`apps`, `play`) appears in the navigation by itself once its page exists, and never before.
+
+**Addresses that are linked from outside stay.** The READMEs of the plugins carry a badge that
+points at `/wkd/p/<slug>/`, so the plugin pages do not move. An address that does move is
+entered in `MOVED` (`src/lib/nav.ts`: `stack` is `nvim/stack` now) and keeps a page at the old
+place that sends the visitor on (`src/components/Moved.astro`: a meta refresh, the new address
+as canonical, a plain link; GitHub Pages cannot answer with a redirect status). After every
+build `src/integrations/routes.ts` checks that every plugin page, every area and every moved
+address is in the output, in both skins, and fails the build otherwise, so a deploy cannot
+break a link that is already out in the world.
+
 ## How content gets in
 
 ```
@@ -93,7 +116,7 @@ worker, worklet or WASM file has to be checked against `pnpm build && pnpm previ
   ~12 KB gzipped) carries the preference helper, search UI, view switcher, Vim keys and the
   fight minigame's shell; the Pagefind engine loads only when the search field is focused
   for a search (the TUI command line reuses the field but never loads it).
-- **Fight** (modern skin, fourth tab of the home view switcher): a small 1v1 fighting game.
+- **Fight** (modern skin, fourth tab of the view switcher of the plugin area): a small 1v1 fighting game.
   `src/scripts/fight.ts` is the shell (canvas, sprites, HUD, input); the rules are a
   deterministic 60 Hz simulation over one `Int32Array` in `src/lib/fight-engine/sim.ts`,
   which is what makes the rest possible:
@@ -135,7 +158,7 @@ worker, worklet or WASM file has to be checked against `pnpm build && pnpm previ
 - **Vim operation** of the TUI skin (`src/scripts/vim.ts`, progressive — everything is a
   plain link underneath): `j`/`k`/`gg`/`G` move a cursor line over the links in `<main>`,
   `:` opens a command line in the footer that shares the search field (`:help x`, `:e x`,
-  `:ls`, `:log`, `:colorscheme x`, `:set skin=modern|tui`, `:q`; `Tab` / `Shift+Tab` cycle
+  `:ls`, `:cd`, `:stack`, `:log`, `:colorscheme x`, `:set skin=modern|tui`, `:q`; `Tab` / `Shift+Tab` cycle
   through the completions of commands, plugin names and themes; `:help x` on a plugin
   without `doc/*.txt` fails with E149 instead of landing on a 404), `?` opens the key help,
   and the statusline shows NORMAL / INSERT / COMMAND.
@@ -145,13 +168,13 @@ worker, worklet or WASM file has to be checked against `pnpm build && pnpm previ
   code blocks, `~` headings, `'option'`, `<Key>`; everything HTML-escaped first. Help pages are
   in the search index (modern skin only, like the plugin pages), so `:help`-style searches
   work site-wide.
-- **Stack** (`/stack`): the `require()` edges between the plugins, read from every file of each
+- **Stack** (`/nvim/stack`): the `require()` edges between the plugins, read from every file of each
   `lua/` tree (Lua comments excluded); a require inside `pcall` -- `pcall(require, …)` included --
   counts as *optional*. "Depended on" ranking plus a per-plugin tree.
-- **Category filter** on the home pages is pure CSS: radio inputs plus `:has()` rules in
+- **Category filter** of the plugin area is pure CSS: radio inputs plus `:has()` rules in
   `src/styles/filter.css`. Adding a category to the registry (`categories` or `appCategories`)
   means adding one rule there; the build and `tests/registry.test.ts` fail without it.
-- **Home statistics** (modern skin) are derived from the checkouts, never typed in, and shown
+- **The statistics of the plugin area** (modern skin) are derived from the checkouts, never typed in, and shown
   as rounded floors ("900+", `approx()` in `src/lib/format.ts`) so they stay true as the family
   grows: *features* = `##` sections across every `docs/FEATURES/*.md` or a single
   `docs/FEATURES.md` (code fences and the folder's `README.md` excluded), *help topics* =
@@ -288,3 +311,4 @@ To rebuild the site on every plugin push, add this to each plugin repo's CI:
 | 3 | Demo pipeline: VHS `.tape` scripts recorded in CI → webm/mp4 + poster on the plugin pages | **pipeline done**; tapes: cascade, emojis, replacer, spotlight, data, diff, markdown, color_my_ascii, hover, insights, fileops, buffer-ctx, recommender, sessions, ui, gopath, runtime-analysis, docmap, pickers, cmdlog |
 | 4 | TUI skin: vim motions (`j`/`k`/`gg`/`G`), `:` command line with completion, `?` help | **done** |
 | 5 | Vimdoc renderer (`doc/*.txt` → HTML with `\|tag\|` links; `:help` opens it), `/stack` dependency graph | **done** |
+| 6 | From the site of the plugins to the site of the workshop: kinds and families in the registry, the plugin area at `/nvim/`, an area and pages for the apps, a new start page, the fight on a page of its own | registry and plugin area **done**; apps, start page and play open |

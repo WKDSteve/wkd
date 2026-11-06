@@ -93,7 +93,7 @@ function init(): void {
       // :help on a plugin page opens that plugin's help; elsewhere the list.
       slug = currentPage.match(/^p\/([^/]+)/)?.[1] ?? null;
       if (!slug) {
-        go('');
+        go('nvim');
         return;
       }
     } else {
@@ -119,7 +119,13 @@ function init(): void {
       desc: 'vimdoc of a plugin',
       run: (arg) => openPlugin(arg, '/help'),
     },
-    { name: 'stack', aliases: [], arg: null, desc: 'dependency graph', run: () => go('stack') },
+    {
+      name: 'stack',
+      aliases: [],
+      arg: null,
+      desc: 'dependency graph',
+      run: () => go('nvim/stack'),
+    },
     {
       name: 'edit',
       aliases: ['e'],
@@ -127,7 +133,8 @@ function init(): void {
       desc: 'open a plugin page',
       run: (arg) => openPlugin(arg),
     },
-    { name: 'ls', aliases: ['plugins'], arg: null, desc: 'all plugins', run: () => go('') },
+    { name: 'ls', aliases: ['plugins'], arg: null, desc: 'all plugins', run: () => go('nvim') },
+    { name: 'cd', aliases: ['start'], arg: null, desc: 'the start page', run: () => go('') },
     {
       name: 'log',
       aliases: ['activity'],

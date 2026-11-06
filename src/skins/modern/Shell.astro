@@ -3,6 +3,7 @@ import Base from '../../components/Base.astro';
 import Search from '../../components/Search.astro';
 import '../../styles/modern.css';
 import registry from '../../data/registry.json';
+import { builtAreas } from '../../lib/nav';
 import { href, MODES } from '../../lib/site';
 
 interface Props {
@@ -12,6 +13,12 @@ interface Props {
 }
 const { page, title, description } = Astro.props;
 const tuiHref = href(page, 'tui');
+// The areas that have a page file; the brand is the link to the start page.
+// Only the keys are used: nothing is imported, a planned area without a page
+// (apps, play) simply is not in the list yet.
+const areas = builtAreas(Object.keys(import.meta.glob('../../pages/**/*.astro'))).filter(
+  (a) => a.page !== '',
+);
 ---
 
 <Base skin="modern" page={page} title={title} description={description}>
@@ -20,9 +27,18 @@ const tuiHref = href(page, 'tui');
     <a class="m-brand" href={href('')} data-nav="" data-astro-prefetch>wkd</a>
     <Search placeholder="search" />
     <nav class="m-nav" aria-label="Site">
-      <a href={href('')} data-nav="" data-astro-prefetch>Plugins</a>
-      <a href={href('activity')} data-nav="activity" data-astro-prefetch>Activity</a>
-      <a href={href('stack')} data-nav="stack" data-astro-prefetch>Stack</a>
+      {
+        areas.map((a) => (
+          <a
+            href={href(a.page)}
+            data-nav={a.page}
+            aria-current={page === a.page || page.startsWith(`${a.page}/`) ? 'page' : undefined}
+            data-astro-prefetch
+          >
+            {a.label}
+          </a>
+        ))
+      }
       <label class="m-select">
         <span class="visually-hidden">Color mode</span>
         <select data-mode-select>

@@ -1,0 +1,121 @@
+// The areas of the site and the addresses that moved. Free of Astro and of
+// other project imports on purpose: the shells and the build check use it,
+// and tests/nav.test.ts runs it under plain `node --test`.
+
+export interface Area {
+  /** site-relative page path, '' for the start page */
+  page: string;
+  /** label in the header of the modern skin */
+  label: string;
+  /** entry in the sidebar of the TUI skin */
+  tui: string;
+}
+
+/** Every area the site is planned to have, in the order of the navigation. */
+export const AREAS: readonly Area[] = [
+  { page: '', label: 'Start', tui: '~/wkd/' },
+  { page: 'nvim', label: 'Plugins', tui: 'nvim/' },
+  { page: 'apps', label: 'Apps', tui: 'apps/' },
+  { page: 'play', label: 'Play', tui: 'play/' },
+  { page: 'activity', label: 'Activity', tui: 'activity.log' },
+];
+
+/**
+ * Addresses that moved, old page to new page (both site-relative, the same in
+ * each skin). The old address keeps answering with a page that sends the
+ * visitor on; the build check holds every pair to that.
+ */
+export const MOVED: Readonly<Record<string, string>> = {
+  stack: 'nvim/stack',
+};
+
+/**
+ * The page a file under src/pages/ serves, or null for a file that is no page
+ * of the modern skin (a dynamic route, a file of the TUI skin):
+ * `index.astro` is '', `activity.astro` and `nvim/index.astro` are 'activity'
+ * and 'nvim'. `file` is a path that ends in `pages/<...>.astro`, with either
+ * kind of slash.
+ */
+export function pageOfFile(file: string): string | null {
+  const rel = file.replace(/\\/g, '/').match(/(?:^|\/)pages\/(.+)\.astro$/)?.[1];
+  if (rel === undefined || rel.includes('[')) return null;
+  if (rel === 'tui' || rel.startsWith('tui/')) return null;
+  return rel === 'index' ? '' : rel.replace(/\/index$/, '');
+}
+
+/**
+ * The areas that have a page, in navigation order. An area that is planned
+ * but not built yet is left out, so the navigation never offers a link into
+ * nothing; it appears by itself once its page file exists.
+ */
+export function builtAreas(pageFiles: readonly string[]): Area[] {
+  const pages = new Set(pageFiles.map(pageOfFile).filter((p): p is string => p !== null));
+  return AREAS.filter((a) => pages.has(a.page));
+}
+
+export interface RouteCheck {
+  /** whether a file exists, by its path relative to the build output, forward slashes */
+  exists: (path: string) => boolean;
+  /** the text of such a file */
+  read: (path: string) => string;
+  /** base path of the site with a leading and a trailing slash, e.g. '/wkd/' */
+  base: string;
+  /** slugs of the plugins whose checkout was there to build from */
+  pluginSlugs: readonly string[];
+  /** the areas the navigation shows */
+  areas: readonly Area[];
+  /** old page to new page */
+  moved: Readonly<Record<string, string>>;
+}
+
+const SKIN_PREFIXES = ['', 'tui/'] as const;
+
+/**
+ * What a finished build must contain, as a list of problems (empty when all
+ * is well). These are the addresses that are already out in the world:
+ *
+ * - every plugin page, in both skins: the READMEs of the plugins carry a
+ *   badge that links to `p/<slug>/`;
+ * - every area the navigation shows, in both skins;
+ * - every address that moved: a page that sends the visitor to the new one
+ *   (meta refresh) and names it as canonical, and the new page itself.
+ */
+export function routeProblems(c: RouteCheck): string[] {
+  const problems: string[] = [];
+  const file = (page: string, skin: string): string => `${skin}${page ? `${page}/` : ''}index.html`;
+
+  for (const skin of SKIN_PREFIXES) {
+    for (const slug of c.pluginSlugs) {
+      const f = file(`p/${slug}`, skin);
+      if (!c.exists(f)) problems.push(`plugin page missing: ${f}`);
+    }
+    for (const area of c.areas) {
+      const f = file(area.page, skin);
+      if (!c.exists(f)) problems.push(`area "${area.label}" has no page: ${f}`);
+    }
+    for (const [from, to] of Object.entries(c.moved)) {
+      const target = file(to, skin);
+      if (!c.exists(target)) problems.push(`${from} moved to ${to}, which has no page: ${target}`);
+      const f = file(from, skin);
+      if (!c.exists(f)) {
+        problems.push(`moved address has no page that sends on: ${f}`);
+        continue;
+      }
+      const html = c.read(f);
+      const url = `${c.base}${skin}${to}/`;
+      const refresh = new RegExp(
+        `<meta[^>]+http-equiv=["']?refresh["']?[^>]+content=["']0;\\s*url=${escapeRe(url)}["']`,
+        'i',
+      );
+      if (!refresh.test(html)) problems.push(`${f} does not send on to ${url}`);
+      if (!/<link[^>]+rel=["']?canonical["']?/i.test(html)) {
+        problems.push(`${f} names no canonical address`);
+      }
+    }
+  }
+  return problems;
+}
+
+function escapeRe(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
+}
