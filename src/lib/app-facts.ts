@@ -22,7 +22,7 @@ export function plainMarkdown(s: string): string {
     .replace(/\*([^*]+)\*/g, '$1')
     .replace(/\s+/g, ' ')
     .trim()
-    .replace(new RegExp(`${HOLD}(\d+)${HOLD}`, 'g'), (_, i: string) => code[Number(i)] ?? '');
+    .replace(new RegExp(`${HOLD}(\\d+)${HOLD}`, 'g'), (_, i: string) => code[Number(i)] ?? '');
 }
 
 /**
