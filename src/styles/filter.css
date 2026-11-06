@@ -16,6 +16,14 @@
     display: none;
   }
 
+  /* The apps page has sections: one the chosen category leaves empty goes too,
+     heading included. */
+  .home:has(#cat-media:checked) .apps-section:not(:has([data-cat="media"])),
+  .home:has(#cat-tooling:checked) .apps-section:not(:has([data-cat="tooling"])),
+  .home:has(#cat-system:checked) .apps-section:not(:has([data-cat="system"])) {
+    display: none;
+  }
+
   .filter {
     border: 0;
     padding: 0;

@@ -9,10 +9,31 @@ import {
   latestVersionTag,
   leadingQuote,
   mentionsRolling,
+  plainMarkdown,
   statusParagraph,
 } from '../src/lib/app-facts.ts';
 
 const md = (...lines: string[]): string => lines.join('\n');
+
+test('inline markdown comes down to plain text', () => {
+  assert.equal(plainMarkdown('A **bold** and *soft* `code` word'), 'A bold and soft code word');
+  assert.equal(plainMarkdown('See [the docs](https://x/y) ![icon](a.png)now'), 'See the docs now');
+  assert.equal(plainMarkdown('  two\n  lines  '), 'two lines');
+});
+
+test('stars in code spans stay: they are no emphasis', () => {
+  assert.equal(
+    plainMarkdown('One place to start every `*-desktop` and `*-web` app'),
+    'One place to start every *-desktop and *-web app',
+  );
+  assert.equal(plainMarkdown('**Status: see `a*b*c`.** More'), 'Status: see a*b*c. More');
+  assert.equal(plainMarkdown('[`latest`](https://x) build'), 'latest build');
+});
+
+test('text that looks like a placeholder stays what it is', () => {
+  assert.equal(plainMarkdown('E0000E000 and `x`'), 'E0000E000 and x');
+  assert.equal(plainMarkdown('0 and `x` and 0'), '0 and x and 0');
+});
 
 test('the quote a README opens with is its status, lines joined', () => {
   assert.equal(

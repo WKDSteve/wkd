@@ -32,7 +32,27 @@ test('an entry without a kind is a plugin, with every field decided', () => {
     family: null,
     variantOf: null,
     platforms: [],
+    stage: null,
   });
+});
+
+test('an app states where it stands; nothing else carries a stage', () => {
+  const [e] = validateRegistry(
+    base([{ name: 'pult', kind: 'app', category: 'media', stage: 'showcase' }]),
+  );
+  assert.equal(e?.stage, 'showcase');
+  assert.throws(
+    () => validateRegistry(base([{ name: 'pult', kind: 'app', category: 'media' }])),
+    /pult \(app\) needs a stage: showcase, companion, building; has ""/,
+  );
+  assert.throws(
+    () => validateRegistry(base([{ name: 'pult', kind: 'app', category: 'media', stage: 'done' }])),
+    /pult \(app\) needs a stage: showcase, companion, building; has "done"/,
+  );
+  assert.throws(
+    () => validateRegistry(base([{ name: 'a.nvim', category: 'edit', stage: 'showcase' }])),
+    /a\.nvim has a stage but is no app/,
+  );
 });
 
 test('the slug drops .nvim and nothing else', () => {
@@ -84,7 +104,13 @@ test('a web variant names its app and takes its category', () => {
   const entries = validateRegistry(
     base([
       { name: 'tasks-web', kind: 'web', variantOf: 'tasks-desktop', family: 'tasks' },
-      { name: 'tasks-desktop', kind: 'app', category: 'tooling', family: 'tasks' },
+      {
+        name: 'tasks-desktop',
+        kind: 'app',
+        category: 'tooling',
+        family: 'tasks',
+        stage: 'companion',
+      },
     ]),
   );
   const web = bySlug(entries, 'tasks-web');
@@ -95,7 +121,7 @@ test('a web variant names its app and takes its category', () => {
 test('a web variant may state its own category, from the apps', () => {
   const entries = validateRegistry(
     base([
-      { name: 'a-desktop', kind: 'app', category: 'tooling' },
+      { name: 'a-desktop', kind: 'app', category: 'tooling', stage: 'showcase' },
       { name: 'a-web', kind: 'web', variantOf: 'a-desktop', category: 'media' },
     ]),
   );
@@ -103,7 +129,7 @@ test('a web variant may state its own category, from the apps', () => {
 });
 
 test('variantOf must name an app of this registry', () => {
-  const app = { name: 'a-desktop', kind: 'app', category: 'tooling' };
+  const app = { name: 'a-desktop', kind: 'app', category: 'tooling', stage: 'showcase' };
   assert.throws(
     () => validateRegistry(base([app, { name: 'a-web', kind: 'web', variantOf: 'b-desktop' }])),
     /a-web is a variant of "b-desktop", which is no app here/,
@@ -133,7 +159,7 @@ test('variantOf on anything but a web variant fails', () => {
     () =>
       validateRegistry(
         base([
-          { name: 'a-desktop', kind: 'app', category: 'tooling' },
+          { name: 'a-desktop', kind: 'app', category: 'tooling', stage: 'showcase' },
           { name: 'b-desktop', kind: 'app', category: 'tooling', variantOf: 'a-desktop' },
         ]),
       ),
@@ -177,7 +203,13 @@ test('a name that is no repository name fails', () => {
 test('platforms are a known word each, once, and only for what is not a plugin', () => {
   const [e] = validateRegistry(
     base([
-      { name: 'p', kind: 'app', category: 'media', platforms: ['windows', 'linux', 'windows'] },
+      {
+        name: 'p',
+        kind: 'app',
+        category: 'media',
+        platforms: ['windows', 'linux', 'windows'],
+        stage: 'showcase',
+      },
     ]),
   );
   assert.deepEqual(e?.platforms, ['windows', 'linux']);
@@ -204,7 +236,13 @@ test('familyOf lists the other members in registry order, and nothing for a lone
     base([
       { name: 'tasks.nvim', category: 'edit', family: 'tasks' },
       { name: 'cascade.nvim', category: 'edit' },
-      { name: 'tasks-desktop', kind: 'app', category: 'tooling', family: 'tasks' },
+      {
+        name: 'tasks-desktop',
+        kind: 'app',
+        category: 'tooling',
+        family: 'tasks',
+        stage: 'companion',
+      },
       { name: 'tasks-web', kind: 'web', variantOf: 'tasks-desktop', family: 'tasks' },
       { name: 'solo.nvim', category: 'edit', family: 'solo' },
     ]),

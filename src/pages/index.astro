@@ -7,7 +7,7 @@ import { href } from '../lib/site';
 import Shell from '../skins/modern/Shell.astro';
 
 // The start page of the site. For now it is the plain way in: the plugin
-// area, and the apps as a list until they have an area of their own.
+// area and the apps, the latter listed by name.
 const all = (await getCollection('plugins')).sort((a, b) => a.data.name.localeCompare(b.data.name));
 const plugins = all.filter((p) => p.data.kind === 'plugin');
 const apps = all.filter((p) => p.data.kind === 'app');
@@ -46,6 +46,9 @@ const description = `${plugins.length} Neovim plugins and ${apps.length} native 
     <h2 class="m-h2">Apps</h2>
     <p class="m-lede">
       {apps.length} native apps: tools that stand on their own, and companions of the plugins.
+    </p>
+    <p class="m-actions">
+      <a class="m-btn" data-primary href={href('apps')} data-nav="apps" data-astro-prefetch>All apps</a>
     </p>
     <ul class="m-list">
       {

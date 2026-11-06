@@ -584,6 +584,11 @@
   .tui-table .cat {
     color: var(--fg-dim);
   }
+  /* The apps page says more per row (platforms, tech, other forms) and has few
+     rows: its text wraps, so the end of a row is not cut off unread. */
+  .apps-section .tui-table > a > .cat {
+    white-space: normal;
+  }
   .tui-table .stat[data-status="beta"] {
     color: var(--yellow);
   }

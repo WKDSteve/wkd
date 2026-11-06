@@ -22,9 +22,17 @@ import {
   latestVersionTag,
   leadingQuote,
   mentionsRolling,
+  plainMarkdown as plain,
   statusParagraph,
 } from '../lib/app-facts';
-import { type Entry, KINDS, PLATFORMS, type RawRegistry, validateRegistry } from '../lib/registry';
+import {
+  type Entry,
+  KINDS,
+  PLATFORMS,
+  type RawRegistry,
+  STAGES,
+  validateRegistry,
+} from '../lib/registry';
 import { collectTags } from '../lib/vimdoc';
 
 // Both collections (plugins + activity) come from one scan of the plugin
@@ -159,6 +167,8 @@ export const pluginSchema = z.object({
   variantOf: z.string().nullable(),
   /** where an app runs, as the registry says; never derived */
   platforms: z.array(z.enum(PLATFORMS)),
+  /** where an app stands: the section of the apps page; null for everything else */
+  stage: z.enum(STAGES).nullable(),
   /** the app's icon, copied to public/ (site-relative path); null without one */
   icon: z.string().nullable(),
   /** what an app is built with ("Rust", "egui"), read from its build files */
@@ -394,18 +404,6 @@ async function mapLimit<T, R>(
   };
   await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
   return out;
-}
-
-/** Strip inline markdown (links, emphasis, code, images) down to plain text. */
-function plain(s: string): string {
-  return s
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
-    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
-    .replace(/\*\*([^*]+)\*\*/g, '$1')
-    .replace(/\*([^*]+)\*/g, '$1')
-    .replace(/`([^`]+)`/g, '$1')
-    .replace(/\s+/g, ' ')
-    .trim();
 }
 
 const TAGLINE_MAX = 140;
@@ -685,6 +683,7 @@ async function scanOne(
       family: entry.family,
       variantOf: entry.variantOf,
       platforms: entry.platforms,
+      stage: entry.stage,
       icon,
       tech,
       release,

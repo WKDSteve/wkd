@@ -836,6 +836,71 @@
   .m-combo-dot[data-combo="work-list"] {
     background: var(--combo-work-list);
   }
+  /* ---- apps page: a tile holds a second link (the other forms of the app), and
+     a link cannot sit inside a link. So the tile is an article, its name the
+     link, stretched over the tile; the other links lie above that. */
+  .m-apps-head {
+    display: grid;
+    gap: var(--s-2);
+    padding: var(--s-8) var(--gutter) var(--s-4);
+    border-bottom: var(--line);
+  }
+  .m-app {
+    grid-template-rows: auto auto 1fr auto auto;
+    gap: var(--s-3);
+    margin: 0;
+  }
+  .m-app:has(.m-app-link:focus-visible) {
+    background: var(--hover);
+    color: var(--acid-ink);
+  }
+  .m-app .m-card-head,
+  .m-app .m-card-tag,
+  .m-app-meta {
+    margin: 0;
+  }
+  .m-app-title {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    min-width: 0;
+  }
+  .m-app-icon {
+    flex: none;
+    width: 3rem;
+    height: 3rem;
+  }
+  .m-app-noicon {
+    display: grid;
+    place-items: center;
+    border: var(--line);
+    font-family: var(--font-mono), monospace;
+    font-size: 1.25rem;
+    text-transform: uppercase;
+  }
+  .m-app-link {
+    color: inherit;
+    text-decoration: none;
+  }
+  .m-app-link:focus-visible {
+    outline: none;
+  }
+  .m-app-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+  .m-app-meta {
+    font-family: var(--font-mono), monospace;
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+  .m-app-also a {
+    position: relative;
+    z-index: 1;
+    color: inherit;
+    text-decoration: underline;
+  }
   .m-status {
     font-family: var(--font-mono), monospace;
     font-size: 0.7rem;

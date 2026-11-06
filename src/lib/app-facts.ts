@@ -3,6 +3,28 @@
 // imports on purpose, so tests/app-facts.test.ts runs them under plain
 // `node --test`; src/loaders/repos.ts does the file and git access.
 
+/** Marks a code span set aside by plainMarkdown(): a private-use character, in no README. */
+const HOLD = String.fromCharCode(0xe000);
+
+/**
+ * Inline markdown (links, emphasis, code, images) down to plain text. Code
+ * spans are set aside first: what is in them is literal, so the stars of
+ * `*-desktop` and `*-web` are no emphasis.
+ */
+export function plainMarkdown(s: string): string {
+  const code: string[] = [];
+  const hold = (text: string): string => `${HOLD}${code.push(text) - 1}${HOLD}`;
+  return s
+    .replace(/`([^`]+)`/g, (_, text: string) => hold(text))
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/\*([^*]+)\*/g, '$1')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(new RegExp(`${HOLD}(\d+)${HOLD}`, 'g'), (_, i: string) => code[Number(i)] ?? '');
+}
+
 /**
  * The paragraph a README marks as its English summary (`**English.** ...`),
  * without the marker, or null. The READMEs of pult and takt are German on

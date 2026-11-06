@@ -10,6 +10,14 @@ export type Kind = (typeof KINDS)[number];
 export const PLATFORMS = ['windows', 'linux', 'macos'] as const;
 export type Platform = (typeof PLATFORMS)[number];
 
+/**
+ * Where an app stands, which decides the section of the apps page it is in:
+ * something to show, a companion of a plugin, or still in the making. Stated
+ * per app in the registry, never derived from a status word.
+ */
+export const STAGES = ['showcase', 'companion', 'building'] as const;
+export type Stage = (typeof STAGES)[number];
+
 /** One entry as written in the file; everything but `name` may be absent. */
 export interface RawEntry {
   name: string;
@@ -18,6 +26,7 @@ export interface RawEntry {
   family?: string;
   variantOf?: string;
   platforms?: string[];
+  stage?: string;
 }
 
 export interface RawRegistry {
@@ -39,6 +48,8 @@ export interface Entry {
   /** slug of the app this entry is the web variant of */
   variantOf: string | null;
   platforms: Platform[];
+  /** for an app; null for everything else */
+  stage: Stage | null;
 }
 
 export function slugOf(name: string): string {
@@ -163,6 +174,18 @@ export function validateRegistry(reg: RawRegistry): Entry[] {
       throw new Error(`registry: ${e.name} is a plugin, platforms are for apps`);
     }
 
+    let stage: Stage | null = null;
+    if (kind === 'app') {
+      if (e.stage === undefined || !(STAGES as readonly string[]).includes(e.stage)) {
+        throw new Error(
+          `registry: ${e.name} (app) needs a stage: ${STAGES.join(', ')}; has "${e.stage ?? ''}"`,
+        );
+      }
+      stage = e.stage as Stage;
+    } else if (e.stage !== undefined) {
+      throw new Error(`registry: ${e.name} has a stage but is no app`);
+    }
+
     return {
       name: e.name,
       slug: slugOf(e.name),
@@ -171,6 +194,7 @@ export function validateRegistry(reg: RawRegistry): Entry[] {
       family: e.family ?? null,
       variantOf,
       platforms,
+      stage,
     };
   });
 }

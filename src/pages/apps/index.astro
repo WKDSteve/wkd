@@ -1,0 +1,115 @@
+---
+import { getCollection } from 'astro:content';
+import CategoryFilter from '../../components/CategoryFilter.astro';
+import { appMeta, appSections, kits, otherForms } from '../../lib/apps';
+import { approx, categoryLabel } from '../../lib/format';
+import { BASE, href } from '../../lib/site';
+import Shell from '../../skins/modern/Shell.astro';
+
+// The area of the native apps. Every figure and word comes from the
+// repositories and the registry; which section an app is in is its `stage`.
+const entries = await getCollection('plugins');
+const items = entries.map((e) => ({ ...e.data, id: e.id }));
+const sections = appSections(items);
+const foundations = kits(items);
+const apps = sections.flatMap((s) => s.apps);
+const webCount = items.filter((i) => i.kind === 'web').length;
+const counts: Record<string, number> = {};
+for (const a of [...apps, ...foundations]) counts[a.category] = (counts[a.category] ?? 0) + 1;
+const stats = [
+  { label: 'apps', value: String(apps.length) },
+  { label: 'web variants', value: String(webCount) },
+  // A tag, not a published release: the repositories say which is which.
+  { label: 'with a version tag', value: String(apps.filter((a) => a.release).length) },
+  { label: 'commits', value: approx(apps.reduce((n, a) => n + a.commitCount, 0)) },
+];
+const description = `${apps.length} native apps from one workshop: tools that stand on their own, and companions of the Neovim plugins.`;
+---
+
+<Shell page="apps" title="Apps — wkd" description={description}>
+  <section class="m-hero">
+    <p class="m-kicker"><b>{apps.length} apps</b> · {webCount} web variants · read from the repositories</p>
+    <h1 class="display" data-kinetic>
+      {apps.length} apps.<br />One <b>workshop</b>.
+    </h1>
+    <p class="m-lede">
+      Native programs: tools that stand on their own, and companions that give a Neovim plugin a
+      window of its own. Icons, status and versions below are read from the repositories.
+    </p>
+    <dl class="m-stats">
+      {
+        stats.map((m) => (
+          <div>
+            <dt><span class="m-stat-label">{m.label}</span></dt>
+            <dd><span class="m-stat-value">{m.value}</span></dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+
+  <div class="home">
+    <div class="m-filter">
+      <CategoryFilter counts={counts} />
+    </div>
+    {
+      [
+        ...sections.map((s) => ({ ...s.section, apps: s.apps })),
+        ...(foundations.length > 0
+          ? [
+              {
+                stage: 'foundation',
+                title: 'Foundation',
+                blurb: 'What the apps share: the guard, the pairing and the tests they all pass.',
+                apps: foundations,
+              },
+            ]
+          : []),
+      ].map((s) => (
+        <section class="apps-section" aria-label={s.title}>
+          <header class="m-apps-head">
+            <h2 class="m-h2">{s.title}</h2>
+            <p class="m-lede">{s.blurb}</p>
+          </header>
+          <div class="roster">
+            {s.apps.map((a) => {
+              const forms = otherForms(items, a);
+              const meta = appMeta(a.platforms, a.tech);
+              return (
+                <article class="m-card m-app" data-cat={a.category}>
+                  <p class="m-card-head">
+                    <span class="m-card-cat">{categoryLabel(a.category)}</span>
+                    {a.status !== 'unknown' ? (
+                      <span class="m-status" data-status={a.status}>{a.status}</span>
+                    ) : null}
+                  </p>
+                  <div class="m-app-title">
+                    {a.icon ? (
+                      <img class="m-app-icon" src={`${BASE}${a.icon}`} alt="" width="128" height="128" loading="lazy" />
+                    ) : (
+                      <span class="m-app-icon m-app-noicon" aria-hidden="true">{a.name.charAt(0)}</span>
+                    )}
+                    <a class="m-app-link m-card-name" href={href(`p/${a.id}`)} data-nav={`p/${a.id}`} data-astro-prefetch>
+                      {a.name}
+                    </a>
+                  </div>
+                  <p class="m-card-tag">{a.tagline}</p>
+                  {meta ? <p class="m-app-meta">{meta}</p> : null}
+                  {forms.length > 0 ? (
+                    <p class="m-app-meta m-app-also">
+                      Also as{' '}
+                      {/* On one line: a line break in the template would be a space before the comma. */}
+                      {forms.map((f, i) => (
+                        <><a href={href(`p/${f.id}`)} data-nav={`p/${f.id}`}>{f.name}</a>{i < forms.length - 1 ? ', ' : ''}</>
+                      ))}
+                    </p>
+                  ) : null}
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      ))
+    }
+  </div>
+</Shell>

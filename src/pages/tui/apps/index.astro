@@ -1,0 +1,71 @@
+---
+import { getCollection } from 'astro:content';
+import CategoryFilter from '../../../components/CategoryFilter.astro';
+import { appMeta, appSections, kits, otherForms } from '../../../lib/apps';
+import { categoryLabel } from '../../../lib/format';
+import { href } from '../../../lib/site';
+import Shell from '../../../skins/tui/Shell.astro';
+
+// The area of the native apps in the TUI skin: text only, so no icons; which
+// section an app is in is its `stage` in the registry.
+const entries = await getCollection('plugins');
+const items = entries.map((e) => ({ ...e.data, id: e.id }));
+const sections = appSections(items);
+const foundations = kits(items);
+const apps = sections.flatMap((s) => s.apps);
+const webCount = items.filter((i) => i.kind === 'web').length;
+const counts: Record<string, number> = {};
+for (const a of [...apps, ...foundations]) counts[a.category] = (counts[a.category] ?? 0) + 1;
+const groups = [
+  ...sections.map((s) => ({ heading: s.section.tui, blurb: s.section.blurb, apps: s.apps })),
+  ...(foundations.length > 0
+    ? [
+        {
+          heading: 'foundation',
+          blurb: 'What the apps share: the guard, the pairing and the tests they all pass.',
+          apps: foundations,
+        },
+      ]
+    : []),
+];
+---
+
+<Shell page="apps" title="Apps — wkd" description={`${apps.length} native apps from one workshop.`} cmd="apps">
+  <h1 class="tui-h1">{apps.length} apps · {webCount} web variants · one workshop</h1>
+  <p class="tui-p tui-dim">
+    Generated from the repositories. Status, platforms and tech are read from source at build time.
+  </p>
+
+  <div class="home">
+    <div class="tui-filter">
+      <span class="tui-dim" aria-hidden="true">:filter</span>
+      <CategoryFilter counts={counts} />
+    </div>
+    {
+      groups.map((g) => (
+        <section class="apps-section" aria-label={g.heading}>
+          <h2 class="tui-h2">{g.heading}</h2>
+          <p class="tui-p tui-dim">{g.blurb}</p>
+          <div class="tui-table">
+            {g.apps.map((a, i) => {
+              const forms = otherForms(items, a).map((f) => f.name);
+              const meta = appMeta(a.platforms, a.tech);
+              return (
+                <a href={href(`p/${a.id}`, 'tui')} data-nav={`p/${a.id}`} data-cat={a.category} data-astro-prefetch>
+                  <span class="idx">{String(i + 1).padStart(2, '0')}</span>
+                  <span class="name">{a.name}</span>
+                  <span class="stat" data-status={a.status}>{a.status === 'unknown' ? '-' : a.status}</span>
+                  <span class="cat">
+                    {categoryLabel(a.category).toLowerCase()} — {a.tagline}
+                    {meta ? ` [${meta}]` : ''}
+                    {forms.length > 0 ? ` (also: ${forms.join(', ')})` : ''}
+                  </span>
+                </a>
+              );
+            })}
+          </div>
+        </section>
+      ))
+    }
+  </div>
+</Shell>

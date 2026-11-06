@@ -21,15 +21,16 @@ the same page in the other skin; `src/scripts/prefs.ts` remembers the choice in
 
 | Area | Address | What is there |
 |---|---|---|
-| Start | `/wkd/` | the way in: the plugin area and, until they have their own, the apps as a list |
+| Start | `/wkd/` | the way in: the plugin area and the apps |
 | Neovim plugins | `/wkd/nvim/` | the roster with its category filter, Tree, Orbit and the fight; the stack at `/wkd/nvim/stack/` |
+| Apps | `/wkd/apps/` | tiles with icon, status, platforms and tech, by `stage`: ready to show, companions of the plugins, in the making; the kits at the end; a category filter over all of them |
 | A plugin or an app | `/wkd/p/<slug>/` | its page; the help of a plugin at `/wkd/p/<slug>/help/` |
 | Activity | `/wkd/activity/` | every recent commit |
 
 Every page exists in both skins (`tests/nav.test.ts` holds each modern page to a twin under
 `src/pages/tui/`). The areas are listed in `src/lib/nav.ts` (`AREAS`); the header of the modern
 skin and the sidebar of the TUI skin show the ones that have a page file, so a planned area
-(`apps`, `play`) appears in the navigation by itself once its page exists, and never before.
+(`play`) appears in the navigation by itself once its page exists, and never before.
 
 **Addresses that are linked from outside stay.** The READMEs of the plugins carry a badge that
 points at `/wkd/p/<slug>/`, so the plugin pages do not move. An address that does move is
@@ -79,6 +80,7 @@ one, it is the pitch on this site, for every kind.
   | `family` | ties a plugin, its app and its web variant together (`tasks.nvim`, `tasks-desktop`, `tasks-web`) |
   | `variantOf` | for `web` only: the app it is a variant of, which must be an entry here |
   | `platforms` | for apps: `windows`, `linux`, `macos`; stated, never derived |
+  | `stage` | required for an app, on nothing else: `showcase`, `companion` or `building`, the section of the apps page |
 
   The rules are in `src/lib/registry.ts` (`validateRegistry`), which the loader runs when it
   loads and `tests/registry.test.ts` runs against the real file; the readers of the app fields
@@ -158,7 +160,7 @@ worker, worklet or WASM file has to be checked against `pnpm build && pnpm previ
 - **Vim operation** of the TUI skin (`src/scripts/vim.ts`, progressive — everything is a
   plain link underneath): `j`/`k`/`gg`/`G` move a cursor line over the links in `<main>`,
   `:` opens a command line in the footer that shares the search field (`:help x`, `:e x`,
-  `:ls`, `:cd`, `:stack`, `:log`, `:colorscheme x`, `:set skin=modern|tui`, `:q`; `Tab` / `Shift+Tab` cycle
+  `:ls`, `:apps`, `:cd`, `:stack`, `:log`, `:colorscheme x`, `:set skin=modern|tui`, `:q`; `Tab` / `Shift+Tab` cycle
   through the completions of commands, plugin names and themes; `:help x` on a plugin
   without `doc/*.txt` fails with E149 instead of landing on a 404), `?` opens the key help,
   and the statusline shows NORMAL / INSERT / COMMAND.
@@ -311,4 +313,4 @@ To rebuild the site on every plugin push, add this to each plugin repo's CI:
 | 3 | Demo pipeline: VHS `.tape` scripts recorded in CI → webm/mp4 + poster on the plugin pages | **pipeline done**; tapes: cascade, emojis, replacer, spotlight, data, diff, markdown, color_my_ascii, hover, insights, fileops, buffer-ctx, recommender, sessions, ui, gopath, runtime-analysis, docmap, pickers, cmdlog |
 | 4 | TUI skin: vim motions (`j`/`k`/`gg`/`G`), `:` command line with completion, `?` help | **done** |
 | 5 | Vimdoc renderer (`doc/*.txt` → HTML with `\|tag\|` links; `:help` opens it), `/stack` dependency graph | **done** |
-| 6 | From the site of the plugins to the site of the workshop: kinds and families in the registry, the plugin area at `/nvim/`, an area and pages for the apps, a new start page, the fight on a page of its own | registry and plugin area **done**; apps, start page and play open |
+| 6 | From the site of the plugins to the site of the workshop: kinds and families in the registry, the plugin area at `/nvim/`, an area and pages for the apps, a new start page, the fight on a page of its own | registry, plugin area and apps overview **done**; app pages, start page and play open |
