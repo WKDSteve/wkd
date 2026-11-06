@@ -7,7 +7,7 @@ import FightView from '../components/FightView.astro';
 import OrbitView from '../components/OrbitView.astro';
 import registry from '../data/registry.json';
 import { COMBOS, combosFor } from '../lib/combos';
-import { approx, byDateDesc, categoryLabel, pad2 } from '../lib/format';
+import { approx, byDateDesc, CATEGORIES, categoryLabel, pad2 } from '../lib/format';
 import { orbitLayout } from '../lib/orbit';
 import { href } from '../lib/site';
 import { buildStack, treeLayout } from '../lib/stack';
@@ -20,7 +20,7 @@ const stackNodes = buildStack(plugins);
 const tree = treeLayout(stackNodes);
 const orbit = orbitLayout(
   plugins.map((p) => ({ slug: p.id, name: p.data.name, category: p.data.category })),
-  registry.categories,
+  CATEGORIES,
 );
 const activity = (await getCollection('activity')).sort(byDateDesc).slice(0, 10);
 const features = plugins.reduce((n, p) => n + p.data.featureCount, 0);

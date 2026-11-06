@@ -1,6 +1,10 @@
 import registry from '../data/registry.json';
 
-export const CATEGORIES: Record<string, string> = registry.categories;
+/** Every category label by id: the plugins' first, then the apps' (the two lists share no id). */
+export const CATEGORIES: Record<string, string> = {
+  ...registry.categories,
+  ...registry.appCategories,
+};
 
 export function categoryLabel(id: string): string {
   return CATEGORIES[id] ?? id;

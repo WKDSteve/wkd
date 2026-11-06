@@ -30,8 +30,36 @@ the same page in the other skin; `src/scripts/prefs.ts` remembers the choice in
   .git        → commit count, last 12 commits (conventional-commit parsed)
 ```
 
-- `src/data/registry.json` — the only hand-maintained list: plugin name, category, kind.
-  Adding a plugin is one line here.
+An entry of kind `app` is read for a few things more, located by convention like the rest:
+
+```
+../<app>/
+  assets/icons/<app>/png/<app>-128.png → icon (copied to public/app-icons/, a PNG by its content)
+  Cargo.toml, CMakeLists.txt, *.csproj, tauri.conf.json → what it is built with ("Rust · egui")
+  README.md   → status (the paragraph or quote that opens with **Status**),
+                install (first code block under an "Install" heading),
+                rolling build (a link to …/releases/tag/latest)
+  .git        → newest version tag vX.Y.Z
+```
+
+A README written in German (pult, takt) carries one paragraph `**English.** …`; where there is
+one, it is the pitch on this site, for every kind.
+
+- `src/data/registry.json` — the only hand-maintained list. Adding a plugin is one line here.
+  Per entry:
+
+  | Field | Meaning |
+  |---|---|
+  | `name` | the repository name |
+  | `kind` | `plugin` (the default), `app` (a native app), `web` (the web variant of an app) or `kit` (a shared foundation); any other word fails the build |
+  | `category` | from `categories` for a plugin, from `appCategories` for an app, from either for a kit; a web variant takes its app's |
+  | `family` | ties a plugin, its app and its web variant together (`tasks.nvim`, `tasks-desktop`, `tasks-web`) |
+  | `variantOf` | for `web` only: the app it is a variant of, which must be an entry here |
+  | `platforms` | for apps: `windows`, `linux`, `macos`; stated, never derived |
+
+  The rules are in `src/lib/registry.ts` (`validateRegistry`), which the loader runs when it
+  loads and `tests/registry.test.ts` runs against the real file; the readers of the app fields
+  are in `src/lib/app-facts.ts`. Both are free of Astro imports so that `pnpm test` covers them.
 - `src/loaders/repos.ts` — the Astro content loader that scans the checkouts and fills two
   collections, `plugins` and `activity`.
 - `PLUGINS_DIR` — where the checkouts live (default: the parent directory of this repo).
@@ -48,7 +76,7 @@ pnpm dev        # http://127.0.0.1:4321/wkd/
 pnpm build      # static output in dist/
 pnpm preview
 pnpm verify     # biome + astro check + tests + build
-pnpm test       # node --test over tests/*.test.ts (the fight engine)
+pnpm test       # node --test over tests/*.test.ts (the fight engine, the registry, the app readers)
 pnpm build:wasm # rebuild src/lib/fight-engine/fight-sim.wasm from wasm/fight-sim (Rust)
 ```
 
@@ -121,7 +149,8 @@ worker, worklet or WASM file has to be checked against `pnpm build && pnpm previ
   `lua/` tree (Lua comments excluded); a require inside `pcall` -- `pcall(require, …)` included --
   counts as *optional*. "Depended on" ranking plus a per-plugin tree.
 - **Category filter** on the home pages is pure CSS: radio inputs plus `:has()` rules in
-  `src/styles/filter.css`. Adding a category to the registry means adding one rule there.
+  `src/styles/filter.css`. Adding a category to the registry (`categories` or `appCategories`)
+  means adding one rule there; the build and `tests/registry.test.ts` fail without it.
 - **Home statistics** (modern skin) are derived from the checkouts, never typed in, and shown
   as rounded floors ("900+", `approx()` in `src/lib/format.ts`) so they stay true as the family
   grows: *features* = `##` sections across every `docs/FEATURES/*.md` or a single

@@ -7,11 +7,15 @@
     "inspect": "Debug & inspect",
     "project": "Project & repos",
     "view": "View & render",
-    "foundation": "Foundation",
-    "desktop": "Desktop"
+    "foundation": "Foundation"
+  },
+  "appCategories": {
+    "media": "Media",
+    "tooling": "Tooling",
+    "system": "System"
   },
   "plugins": [
-    { "name": "ai.nvim", "category": "ai" },
+    { "name": "ai.nvim", "category": "ai", "family": "ai" },
     { "name": "buffer-ctx.nvim", "category": "ai" },
 
     { "name": "cascade.nvim", "category": "edit" },
@@ -38,12 +42,12 @@
     { "name": "recommender.nvim", "category": "inspect" },
     { "name": "spotlight.nvim", "category": "inspect" },
     { "name": "cmdlog.nvim", "category": "inspect" },
-    { "name": "rules.nvim", "category": "inspect" },
+    { "name": "rules.nvim", "category": "inspect", "family": "rules" },
 
     { "name": "sandbox.nvim", "category": "project" },
     { "name": "github_stats.nvim", "category": "project" },
     { "name": "reposcope.nvim", "category": "project" },
-    { "name": "docmap.nvim", "category": "project" },
+    { "name": "docmap.nvim", "category": "project", "family": "docmap" },
     { "name": "gitsuite.nvim", "category": "project" },
     { "name": "terminal.nvim", "category": "project" },
 
@@ -56,10 +60,10 @@
 
     { "name": "lib.nvim", "category": "foundation" },
 
-    { "name": "ai-desktop", "category": "desktop", "kind": "desktop" },
-    { "name": "docmap-desktop", "category": "desktop", "kind": "desktop" },
-    { "name": "rules-desktop", "category": "desktop", "kind": "desktop" },
-    { "name": "tasks-desktop", "category": "desktop", "kind": "desktop" },
-    { "name": "testing-desktop", "category": "desktop", "kind": "desktop" }
+    { "name": "ai-desktop", "kind": "app", "category": "tooling", "family": "ai" },
+    { "name": "docmap-desktop", "kind": "app", "category": "tooling", "family": "docmap" },
+    { "name": "rules-desktop", "kind": "app", "category": "tooling", "family": "rules" },
+    { "name": "tasks-desktop", "kind": "app", "category": "tooling", "family": "tasks" },
+    { "name": "testing-desktop", "kind": "app", "category": "tooling", "family": "testing" }
   ]
 }

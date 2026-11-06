@@ -1,10 +1,29 @@
 import { execFile } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import {
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
 import { join, resolve } from 'node:path';
 import { promisify } from 'node:util';
 import type { Loader, LoaderContext } from 'astro/loaders';
 import { z } from 'astro/zod';
 import registry from '../data/registry.json';
+import {
+  detectTech,
+  englishParagraph,
+  ICON_MAX_BYTES,
+  installSnippet,
+  isPngIcon,
+  latestVersionTag,
+  mentionsRolling,
+  statusParagraph,
+} from '../lib/app-facts';
+import { type Entry, KINDS, PLATFORMS, type RawRegistry, validateRegistry } from '../lib/registry';
 import { collectTags } from '../lib/vimdoc';
 
 // Both collections (plugins + activity) come from one scan of the plugin
@@ -12,7 +31,13 @@ import { collectTags } from '../lib/vimdoc';
 // deploy workflow clones every registry entry into PLUGINS_DIR first.
 const OWNER = registry.owner;
 const RECENT_PER_REPO = 12;
-const CATEGORY_IDS = Object.keys(registry.categories) as [string, ...string[]];
+// The registry is checked once, when this module loads: an unknown kind, a
+// category from the wrong list or a variant of nothing fails the build here.
+const ENTRIES: Entry[] = validateRegistry(registry as RawRegistry);
+const CATEGORY_IDS = [
+  ...Object.keys(registry.categories),
+  ...Object.keys(registry.appCategories),
+] as [string, ...string[]];
 const UNIT_SEP = String.fromCharCode(31);
 
 export const commitSchema = z.object({
@@ -75,7 +100,7 @@ function readDemos(slug: string): DemoInfo[] {
   if (!parsed.success) throw new Error(`${manifestPath}: ${parsed.error.message}`);
   // A tape's plugin and needs become links on the page: a typo must fail the
   // build here, not ship as a 404.
-  const slugs = new Set(registry.plugins.map((p) => p.name.replace(/\.nvim$/, '')));
+  const slugs = new Set(ENTRIES.map((e) => e.slug));
   for (const t of parsed.data.tapes) {
     for (const n of [t.plugin, ...(t.needs ?? [])]) {
       if (!slugs.has(n)) {
@@ -125,8 +150,24 @@ export const pluginSchema = z.object({
   slug: z.string(),
   owner: z.string(),
   url: z.url(),
-  kind: z.enum(['plugin', 'desktop']),
+  kind: z.enum(KINDS),
   category: z.enum(CATEGORY_IDS),
+  /** ties a plugin, its app and its web variant together; null for an entry on its own */
+  family: z.string().nullable(),
+  /** slug of the app this entry is the web variant of */
+  variantOf: z.string().nullable(),
+  /** where an app runs, as the registry says; never derived */
+  platforms: z.array(z.enum(PLATFORMS)),
+  /** the app's icon, copied to public/ (site-relative path); null without one */
+  icon: z.string().nullable(),
+  /** what an app is built with ("Rust", "egui"), read from its build files */
+  tech: z.array(z.string()),
+  /** newest version tag `vX.Y.Z` of the repository */
+  release: z.object({ tag: z.string(), url: z.url() }).nullable(),
+  /** page of the rolling pre-release `latest`, when the README points at it */
+  rollingUrl: z.url().nullable(),
+  /** first code block under the README's "Install" heading */
+  install: z.string().nullable(),
   tagline: z.string(),
   description: z.string(),
   banner: z.string().nullable(),
@@ -404,6 +445,11 @@ interface ReadmeFacts {
  * its own marker so a README that drops one part still parses. The status
  * quote must be the first non-blank content, though: a quote further down is
  * prose, not status.
+ *
+ * The app READMEs differ in two marked ways, read by src/lib/app-facts.ts: the
+ * status is a paragraph or quote that opens with a bold `Status` (the icon
+ * and the heading come first there), and a README written in German carries
+ * one paragraph `**English.** ...`, which is the pitch on this site.
  */
 export function parseReadme(md: string): ReadmeFacts {
   const lines = md.split(/\r?\n/);
@@ -413,7 +459,8 @@ export function parseReadme(md: string): ReadmeFacts {
     if (l.startsWith('>')) quote.push(l.replace(/^>\s?/, ''));
     else if (l.trim() || quote.length) break; // first blank line ends the quote
   }
-  const statusNote = quote.length ? plain(quote.join(' ')) : null;
+  const marked = quote.length ? null : statusParagraph(md);
+  const statusNote = quote.length ? plain(quote.join(' ')) : marked ? plain(marked) : null;
   let status: PluginData['status'] = 'unknown';
   if (statusNote) {
     if (/\balpha\b/i.test(statusNote)) status = 'alpha';
@@ -449,7 +496,7 @@ export function parseReadme(md: string): ReadmeFacts {
     } else if (!l) break;
     else para.push(l);
   }
-  const description = plain(para.join(' '));
+  const description = plain(englishParagraph(md) ?? para.join(' '));
   return { banner, status, statusNote, nvimMin, description, tagline: firstSentence(description) };
 }
 
@@ -471,15 +518,67 @@ function parseCommitLine(line: string, plugin: string, pluginName: string): Comm
   };
 }
 
-type RegistryEntry = (typeof registry.plugins)[number] & { kind?: 'plugin' | 'desktop' };
+const TECH_DEPTH = 3;
+const TECH_MAX_PATHS = 4000;
+const TECH_SKIP = new Set(['node_modules', 'target', 'dist', 'build', 'third_party', 'vendor']);
+
+/**
+ * The files detectTech() looks at: repository-relative paths a few levels
+ * deep (a workspace keeps its manifests in crates/<name>/ or desktop/), and
+ * the text of the Cargo manifests among them. Hidden directories, build
+ * output and vendored code are no part of what the app is written in.
+ */
+function techInput(dir: string): { paths: string[]; cargoManifests: string[] } {
+  const paths: string[] = [];
+  const cargoManifests: string[] = [];
+  const walk = (abs: string, rel: string, depth: number): void => {
+    for (const entry of readdirSync(abs, { withFileTypes: true })) {
+      if (paths.length >= TECH_MAX_PATHS) return;
+      if (entry.name.startsWith('.') || TECH_SKIP.has(entry.name)) continue;
+      const relPath = rel ? `${rel}/${entry.name}` : entry.name;
+      if (entry.isDirectory()) {
+        if (depth < TECH_DEPTH) walk(join(abs, entry.name), relPath, depth + 1);
+      } else if (entry.isFile()) {
+        paths.push(relPath);
+        if (entry.name === 'Cargo.toml') {
+          cargoManifests.push(readFileSync(join(abs, entry.name), 'utf8'));
+        }
+      }
+    }
+  };
+  walk(dir, '', 0);
+  return { paths, cargoManifests };
+}
+
+/**
+ * Copies an app's icon (`assets/icons/<name>/png/<name>-128.png`, the place
+ * every app repository keeps it) to public/app-icons/<slug>.png and returns
+ * the site-relative path, or null without a usable one. The file comes from
+ * a repository and ends up under the site's origin, so it must be a regular
+ * file (a symlink is not followed) and a PNG of icon size by its content.
+ */
+function copyIcon(dir: string, entry: Entry, logger: Logger): string | null {
+  const src = join(dir, 'assets', 'icons', entry.name, 'png', `${entry.name}-128.png`);
+  const stat = lstatSync(src, { throwIfNoEntry: false });
+  if (!stat?.isFile() || stat.size > ICON_MAX_BYTES) return null;
+  const bytes = readFileSync(src);
+  if (!isPngIcon(bytes)) {
+    logger.warn(`${entry.name}: ${src} is not a PNG icon -- left out`);
+    return null;
+  }
+  const outDir = resolve('public/app-icons');
+  mkdirSync(outDir, { recursive: true });
+  writeFileSync(join(outDir, `${entry.slug}.png`), bytes);
+  return `app-icons/${entry.slug}.png`;
+}
 
 /** lua/<module>/ directory name -> plugin slug, for directories unique to one plugin. */
 function moduleMap(root: string): Map<string, string> {
   const owners = new Map<string, string[]>();
-  for (const entry of registry.plugins) {
+  for (const entry of ENTRIES) {
     const luaDir = join(root, entry.name, 'lua');
     if (!existsSync(luaDir)) continue;
-    const slug = entry.name.replace(/\.nvim$/, '');
+    const slug = entry.slug;
     for (const d of readdirSync(luaDir, { withFileTypes: true })) {
       if (d.isDirectory()) owners.set(d.name, [...(owners.get(d.name) ?? []), slug]);
     }
@@ -491,7 +590,7 @@ function moduleMap(root: string): Map<string, string> {
 
 async function scanOne(
   root: string,
-  entry: RegistryEntry,
+  entry: Entry,
   modules: Map<string, string>,
   logger: Logger,
 ): Promise<Scanned | null> {
@@ -501,9 +600,10 @@ async function scanOne(
     return null;
   }
   const readmePath = join(dir, 'README.md');
-  const facts = parseReadme(existsSync(readmePath) ? readFileSync(readmePath, 'utf8') : '');
+  const readme = existsSync(readmePath) ? readFileSync(readmePath, 'utf8') : '';
+  const facts = parseReadme(readme);
 
-  const slug = entry.name.replace(/\.nvim$/, '');
+  const slug = entry.slug;
   const docsDir = join(dir, 'docs');
   const docs = existsSync(docsDir)
     ? readdirSync(docsDir)
@@ -547,13 +647,24 @@ async function scanOne(
   uses.sort();
   usesOptional.sort();
 
+  const url = `https://github.com/${OWNER}/${entry.name}`;
+  const isApp = entry.kind === 'app';
+  const icon = isApp ? copyIcon(dir, entry, logger) : null;
+  const tech = isApp ? detectTech(techInput(dir)) : [];
+  const install = isApp ? installSnippet(readme) : null;
+  const rollingUrl = isApp && mentionsRolling(readme) ? `${url}/releases/tag/latest` : null;
+
   let commits: Commit[] = [];
   let commitCount = 0;
+  let release: PluginData['release'] = null;
   try {
-    const [count, log] = await Promise.all([
+    const [count, log, tags] = await Promise.all([
       git(dir, ['rev-list', '--count', 'HEAD']),
       git(dir, ['log', `-n${RECENT_PER_REPO}`, '--format=%H%x1f%cI%x1f%s']),
+      isApp ? git(dir, ['tag', '--list', 'v*']) : Promise.resolve(''),
     ]);
+    const tag = latestVersionTag(tags.split('\n'));
+    if (tag) release = { tag, url: `${url}/releases/tag/${tag}` };
     commitCount = Number(count);
     commits = log
       .split('\n')
@@ -568,9 +679,17 @@ async function scanOne(
       name: entry.name,
       slug,
       owner: OWNER,
-      url: `https://github.com/${OWNER}/${entry.name}`,
-      kind: entry.kind ?? 'plugin',
+      url,
+      kind: entry.kind,
       category: entry.category,
+      family: entry.family,
+      variantOf: entry.variantOf,
+      platforms: entry.platforms,
+      icon,
+      tech,
+      release,
+      rollingUrl,
+      install,
       tagline: facts.tagline,
       description: facts.description,
       banner: facts.banner,
@@ -604,11 +723,11 @@ let cache: { at: number; result: Promise<Scanned[]> } | null = null;
 async function scanAll(logger: Logger): Promise<Scanned[]> {
   const root = resolve(process.env.PLUGINS_DIR ?? '..');
   const modules = moduleMap(root);
-  const scanned = await mapLimit(registry.plugins as RegistryEntry[], GIT_CONCURRENCY, (entry) =>
+  const scanned = await mapLimit(ENTRIES, GIT_CONCURRENCY, (entry) =>
     scanOne(root, entry, modules, logger),
   );
   const out = scanned.filter((s): s is Scanned => s !== null);
-  logger.info(`scanned ${out.length}/${registry.plugins.length} repositories under ${root}`);
+  logger.info(`scanned ${out.length}/${ENTRIES.length} repositories under ${root}`);
   // A missing repo is skipped on purpose (see deploy.yml), but nothing at all
   // means the checkout step failed -- never publish an empty site from CI.
   if (process.env.CI && out.length === 0) {

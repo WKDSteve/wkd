@@ -13,6 +13,10 @@ public/demos/
 demos/out/
 /out/
 
+# app icons: copied from the app repositories by the content loader on every
+# build (src/loaders/repos.ts, copyIcon), never to be committed
+public/app-icons/
+
 # demo fixtures may be .log files
 !demos/fixtures/*.log
 

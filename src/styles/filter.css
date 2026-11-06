@@ -1,6 +1,7 @@
 /* Category filter behaviour (shared by both skins). One rule per category id
-   from src/data/registry.json -- CSS cannot read the radio's value, so the
-   ids are spelled out. Visuals are per skin. */
+   from src/data/registry.json, the plugins' (`categories`) and the apps'
+   (`appCategories`) -- CSS cannot read the radio's value, so the ids are
+   spelled out. Visuals are per skin. */
 @layer components {
   .home:has(#cat-ai:checked) [data-cat]:not([data-cat="ai"]),
   .home:has(#cat-edit:checked) [data-cat]:not([data-cat="edit"]),
@@ -9,7 +10,9 @@
   .home:has(#cat-project:checked) [data-cat]:not([data-cat="project"]),
   .home:has(#cat-view:checked) [data-cat]:not([data-cat="view"]),
   .home:has(#cat-foundation:checked) [data-cat]:not([data-cat="foundation"]),
-  .home:has(#cat-desktop:checked) [data-cat]:not([data-cat="desktop"]) {
+  .home:has(#cat-media:checked) [data-cat]:not([data-cat="media"]),
+  .home:has(#cat-tooling:checked) [data-cat]:not([data-cat="tooling"]),
+  .home:has(#cat-system:checked) [data-cat]:not([data-cat="system"]) {
     display: none;
   }
 
