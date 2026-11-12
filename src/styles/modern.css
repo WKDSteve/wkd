@@ -925,6 +925,35 @@
     display: grid;
     gap: var(--s-4);
   }
+  /* ---- app page: icon beside the name, the forms as a list --------------- */
+  .m-apppage-title {
+    display: flex;
+    align-items: center;
+    gap: var(--s-4);
+    min-width: 0;
+  }
+  .m-apppage-icon {
+    flex: none;
+    width: clamp(3.5rem, 9vw, 6rem);
+    height: clamp(3.5rem, 9vw, 6rem);
+  }
+  .m-apppage-icon.m-app-noicon {
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+  }
+  .m-status-note {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+  .m-variant-role {
+    display: block;
+    font-family: var(--font-mono), monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
   .m-cols {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));

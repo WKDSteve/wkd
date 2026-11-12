@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import CommitLine from '../components/CommitLine.astro';
 import registry from '../data/registry.json';
 import { byDateDesc } from '../lib/format';
+import { entryPage } from '../lib/nav';
 import { href } from '../lib/site';
 import Shell from '../skins/modern/Shell.astro';
 
@@ -54,7 +55,7 @@ const description = `${plugins.length} Neovim plugins and ${apps.length} native 
       {
         apps.map((a) => (
           <li>
-            <a href={href(`p/${a.id}`)} data-nav={`p/${a.id}`} data-astro-prefetch>
+            <a href={href(entryPage(a.data))} data-nav={entryPage(a.data)} data-astro-prefetch>
               {a.data.name}
             </a>
             {' — '}

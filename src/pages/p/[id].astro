@@ -1,12 +1,14 @@
 ---
 import { getCollection } from 'astro:content';
 import type { InferGetStaticPropsType } from 'astro';
-import CommitLine from '../../components/CommitLine.astro';
 import Demo from '../../components/Demo.astro';
+import Moved from '../../components/Moved.astro';
+import RecentCommits from '../../components/RecentCommits.astro';
 import ShotComposite from '../../components/ShotComposite.astro';
 import Shots from '../../components/Shots.astro';
 import { combosFor } from '../../lib/combos';
 import { categoryLabel, lazySnippet } from '../../lib/format';
+import { entryPage } from '../../lib/nav';
 import { href } from '../../lib/site';
 import Shell from '../../skins/modern/Shell.astro';
 
@@ -23,6 +25,9 @@ type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 const { plugin, allPlugins } = Astro.props as Props;
 const d = plugin.data;
 const page = `p/${plugin.id}`;
+// An app, a web variant or a kit had this address before it had a page of its
+// own kind under apps/; the address stays and sends on (MOVED in the build check).
+const movedTo = d.kind === 'plugin' ? null : entryPage({ kind: d.kind, slug: plugin.id });
 // Let the huge headline break between name and suffix instead of mid-word.
 const [nameBase, nameSuffix] = d.name.endsWith('.nvim')
   ? [d.name.slice(0, -5), '.nvim']
@@ -31,9 +36,15 @@ const combos = combosFor(plugin.id);
 const nameOf = (slug: string): string => allPlugins.find((p) => p.id === slug)?.data.name ?? slug;
 ---
 
+{movedTo ? <Moved to={movedTo} skin="modern" /> : (
 <Shell page={page} title={`${d.name} — wkd`} description={d.tagline}>
   {/* data-pagefind-*: this (modern) page is the one Pagefind indexes for the plugin. */}
-  <article class="m-plugin" data-pagefind-body data-pagefind-meta={`title:${d.name}`}>
+  <article
+    class="m-plugin"
+    data-pagefind-body
+    data-pagefind-meta={`title:${d.name}`}
+    data-pagefind-filter="kind:plugin"
+  >
     <header class="m-plugin-head">
       <p class="m-kicker">
         <b data-pagefind-filter="category">{categoryLabel(d.category)}</b> ·
@@ -62,27 +73,15 @@ const nameOf = (slug: string): string => allPlugins.find((p) => p.id === slug)?.
       plugin.id === 'ui' ? (
         d.shots.length > 0 && <ShotComposite slug={plugin.id} shots={d.shots} />
       ) : d.shots.length > 0 ? (
-        <Shots slug={plugin.id} shots={d.shots} skin="modern" />
+        <Shots slug={plugin.id} name={d.name} shots={d.shots} skin="modern" />
       ) : null
     }
 
     <div class="m-cols">
       <section data-pagefind-ignore>
-        {
-          /* The lazy.nvim spec is for plugins. An app shows the install block
-             of its own README where it has one; until the apps have a page of
-             their own kind, this page is theirs too. */
-        }
-        <h2 class="m-h2">{d.kind === 'plugin' || d.install ? 'Install' : 'Status'}</h2>
-        {
-          d.kind === 'plugin' ? (
-            <pre class="code"><code>{lazySnippet(d.owner, d.name)}</code></pre>
-          ) : d.install ? (
-            <pre class="code"><code>{d.install}</code></pre>
-          ) : null
-        }
+        <h2 class="m-h2">Install</h2>
+        <pre class="code"><code>{lazySnippet(d.owner, d.name)}</code></pre>
         {d.statusNote ? <p class="m-kicker">{d.statusNote}</p> : null}
-        {d.kind !== 'plugin' && !d.install && !d.statusNote ? <p class="m-kicker">See the README.</p> : null}
       </section>
       <section>
         <h2 class="m-h2">Documentation</h2>
@@ -99,9 +98,7 @@ const nameOf = (slug: string): string => allPlugins.find((p) => p.id === slug)?.
       </section>
       <section data-pagefind-ignore>
         <h2 class="m-h2">Recent commits</h2>
-        <ol class="m-list">
-          {d.recent.slice(0, 8).map((c) => <CommitLine commit={c} skin="modern" showPlugin={false} />)}
-        </ol>
+        <RecentCommits commits={d.recent} skin="modern" limit={8} />
       </section>
       {
         combos.length > 0 && (
@@ -138,3 +135,4 @@ const nameOf = (slug: string): string => allPlugins.find((p) => p.id === slug)?.
     {d.banner ? <pre class="m-banner" aria-hidden="true" tabindex="-1" data-pagefind-ignore>{d.banner}</pre> : null}
   </article>
 </Shell>
+)}

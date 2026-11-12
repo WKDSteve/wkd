@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import registry from '../data/registry.json';
+import { pageOfSlug } from '../lib/entries';
 import { isoDay } from '../lib/format';
 import { href, type Skin } from '../lib/site';
 
@@ -10,6 +11,8 @@ interface Props {
   showPlugin?: boolean;
 }
 const { commit: c, skin, showPlugin = true } = Astro.props;
+// A commit of an app links to the app's page, one of a plugin to the plugin's.
+const page = pageOfSlug(c.plugin);
 // Abbreviated SHA: GitHub resolves it, and 432 full SHAs are ~10 KB gzip on
 // the activity page. 12 hex chars cannot collide in repos this size.
 const commitUrl = `https://github.com/${registry.owner}/${c.pluginName}/commit/${c.sha.slice(0, 12)}`;
@@ -19,7 +22,7 @@ const commitUrl = `https://github.com/${registry.owner}/${c.pluginName}/commit/$
   <time datetime={c.date}>{isoDay(c.date)}</time>
   {
     showPlugin ? (
-      <a class="cplug" href={href(`p/${c.plugin}`, skin)} data-nav={`p/${c.plugin}`}>
+      <a class="cplug" href={href(page, skin)} data-nav={page}>
         {c.pluginName}
       </a>
     ) : null

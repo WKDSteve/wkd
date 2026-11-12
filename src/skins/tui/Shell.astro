@@ -5,7 +5,7 @@ import Search from '../../components/Search.astro';
 import '../../styles/tui.css';
 import '../../styles/themes.css';
 import { CATEGORIES } from '../../lib/format';
-import { builtAreas } from '../../lib/nav';
+import { builtAreas, entryPage } from '../../lib/nav';
 import { href, THEMES } from '../../lib/site';
 
 interface Props {
@@ -32,7 +32,8 @@ const groups = Object.entries(CATEGORIES)
 const moreAreas = builtAreas(Object.keys(import.meta.glob('../../pages/**/*.astro'))).filter(
   (a) => !['', 'nvim', 'activity'].includes(a.page),
 );
-const current = page.startsWith('p/') ? page.slice(2) : null;
+// The entry whose page this is: p/<slug> for a plugin, apps/<slug> for an app.
+const current = page.match(/^(?:p|apps)\/([^/]+)$/)?.[1] ?? null;
 const file = page ? `~/wkd/${page}` : '~/wkd';
 ---
 
@@ -73,8 +74,8 @@ const file = page ? `~/wkd/${page}` : '~/wkd';
               {g.items.map((p) => (
                 <a
                   class:list={['item', { cur: p.id === current }]}
-                  href={href(`p/${p.id}`, 'tui')}
-                  data-nav={`p/${p.id}`}
+                  href={href(entryPage(p.data), 'tui')}
+                  data-nav={entryPage(p.data)}
                   data-vimdoc={p.data.hasVimdoc ? '' : undefined}
                   aria-current={p.id === current ? 'page' : undefined}
                 >

@@ -1,0 +1,105 @@
+---
+import { getCollection } from 'astro:content';
+import type { InferGetStaticPropsType } from 'astro';
+import RecentCommits from '../../../components/RecentCommits.astro';
+import Shots from '../../../components/Shots.astro';
+import {
+  appMeta,
+  FORM_LABELS,
+  getLinks,
+  KIND_LABELS,
+  shortNote,
+  variantsOf,
+} from '../../../lib/apps';
+import { categoryLabel } from '../../../lib/format';
+import { entryPage } from '../../../lib/nav';
+import { href } from '../../../lib/site';
+import Shell from '../../../skins/tui/Shell.astro';
+
+// The page of an app, a web variant or a kit in the TUI skin: the same facts
+// as the modern page, screenshots first. The modern page is the one the search
+// indexes.
+export async function getStaticPaths() {
+  const entries = await getCollection('plugins');
+  const items = entries.map((e) => ({ ...e.data, id: e.id }));
+  return items
+    .filter((i) => i.kind !== 'plugin')
+    .map((app) => ({ params: { id: app.id }, props: { app, items } }));
+}
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+const { app: d, items } = Astro.props as Props;
+const page = entryPage(d);
+const meta = appMeta(d.platforms, d.tech);
+const links = getLinks(d);
+const variants = variantsOf(items, d);
+const note = d.statusNote ? shortNote(d.statusNote) : null;
+---
+
+<Shell page={page} title={`${d.name} — wkd`} description={d.tagline} cmd={`edit ${d.id}`}>
+  <h1 class="tui-h1">{d.name}</h1>
+  <p class="tui-p">{d.description}</p>
+
+  <dl class="tui-kv">
+    {d.kind !== 'app' ? <dt>kind</dt> : null}
+    {d.kind !== 'app' ? <dd>{KIND_LABELS[d.kind].toLowerCase()}</dd> : null}
+    <dt>status</dt>
+    <dd>{d.status === 'unknown' ? '-' : d.status}{note ? <span class="tui-dim"> — {note}</span> : null}</dd>
+    <dt>category</dt>
+    <dd>{categoryLabel(d.category)}</dd>
+    {meta ? <dt>runs on</dt> : null}
+    {meta ? <dd>{meta}</dd> : null}
+    <dt>repo</dt>
+    <dd><a href={d.url} rel="noopener">{d.url.replace('https://', '')}</a></dd>
+    <dt>commits</dt>
+    <dd>{d.commitCount}</dd>
+    {
+      links.map((l) => (
+        <>
+          <dt>{l.label === 'latest' ? 'rolling' : 'tag'}</dt>
+          <dd><a href={l.url} rel="noopener">{l.label}</a> <span class="tui-dim">— {l.note}</span></dd>
+        </>
+      ))
+    }
+  </dl>
+
+  {d.shots.length > 0 ? <h2 class="tui-h2">screenshots</h2> : null}
+  {d.shots.length > 0 ? <Shots slug={d.id} name={d.name} shots={d.shots} skin="tui" /> : null}
+
+  {d.install ? <h2 class="tui-h2">install</h2> : null}
+  {d.install ? <pre class="tui-code"><code>{d.install}</code></pre> : null}
+
+  {variants.length > 0 ? <h2 class="tui-h2">variants</h2> : null}
+  {
+    variants.length > 0 ? (
+      <ul class="tui-list">
+        {variants.map((v) => (
+          <li aria-current={v.item.id === d.id ? 'page' : undefined}>
+            <span class="tui-dim">{FORM_LABELS[v.role].toLowerCase()}:</span>{' '}
+            {v.item.id === d.id ? (
+              <b>{v.item.name}</b>
+            ) : (
+              <a href={href(entryPage(v.item), 'tui')} data-nav={entryPage(v.item)}>{v.item.name}</a>
+            )}{' '}
+            <a href={v.item.url} rel="noopener">[repo]</a>
+          </li>
+        ))}
+      </ul>
+    ) : null
+  }
+
+  {d.docs.length > 0 ? <h2 class="tui-h2">docs/</h2> : null}
+  {
+    d.docs.length > 0 ? (
+      <ul class="tui-list">
+        {d.docs.map((f) => (
+          <li>
+            <a href={`${d.url}/blob/HEAD/docs/${encodeURIComponent(f)}`} rel="noopener">{f}</a>
+          </li>
+        ))}
+      </ul>
+    ) : null
+  }
+
+  <h2 class="tui-h2">git log</h2>
+  <RecentCommits commits={d.recent} skin="tui" />
+</Shell>

@@ -1,0 +1,133 @@
+---
+import { getCollection } from 'astro:content';
+import type { InferGetStaticPropsType } from 'astro';
+import RecentCommits from '../../components/RecentCommits.astro';
+import Shots from '../../components/Shots.astro';
+import { appMeta, FORM_LABELS, getLinks, KIND_LABELS, shortNote, variantsOf } from '../../lib/apps';
+import { categoryLabel } from '../../lib/format';
+import { entryPage } from '../../lib/nav';
+import { BASE, href } from '../../lib/site';
+import Shell from '../../skins/modern/Shell.astro';
+
+// The page of an app, a web variant or a kit. An app is looked at before it
+// is read: the screenshots come first, then how to get it, its other forms
+// and its latest commits. Nothing of the plugin page (lazy.nvim, :help,
+// "Neovim x+") belongs here.
+export async function getStaticPaths() {
+  const entries = await getCollection('plugins');
+  const items = entries.map((e) => ({ ...e.data, id: e.id }));
+  return items
+    .filter((i) => i.kind !== 'plugin')
+    .map((app) => ({ params: { id: app.id }, props: { app, items } }));
+}
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+const { app: d, items } = Astro.props as Props;
+const page = entryPage(d);
+const meta = appMeta(d.platforms, d.tech);
+const links = getLinks(d);
+const variants = variantsOf(items, d);
+const hasGet = links.length > 0 || d.install !== null;
+const note = d.statusNote ? shortNote(d.statusNote) : null;
+---
+
+<Shell page={page} title={`${d.name} — wkd`} description={d.tagline}>
+  <article
+    class="m-plugin m-apppage"
+    data-pagefind-body
+    data-pagefind-meta={`title:${d.name}`}
+    data-pagefind-filter={`kind:${d.kind}`}
+  >
+    <header class="m-plugin-head">
+      <p class="m-kicker">
+        <b data-pagefind-filter="category">{categoryLabel(d.category)}</b>
+        {d.kind !== 'app' ? <span> · {KIND_LABELS[d.kind]}</span> : null}
+        {
+          d.status !== 'unknown' ? (
+            <>
+              {' · '}
+              <span class="m-status" data-status={d.status} data-pagefind-filter="status">{d.status}</span>
+            </>
+          ) : null
+        }
+        {meta ? <span data-pagefind-ignore> · {meta}</span> : null}
+        <span data-pagefind-ignore> · {d.commitCount} commits</span>
+      </p>
+      <div class="m-apppage-title">
+        {
+          d.icon ? (
+            <img class="m-apppage-icon" src={`${BASE}${d.icon}`} alt="" width="128" height="128" />
+          ) : (
+            <span class="m-apppage-icon m-app-noicon" aria-hidden="true">{d.name.charAt(0)}</span>
+          )
+        }
+        <h1 class="display display--name" data-kinetic>{d.name}</h1>
+      </div>
+      <p class="m-lede">{d.description}</p>
+      <p class="m-actions" data-pagefind-ignore>
+        <a class="m-btn" data-primary href={d.url} rel="noopener">Repository</a>
+        <a class="m-btn" href={`${d.url}#readme`} rel="noopener">README</a>
+      </p>
+    </header>
+
+    {d.shots.length > 0 ? <Shots slug={d.id} name={d.name} shots={d.shots} skin="modern" /> : null}
+
+    <div class="m-cols">
+      <section data-pagefind-ignore>
+        <h2 class="m-h2">{hasGet ? 'Get it' : 'Status'}</h2>
+        {
+          links.length > 0 ? (
+            <ul class="m-list">
+              {links.map((l) => (
+                <li>
+                  <a href={l.url} rel="noopener">{l.label}</a> — {l.note}
+                </li>
+              ))}
+            </ul>
+          ) : null
+        }
+        {d.install ? <pre class="code"><code>{d.install}</code></pre> : null}
+        {note ? <p class="m-status-note">{note}</p> : null}
+        {!hasGet && !note ? <p class="m-kicker">No build to download yet; the README says how to build it.</p> : null}
+      </section>
+      {
+        variants.length > 0 ? (
+          <section>
+            <h2 class="m-h2">Variants</h2>
+            <ul class="m-list m-variants">
+              {variants.map((v) => (
+                <li aria-current={v.item.id === d.id ? 'page' : undefined}>
+                  <span class="m-variant-role">{FORM_LABELS[v.role]}</span>
+                  {v.item.id === d.id ? (
+                    <b>{v.item.name}</b>
+                  ) : (
+                    <a href={href(entryPage(v.item))} data-nav={entryPage(v.item)}>{v.item.name}</a>
+                  )}
+                  {' · '}
+                  <a href={v.item.url} rel="noopener">repository</a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null
+      }
+      {
+        d.docs.length > 0 ? (
+          <section>
+            <h2 class="m-h2">Documentation</h2>
+            <ul class="m-list">
+              {d.docs.map((f) => (
+                <li>
+                  <a href={`${d.url}/blob/HEAD/docs/${encodeURIComponent(f)}`} rel="noopener">docs/{f}</a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null
+      }
+      <section data-pagefind-ignore>
+        <h2 class="m-h2">Recent commits</h2>
+        <RecentCommits commits={d.recent} skin="modern" limit={8} />
+      </section>
+    </div>
+  </article>
+</Shell>

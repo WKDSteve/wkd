@@ -1,0 +1,20 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import type { Skin } from '../lib/site';
+import CommitLine from './CommitLine.astro';
+
+// The newest commits of one repository, as the page of a plugin or an app
+// lists them: without the repository's name, which the page already says.
+interface Props {
+  commits: CollectionEntry<'activity'>['data'][];
+  skin: Skin;
+  /** how many to show; all when absent */
+  limit?: number;
+}
+const { commits, skin, limit } = Astro.props;
+const shown = limit === undefined ? commits : commits.slice(0, limit);
+---
+
+<ol class={skin === 'tui' ? 'tui-list' : 'm-list'}>
+  {shown.map((c) => <CommitLine commit={c} skin={skin} showPlugin={false} />)}
+</ol>

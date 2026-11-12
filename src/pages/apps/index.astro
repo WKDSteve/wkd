@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import CategoryFilter from '../../components/CategoryFilter.astro';
 import { appMeta, appSections, kits, otherForms } from '../../lib/apps';
 import { approx, categoryLabel } from '../../lib/format';
+import { entryPage } from '../../lib/nav';
 import { BASE, href } from '../../lib/site';
 import Shell from '../../skins/modern/Shell.astro';
 
@@ -89,7 +90,7 @@ const description = `${apps.length} native apps from one workshop: tools that st
                     ) : (
                       <span class="m-app-icon m-app-noicon" aria-hidden="true">{a.name.charAt(0)}</span>
                     )}
-                    <a class="m-app-link m-card-name" href={href(`p/${a.id}`)} data-nav={`p/${a.id}`} data-astro-prefetch>
+                    <a class="m-app-link m-card-name" href={href(entryPage(a))} data-nav={entryPage(a)} data-astro-prefetch>
                       {a.name}
                     </a>
                   </div>
@@ -100,7 +101,7 @@ const description = `${apps.length} native apps from one workshop: tools that st
                       Also as{' '}
                       {/* On one line: a line break in the template would be a space before the comma. */}
                       {forms.map((f, i) => (
-                        <><a href={href(`p/${f.id}`)} data-nav={`p/${f.id}`}>{f.name}</a>{i < forms.length - 1 ? ', ' : ''}</>
+                        <><a href={href(entryPage(f))} data-nav={entryPage(f)}>{f.name}</a>{i < forms.length - 1 ? ', ' : ''}</>
                       ))}
                     </p>
                   ) : null}

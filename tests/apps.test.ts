@@ -1,7 +1,18 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
-import { type AppLike, appMeta, appSections, kits, otherForms, SECTIONS } from '../src/lib/apps.ts';
+import {
+  type AppLike,
+  appMeta,
+  appSections,
+  getLinks,
+  kits,
+  NOTE_MAX,
+  otherForms,
+  SECTIONS,
+  shortNote,
+  variantsOf,
+} from '../src/lib/apps.ts';
 import { type RawRegistry, STAGES, validateRegistry } from '../src/lib/registry.ts';
 
 const item = (slug: string, over: Partial<AppLike> = {}): AppLike => ({
@@ -120,4 +131,84 @@ test('filter.css hides a section the chosen category leaves empty, for every app
       `filter.css has no section rule for "${id}"`,
     );
   }
+});
+
+const family = [
+  item('tasks-desktop', { family: 'tasks', stage: 'companion' }),
+  item('tasks-web', { kind: 'web', family: 'tasks', variantOf: 'tasks-desktop', stage: null }),
+  item('tasks', { kind: 'plugin', family: 'tasks', stage: null }),
+  item('lib', { kind: 'plugin', stage: null }),
+  item('appkit', { kind: 'kit', stage: null }),
+  item('pult'),
+];
+const roles = (forms: { role: string; item: AppLike }[]): string[][] =>
+  forms.map((f) => [f.role, f.item.slug]);
+
+test('the variants of an app are the app, its web variants, then its plugin', () => {
+  const app = family[0] as AppLike;
+  assert.deepEqual(roles(variantsOf(family, app)), [
+    ['native', 'tasks-desktop'],
+    ['web', 'tasks-web'],
+    ['plugin', 'tasks'],
+  ]);
+});
+
+test('a web variant shows the same variants as its app', () => {
+  assert.deepEqual(
+    roles(variantsOf(family, family[1] as AppLike)),
+    roles(variantsOf(family, family[0] as AppLike)),
+  );
+});
+
+test('an app that stands alone, a kit and a plugin have no variants block', () => {
+  assert.deepEqual(variantsOf(family, family[5] as AppLike), []);
+  assert.deepEqual(variantsOf(family, family[4] as AppLike), []);
+  assert.deepEqual(variantsOf(family, family[2] as AppLike), []);
+});
+
+test('a web variant whose app is not there has no variants block', () => {
+  const web = item('x-web', { kind: 'web', variantOf: 'x-desktop', stage: null });
+  assert.deepEqual(variantsOf([web], web), []);
+});
+
+test('the links to a build name a tag a tag, then the rolling build', () => {
+  assert.deepEqual(getLinks({ release: null, rollingUrl: null }), []);
+  const links = getLinks({
+    release: { tag: 'v0.1.0', url: 'https://github.com/o/r/releases/tag/v0.1.0' },
+    rollingUrl: 'https://github.com/o/r/releases/tag/latest',
+  });
+  assert.deepEqual(
+    links.map((l) => l.label),
+    ['v0.1.0', 'latest'],
+  );
+  assert.ok(
+    links.every((l) => !/\brelease\b/i.test(l.note)),
+    'a tag is not called a release',
+  );
+});
+
+test('a short status note stays as it is', () => {
+  assert.equal(shortNote('Status: beta. Works.'), 'Status: beta. Works.');
+});
+
+test('a long status note keeps the whole sentences that fit', () => {
+  const note = `Status: early development. No release yet. ${'More words here. '.repeat(30)}`;
+  assert.equal(
+    shortNote(note, 60),
+    'Status: early development. No release yet. More words here. …',
+  );
+  assert.ok(shortNote(note).length <= NOTE_MAX + 2);
+});
+
+test('a dot that ends no sentence does not split one, nor drop text', () => {
+  const note = `Status: early. It reads /api/x?key=..., v0.1 and more. ${'Tail words. '.repeat(30)}`;
+  assert.equal(shortNote(note, 60), 'Status: early. It reads /api/x?key=..., v0.1 and more. …');
+});
+
+test('a first sentence longer than the limit is cut at a word', () => {
+  const note = `${'word '.repeat(80)}end.`;
+  const short = shortNote(note, 50);
+  assert.ok(short.endsWith(' …'));
+  assert.ok(short.length <= 52);
+  assert.ok(!short.includes('wor …'), 'cut inside a word');
 });

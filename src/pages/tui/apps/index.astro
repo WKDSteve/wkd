@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import CategoryFilter from '../../../components/CategoryFilter.astro';
 import { appMeta, appSections, kits, otherForms } from '../../../lib/apps';
 import { categoryLabel } from '../../../lib/format';
+import { entryPage } from '../../../lib/nav';
 import { href } from '../../../lib/site';
 import Shell from '../../../skins/tui/Shell.astro';
 
@@ -51,7 +52,7 @@ const groups = [
               const forms = otherForms(items, a).map((f) => f.name);
               const meta = appMeta(a.platforms, a.tech);
               return (
-                <a href={href(`p/${a.id}`, 'tui')} data-nav={`p/${a.id}`} data-cat={a.category} data-astro-prefetch>
+                <a href={href(entryPage(a), 'tui')} data-nav={entryPage(a)} data-cat={a.category} data-astro-prefetch>
                   <span class="idx">{String(i + 1).padStart(2, '0')}</span>
                   <span class="name">{a.name}</span>
                   <span class="stat" data-status={a.status}>{a.status === 'unknown' ? '-' : a.status}</span>

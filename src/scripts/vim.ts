@@ -49,7 +49,9 @@ function init(): void {
   const plugins = [
     ...document.querySelectorAll<HTMLAnchorElement>('nav.tui-side a.item[data-nav]'),
   ].map((a) => ({
-    slug: (a.dataset.nav ?? '').replace(/^p\//, ''),
+    // p/<slug> for a plugin, apps/<slug> for an app: the sidebar knows which.
+    page: a.dataset.nav ?? '',
+    slug: (a.dataset.nav ?? '').replace(/^(p|apps)\//, ''),
     name: a.textContent?.trim() ?? '',
     help: a.hasAttribute('data-vimdoc'), // has a /help page (doc/*.txt exists)
   }));
@@ -108,7 +110,8 @@ function init(): void {
       fail(`E149: Sorry, no help for ${slug}`);
       return;
     }
-    go(`p/${slug}${suffix}`);
+    const page = plugins.find((p) => p.slug === slug)?.page ?? `p/${slug}`;
+    go(`${page}${suffix}`);
   };
 
   const commands: Command[] = [
@@ -130,7 +133,7 @@ function init(): void {
       name: 'edit',
       aliases: ['e'],
       arg: 'plugin',
-      desc: 'open a plugin page',
+      desc: 'open the page of a plugin or an app',
       run: (arg) => openPlugin(arg),
     },
     { name: 'ls', aliases: ['plugins'], arg: null, desc: 'all plugins', run: () => go('nvim') },

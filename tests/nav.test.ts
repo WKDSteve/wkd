@@ -6,7 +6,9 @@ import { fileURLToPath } from 'node:url';
 import {
   AREAS,
   builtAreas,
+  entryPage,
   MOVED,
+  movedEntries,
   pageOfFile,
   type RouteCheck,
   routeProblems,
@@ -203,4 +205,33 @@ test('the plugin area and the plugin pages are where the badges point', () => {
   assert.ok(areas.includes('nvim'), 'no plugin area');
   assert.ok(pages.includes('p/[id].astro'), 'the plugin page left p/<slug>/');
   assert.ok(pages.includes('tui/p/[id].astro'), 'the TUI plugin page left tui/p/<slug>/');
+});
+
+test('a plugin has its page under p/, every other entry under apps/', () => {
+  assert.equal(entryPage({ kind: 'plugin', slug: 'cascade' }), 'p/cascade');
+  assert.equal(entryPage({ kind: 'app', slug: 'pult' }), 'apps/pult');
+  assert.equal(entryPage({ kind: 'web', slug: 'tasks-web' }), 'apps/tasks-web');
+  assert.equal(entryPage({ kind: 'kit', slug: 'appkit' }), 'apps/appkit');
+});
+
+test('the old plugin page of every entry that is no plugin sends on to its apps page', () => {
+  assert.deepEqual(
+    movedEntries([
+      { kind: 'plugin', slug: 'cascade' },
+      { kind: 'app', slug: 'tasks-desktop' },
+      { kind: 'web', slug: 'tasks-web' },
+      { kind: 'kit', slug: 'appkit' },
+    ]),
+    {
+      'p/tasks-desktop': 'apps/tasks-desktop',
+      'p/tasks-web': 'apps/tasks-web',
+      'p/appkit': 'apps/appkit',
+    },
+  );
+});
+
+test('an apps page has its own route in both skins', () => {
+  const pages = astroFiles(pagesDir);
+  assert.ok(pages.includes('apps/[id].astro'), 'no apps/<slug>/ page');
+  assert.ok(pages.includes('tui/apps/[id].astro'), 'no tui/apps/<slug>/ page');
 });

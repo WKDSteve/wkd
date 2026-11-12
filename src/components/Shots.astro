@@ -6,10 +6,12 @@ import type { Shot } from '../loaders/repos';
 // features a recording cannot show. Lazy, sized up front, one figure each.
 interface Props {
   slug: string;
+  /** name of the plugin or app, for the alt text */
+  name: string;
   shots: Shot[];
   skin: Skin;
 }
-const { slug, shots, skin } = Astro.props;
+const { slug, name, shots, skin } = Astro.props;
 ---
 
 <div class:list={['shots', skin === 'tui' ? 'tui-shots' : 'm-shots']}>
@@ -22,7 +24,7 @@ const { slug, shots, skin } = Astro.props;
           height={s.height}
           loading="lazy"
           decoding="async"
-          alt={`${slug}.nvim: ${s.caption}`}
+          alt={`${name}: ${s.caption}`}
         />
         <figcaption>{s.caption}</figcaption>
       </figure>

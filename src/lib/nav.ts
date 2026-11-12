@@ -29,6 +29,32 @@ export const MOVED: Readonly<Record<string, string>> = {
   stack: 'nvim/stack',
 };
 
+/** The fields of an entry that decide the address of its page. */
+export interface PageEntry {
+  kind: 'plugin' | 'app' | 'web' | 'kit';
+  slug: string;
+}
+
+/**
+ * The site-relative page of an entry: a plugin has `p/<slug>`, everything
+ * else (an app, a web variant, a kit) `apps/<slug>`. Every link to an entry
+ * goes through this, so no page links to an address that only sends on.
+ */
+export function entryPage(e: PageEntry): string {
+  return e.kind === 'plugin' ? `p/${e.slug}` : `apps/${e.slug}`;
+}
+
+/**
+ * The addresses of entries that moved out of the plugin pages: until the apps
+ * had pages of their own kind, every entry had `p/<slug>`. Old page to new
+ * page, for every entry that is no plugin.
+ */
+export function movedEntries(entries: readonly PageEntry[]): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const e of entries) if (e.kind !== 'plugin') out[`p/${e.slug}`] = entryPage(e);
+  return out;
+}
+
 /**
  * The page a file under src/pages/ serves, or null for a file that is no page
  * of the modern skin (a dynamic route, a file of the TUI skin):

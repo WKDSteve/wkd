@@ -24,7 +24,8 @@ the same page in the other skin; `src/scripts/prefs.ts` remembers the choice in
 | Start | `/wkd/` | the way in: the plugin area and the apps |
 | Neovim plugins | `/wkd/nvim/` | the roster with its category filter, Tree, Orbit and the fight; the stack at `/wkd/nvim/stack/` |
 | Apps | `/wkd/apps/` | tiles with icon, status, platforms and tech, by `stage`: ready to show, companions of the plugins, in the making; the kits at the end; a category filter over all of them |
-| A plugin or an app | `/wkd/p/<slug>/` | its page; the help of a plugin at `/wkd/p/<slug>/help/` |
+| A plugin | `/wkd/p/<slug>/` | its page; its help at `/wkd/p/<slug>/help/` |
+| An app, a web variant or a kit | `/wkd/apps/<slug>/` | screenshots first, then how to get it (newest version tag, the rolling build `latest`, the install block of the README), the variants (native, web, plugin) and the latest commits; no `lazy.nvim` spec, no `:help` |
 | Activity | `/wkd/activity/` | every recent commit |
 
 Every page exists in both skins (`tests/nav.test.ts` holds each modern page to a twin under
@@ -34,7 +35,8 @@ skin and the sidebar of the TUI skin show the ones that have a page file, so a p
 
 **Addresses that are linked from outside stay.** The READMEs of the plugins carry a badge that
 points at `/wkd/p/<slug>/`, so the plugin pages do not move. An address that does move is
-entered in `MOVED` (`src/lib/nav.ts`: `stack` is `nvim/stack` now) and keeps a page at the old
+entered in `MOVED` (`src/lib/nav.ts`: `stack` is `nvim/stack` now; every entry that is no
+plugin had `p/<slug>` before it had `apps/<slug>`, which `movedEntries()` adds) and keeps a page at the old
 place that sends the visitor on (`src/components/Moved.astro`: a meta refresh, the new address
 as canonical, a plain link; GitHub Pages cannot answer with a redirect status). After every
 build `src/integrations/routes.ts` checks that every plugin page, every area and every moved

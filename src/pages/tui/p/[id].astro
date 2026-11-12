@@ -1,10 +1,12 @@
 ---
 import { getCollection } from 'astro:content';
 import type { InferGetStaticPropsType } from 'astro';
-import CommitLine from '../../../components/CommitLine.astro';
 import Demo from '../../../components/Demo.astro';
+import Moved from '../../../components/Moved.astro';
+import RecentCommits from '../../../components/RecentCommits.astro';
 import Shots from '../../../components/Shots.astro';
 import { categoryLabel, lazySnippet } from '../../../lib/format';
+import { entryPage } from '../../../lib/nav';
 import { href } from '../../../lib/site';
 import Shell from '../../../skins/tui/Shell.astro';
 
@@ -15,8 +17,12 @@ export async function getStaticPaths() {
 type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 const { plugin } = Astro.props as Props;
 const d = plugin.data;
+// An app, a web variant or a kit had this address before it had a page of its
+// own kind under apps/; the address stays and sends on (MOVED in the build check).
+const movedTo = d.kind === 'plugin' ? null : entryPage({ kind: d.kind, slug: plugin.id });
 ---
 
+{movedTo ? <Moved to={movedTo} skin="tui" /> : (
 <Shell page={`p/${plugin.id}`} title={`${d.name} — wkd`} description={d.tagline} cmd={`help ${plugin.id}`}>
   {d.banner ? <pre class="banner" aria-hidden="true" tabindex="-1">{d.banner}</pre> : null}
   <h1 class="tui-h1">{d.name}</h1>
@@ -41,21 +47,10 @@ const d = plugin.data;
   {d.demos.length > 0 ? <Demo slug={plugin.id} demos={d.demos} skin="tui" /> : null}
 
   {d.shots.length > 0 ? <h2 class="tui-h2">screenshots</h2> : null}
-  {d.shots.length > 0 ? <Shots slug={plugin.id} shots={d.shots} skin="tui" /> : null}
+  {d.shots.length > 0 ? <Shots slug={plugin.id} name={d.name} shots={d.shots} skin="tui" /> : null}
 
-  {
-    /* The lazy.nvim spec is for plugins. An app shows the install block of its
-       own README where it has one; until the apps have a page of their own
-       kind, this page is theirs too. */
-  }
-  {d.kind === 'plugin' || d.install ? <h2 class="tui-h2">install</h2> : null}
-  {
-    d.kind === 'plugin' ? (
-      <pre class="tui-code"><code>{lazySnippet(d.owner, d.name)}</code></pre>
-    ) : d.install ? (
-      <pre class="tui-code"><code>{d.install}</code></pre>
-    ) : null
-  }
+  <h2 class="tui-h2">install</h2>
+  <pre class="tui-code"><code>{lazySnippet(d.owner, d.name)}</code></pre>
 
   {d.docs.length > 0 ? <h2 class="tui-h2">docs/</h2> : null}
   {
@@ -71,7 +66,6 @@ const d = plugin.data;
   }
 
   <h2 class="tui-h2">git log</h2>
-  <ol class="tui-list">
-    {d.recent.map((c) => <CommitLine commit={c} skin="tui" showPlugin={false} />)}
-  </ol>
+  <RecentCommits commits={d.recent} skin="tui" />
 </Shell>
+)}
