@@ -1,69 +1,103 @@
 ---
 import { getCollection } from 'astro:content';
 import CommitLine from '../components/CommitLine.astro';
+import Ticker from '../components/Ticker.astro';
 import registry from '../data/registry.json';
 import { byDateDesc } from '../lib/format';
 import { entryPage } from '../lib/nav';
+import { PLAY } from '../lib/play';
 import { href } from '../lib/site';
+import { doorExamples, SHOWN_STATS, workshopStats } from '../lib/start';
 import Shell from '../skins/modern/Shell.astro';
 
-// The start page of the site. For now it is the plain way in: the plugin
-// area and the apps, the latter listed by name.
-const all = (await getCollection('plugins')).sort((a, b) => a.data.name.localeCompare(b.data.name));
-const plugins = all.filter((p) => p.data.kind === 'plugin');
-const apps = all.filter((p) => p.data.kind === 'app');
+// The way into the workshop: what it is, a door to the plugins and one to the
+// apps, the play area, and what happened last in any of the repositories.
+const items = (await getCollection('plugins')).map((e) => e.data);
+const plugins = items.filter((i) => i.kind === 'plugin');
+const apps = items.filter((i) => i.kind === 'app');
 const activity = (await getCollection('activity')).sort(byDateDesc).slice(0, 10);
+const statsPool = workshopStats(items, PLAY.length);
+const doors = [
+  {
+    page: 'nvim',
+    count: plugins.length,
+    title: 'Neovim plugins',
+    text: 'One command, one concern, and one tested foundation under all of them.',
+    go: 'All plugins',
+    examples: doorExamples(items, 'plugin'),
+  },
+  {
+    page: 'apps',
+    count: apps.length,
+    title: 'Apps',
+    text: 'Native programs: tools that stand on their own, and companions that give a plugin a window.',
+    go: 'All apps',
+    examples: doorExamples(items, 'app'),
+  },
+];
 const title = 'wkd — Neovim plugins and native apps from one workshop';
-const description = `${plugins.length} Neovim plugins and ${apps.length} native apps from one workshop, generated from their repositories.`;
+const description =
+  'Neovim plugins, native apps and a few experiments from one workshop, generated from their repositories.';
 ---
 
 <Shell page="" title={title} description={description}>
   <section class="m-hero">
     <p class="m-kicker">
-      github.com/{registry.owner} · <b>{all.length} repositories</b>
+      github.com/{registry.owner} · <b>{items.length} repositories</b> · read from the source
     </p>
     <h1 class="display" data-kinetic>
       One <b>workshop</b>.
     </h1>
     <p class="m-lede">
-      Neovim plugins and native apps, built side by side. This site is generated from the
-      repositories themselves: every tagline, status and commit is read from the source.
+      Plugins, apps, experiments. Neovim plugins and native apps are built here side by side, and
+      now and then something just for fun. This site is generated from the repositories
+      themselves: every tagline, status and commit is read from the source.
     </p>
-  </section>
-
-  <section class="m-plugin" aria-label="Neovim plugins">
-    <h2 class="m-h2">Neovim plugins</h2>
-    <p class="m-lede">
-      {plugins.length} plugins that share one rule — one command, one concern — and one tested
-      foundation.
-    </p>
-    <p class="m-actions">
-      <a class="m-btn" data-primary href={href('nvim')} data-nav="nvim" data-astro-prefetch>All plugins</a>
-      <a class="m-btn" href={href('nvim/stack')} data-nav="nvim/stack" data-astro-prefetch>Stack</a>
-    </p>
-  </section>
-
-  <section class="m-plugin" aria-label="Apps">
-    <h2 class="m-h2">Apps</h2>
-    <p class="m-lede">
-      {apps.length} native apps: tools that stand on their own, and companions of the plugins.
-    </p>
-    <p class="m-actions">
-      <a class="m-btn" data-primary href={href('apps')} data-nav="apps" data-astro-prefetch>All apps</a>
-    </p>
-    <ul class="m-list">
+    <dl class="m-stats" data-stats-pool={JSON.stringify(statsPool)}>
       {
-        apps.map((a) => (
-          <li>
-            <a href={href(entryPage(a.data))} data-nav={entryPage(a.data)} data-astro-prefetch>
-              {a.data.name}
-            </a>
-            {' — '}
-            {a.data.tagline}
-          </li>
+        statsPool.slice(0, SHOWN_STATS).map((m) => (
+          <div>
+            <dt><span class="m-stat-label">{m.label}</span></dt>
+            <dd><span class="m-stat-value">{m.value}</span></dd>
+          </div>
         ))
       }
-    </ul>
+    </dl>
+  </section>
+
+  <Ticker commits={activity.map((c) => c.data)} label="Latest commits across all repositories" marks />
+
+  <section class="m-doors" aria-label="Areas">
+    {
+      doors.map((d) => (
+        <article class="m-card m-app m-door">
+          <p class="m-door-count">{d.count}</p>
+          <h2 class="m-door-title">
+            <a class="m-app-link" href={href(d.page)} data-nav={d.page} data-astro-prefetch>{d.title}</a>
+          </h2>
+          <p class="m-card-tag">{d.text}</p>
+          <ul class="m-door-examples">
+            {d.examples.map((e) => (
+              <li>
+                <a href={href(entryPage(e))} data-nav={entryPage(e)}>{e.name}</a>
+                <span>{e.tagline}</span>
+              </li>
+            ))}
+          </ul>
+          <p class="m-door-go" aria-hidden="true">{d.go} →</p>
+        </article>
+      ))
+    }
+  </section>
+
+  <section class="m-strip" aria-labelledby="start-play">
+    <h2 class="m-strip-title" id="start-play">Play</h2>
+    <p class="m-strip-text">
+      {PLAY.map((p) => p.blurb).join(' ')}
+    </p>
+    <a class="m-btn" data-primary href={href('play')} data-nav="play" data-astro-prefetch>
+      {PLAY.length === 1 ? `Play ${PLAY[0]?.name}` : 'To the play area'}
+    </a>
   </section>
 
   <section class="m-plugin" aria-label="Recent activity">

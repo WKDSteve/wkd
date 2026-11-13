@@ -1,0 +1,44 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { AREA_MARKS, areaOfSlug, pageOfSlug } from '../lib/entries';
+import { href } from '../lib/site';
+
+// The band of the latest commits (modern skin). It runs as a CSS animation,
+// pauses on hover, on focus and by its checkbox, and stands still under
+// prefers-reduced-motion; nothing of it needs script.
+interface Props {
+  commits: CollectionEntry<'activity'>['data'][];
+  label: string;
+  /** Say which area a commit is from; a band of one area alone has no use for it. */
+  marks?: boolean;
+}
+const { commits, label, marks = false } = Astro.props;
+---
+
+<section class="ticker" aria-label={label}>
+  <div class="ticker-label">live</div>
+  <label class="ticker-pause">
+    <input type="checkbox" id="ticker-pause" />
+    pause
+  </label>
+  <div class="ticker-viewport">
+    <div class="ticker-track">
+      {
+        /* The second copy only exists for the seamless loop: inert + aria-hidden
+           keep it out of the tab order and the accessibility tree. */
+        [...commits, ...commits].map((c, i) => {
+          const dup = i >= commits.length;
+          const page = pageOfSlug(c.plugin);
+          return (
+            <a href={href(page)} data-nav={page} inert={dup || undefined} aria-hidden={dup ? 'true' : undefined}>
+              {marks ? <span class="carea" data-area={areaOfSlug(c.plugin)}>{AREA_MARKS[areaOfSlug(c.plugin)]}</span> : null}
+              <span class="cplug">{c.pluginName}</span>
+              <span class="ctype">{c.type ?? '·'}</span>
+              <span>{c.subject}</span>
+            </a>
+          );
+        })
+      }
+    </div>
+  </div>
+</section>

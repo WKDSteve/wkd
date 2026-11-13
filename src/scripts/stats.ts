@@ -1,5 +1,5 @@
 // Progressive enhancement over the four static stat tiles: without this,
-// the four values from src/pages/index.astro's frontmatter just sit there,
+// the four values the page rendered (the start page, the plugin area) just sit there,
 // correct and final. With it, a slot swaps to a different metric from the
 // pool every few seconds, one at a time so the page stays legible instead
 // of flashing all four at once.

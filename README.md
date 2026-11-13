@@ -21,7 +21,7 @@ the same page in the other skin; `src/scripts/prefs.ts` remembers the choice in
 
 | Area | Address | What is there |
 |---|---|---|
-| Start | `/wkd/` | the way in: the plugin area and the apps |
+| Start | `/wkd/` | the way into the workshop: figures over plugins and apps (`src/lib/start.ts`), the ticker over all repositories, a door to the plugins and one to the apps (a count and three examples each), the strip of the play area, the latest commits with the mark of their area |
 | Neovim plugins | `/wkd/nvim/` | the roster with its category filter, Tree and Orbit; a tile says when the plugin also exists as an app or a web file; the stack at `/wkd/nvim/stack/` |
 | Apps | `/wkd/apps/` | tiles with icon, status, platforms and tech, by `stage`: ready to show, companions of the plugins, in the making; the kits at the end; a category filter over all of them |
 | A plugin | `/wkd/p/<slug>/` | its page, with a block "Also as" when its family has an app or a web variant; its help at `/wkd/p/<slug>/help/` |
@@ -119,7 +119,7 @@ worker, worklet or WASM file has to be checked against `pnpm build && pnpm previ
 ## Stack and constraints
 
 - **Astro 7**, zero client JS by default. One client bundle (`src/scripts/client.ts`,
-  ~12 KB gzipped) carries the preference helper, search UI, view switcher, Vim keys and the
+  ~15 KB gzipped) carries the preference helper, search UI, view switcher, Vim keys and the
   fight minigame's shell; the Pagefind engine loads only when the search field is focused
   for a search (the TUI command line reuses the field but never loads it).
 - **Fight** (modern skin, on the play page `/wkd/play/`): a small 1v1 fighting game.
@@ -318,4 +318,4 @@ To rebuild the site on every plugin push, add this to each plugin repo's CI:
 | 3 | Demo pipeline: VHS `.tape` scripts recorded in CI → webm/mp4 + poster on the plugin pages | **pipeline done**; tapes: cascade, emojis, replacer, spotlight, data, diff, markdown, color_my_ascii, hover, insights, fileops, buffer-ctx, recommender, sessions, ui, gopath, runtime-analysis, docmap, pickers, cmdlog |
 | 4 | TUI skin: vim motions (`j`/`k`/`gg`/`G`), `:` command line with completion, `?` help | **done** |
 | 5 | Vimdoc renderer (`doc/*.txt` → HTML with `\|tag\|` links; `:help` opens it), `/stack` dependency graph | **done** |
-| 6 | From the site of the plugins to the site of the workshop: kinds and families in the registry, the plugin area at `/nvim/`, an area and pages for the apps, a new start page, the fight on a page of its own | registry, plugin area, apps overview, app pages, family references and play **done**; start page open |
+| 6 | From the site of the plugins to the site of the workshop: kinds and families in the registry, the plugin area at `/nvim/`, an area and pages for the apps, a new start page, the fight on a page of its own | **done**; open: screenshots of the apps, the filter of search and activity by area |

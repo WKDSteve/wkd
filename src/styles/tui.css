@@ -518,6 +518,15 @@
     flex: none;
     min-width: 18ch;
   }
+  /* The area a commit is from: plugins dim, apps in the colour of the app list. */
+  .tui-list .carea {
+    flex: none;
+    min-width: 6ch;
+    color: var(--fg-dim);
+  }
+  .tui-list .carea[data-area="apps"] {
+    color: var(--yellow);
+  }
   .tui-list .csubj {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -583,6 +592,16 @@
   }
   .tui-table .cat {
     color: var(--fg-dim);
+  }
+  /* The start buffer: three rows, the command that leads there in front. */
+  .tui-start {
+    grid-template-columns: 6ch max-content 1fr;
+  }
+  .tui-start .idx {
+    text-align: left;
+  }
+  .tui-start > a > .cat {
+    white-space: normal;
   }
   /* The apps page says more per row (platforms, tech, other forms) and has few
      rows: its text wraps, so the end of a row is not cut off unread. */

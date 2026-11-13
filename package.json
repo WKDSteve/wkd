@@ -2,7 +2,7 @@
   "name": "wkd",
   "version": "0.1.0",
   "private": true,
-  "description": "Website for the .nvim plugin family -- generated from the plugin repositories themselves.",
+  "description": "Website of the wkd workshop: Neovim plugins and native apps -- generated from the repositories themselves.",
   "type": "module",
   "engines": {
     "node": ">=22.18.0",
