@@ -1,0 +1,20 @@
+[
+  {
+    "file": "repos.webp",
+    "width": 1360,
+    "height": 850,
+    "caption": "The repositories: the last local run of each one next to its CI on three systems; a red repository stands first."
+  },
+  {
+    "file": "red.webp",
+    "width": 1360,
+    "height": 850,
+    "caption": "A red repository: the failing case with its message, expected and actual side by side, then the history and the cases that are red most often."
+  },
+  {
+    "file": "green.webp",
+    "width": 1360,
+    "height": 850,
+    "caption": "A green repository: the share of green runs, the median duration, the runs per day and every run with its result."
+  }
+]
