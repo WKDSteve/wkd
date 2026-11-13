@@ -116,7 +116,10 @@ for (const entry of registry.plugins) {
     results.push({ name: entry.name, status: `skipped: ${outcome.skip}` });
     continue;
   }
-  if (WRITE) writeFileSync(readmePath, outcome.lines.join('\n'));
+  // The line ends the README has are kept: a CRLF file must not come out as
+  // one big diff.
+  const eol = readme.includes('\r\n') ? '\r\n' : '\n';
+  if (WRITE) writeFileSync(readmePath, outcome.lines.join(eol));
   results.push({ name: entry.name, status: WRITE ? 'written' : 'would write' });
 }
 

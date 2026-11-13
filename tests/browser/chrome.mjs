@@ -2,7 +2,7 @@
 // headless Chrome spoken to over the DevTools protocol. No dependency: Node
 // has fetch and WebSocket, Chrome is the one on this machine (or $CHROME).
 import { spawn } from 'node:child_process';
-import { existsSync, mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs';
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { extname, join, normalize, resolve, sep } from 'node:path';
@@ -80,36 +80,71 @@ export function serve(dist, base = '/wkd') {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+/** The promise, or nothing after `ms`; the timer does not outlive the promise (it would hold the process open). */
+function within(promise, ms) {
+  let timer;
+  const late = new Promise((r) => {
+    timer = setTimeout(r, ms);
+  });
+  return Promise.race([promise, late]).finally(() => clearTimeout(timer));
+}
+
+const PROFILE = 'wkd-chrome-';
+
+/** Removes the profiles earlier runs could not remove (Chrome still held them), once they are ten minutes old. */
+function sweepProfiles() {
+  for (const name of readdirSync(tmpdir())) {
+    if (!name.startsWith(PROFILE)) continue;
+    const dir = join(tmpdir(), name);
+    try {
+      if (Date.now() - statSync(dir).mtimeMs > 600_000)
+        rmSync(dir, { recursive: true, force: true });
+    } catch {
+      // Held by a Chrome that still runs, or gone meanwhile.
+    }
+  }
+}
+
 /** Starts a headless Chrome and returns one page of it. */
 export async function launch({ width = 1280, height = 900 } = {}) {
   const exe = chromePath();
   if (!exe) throw new Error('no Chrome found; set CHROME to its path');
-  const profile = mkdtempSync(join(tmpdir(), 'wkd-chrome-'));
-  const chrome = spawn(exe, [
-    '--headless=new',
-    '--remote-debugging-port=0',
-    `--user-data-dir=${profile}`,
-    `--window-size=${width},${height}`,
-    '--no-first-run',
-    '--mute-audio',
-    '--autoplay-policy=no-user-gesture-required',
-    // A hosted runner forbids the user namespaces Chrome's sandbox needs, and
-    // its /dev/shm is small. The pages loaded there are this repo's own build.
-    ...(process.env.CI ? ['--no-sandbox', '--disable-dev-shm-usage'] : []),
-    'about:blank',
-  ]);
+  sweepProfiles();
+  const profile = mkdtempSync(join(tmpdir(), PROFILE));
+  const chrome = spawn(
+    exe,
+    [
+      '--headless=new',
+      '--remote-debugging-port=0',
+      `--user-data-dir=${profile}`,
+      `--window-size=${width},${height}`,
+      '--no-first-run',
+      '--mute-audio',
+      '--autoplay-policy=no-user-gesture-required',
+      // A hosted runner forbids the user namespaces Chrome's sandbox needs, and
+      // its /dev/shm is small. The pages loaded there are this repo's own build.
+      ...(process.env.CI ? ['--no-sandbox', '--disable-dev-shm-usage'] : []),
+      'about:blank',
+    ],
+    // Only stderr is read (for the port); a pipe nobody reads would fill up.
+    { stdio: ['ignore', 'ignore', 'pipe'] },
+  );
   // Chrome prints the port it took to stderr.
   const port = await new Promise((done, fail) => {
     let err = '';
     const timer = setTimeout(() => fail(new Error(`Chrome did not start: ${err}`)), 20000);
-    chrome.stderr.on('data', (d) => {
+    const read = (d) => {
       err += d;
       const m = err.match(/DevTools listening on ws:\/\/[^:]+:(\d+)\//);
       if (m) {
         clearTimeout(timer);
+        // From here on stderr is drained and dropped.
+        chrome.stderr.off('data', read);
+        chrome.stderr.resume();
         done(Number(m[1]));
       }
-    });
+    };
+    chrome.stderr.on('data', read);
   });
   let target;
   for (let i = 0; i < 50 && !target; i++) {
@@ -169,7 +204,7 @@ export async function launch({ width = 1280, height = 900 } = {}) {
     async goto(url) {
       const loaded = once('Page.loadEventFired');
       await send('Page.navigate', { url });
-      await Promise.race([loaded, sleep(15000)]);
+      await within(loaded, 15000);
       await sleep(150);
     },
     async eval(expression) {
@@ -216,14 +251,27 @@ export async function launch({ width = 1280, height = 900 } = {}) {
       }),
     noScript: (off) => send('Emulation.setScriptExecutionDisabled', { value: off }),
     async close() {
-      ws.close();
       const gone = new Promise((r) => chrome.once('exit', r));
-      chrome.kill();
-      await Promise.race([gone, sleep(3000)]);
+      ws.close();
       try {
-        rmSync(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+        // Browser.close belongs to the browser's own endpoint, not to a page's.
+        const version = await (await fetch(`http://127.0.0.1:${port}/json/version`)).json();
+        const browser = new WebSocket(version.webSocketDebuggerUrl);
+        await within(new Promise((r) => browser.addEventListener('open', r)), 2000);
+        browser.send(JSON.stringify({ id: 1, method: 'Browser.close' }));
       } catch {
-        // A profile Chrome still holds stays in the temp folder.
+        // Not reachable any more: the kill below ends it.
+      }
+      await within(gone, 1500);
+      if (chrome.exitCode === null && chrome.signalCode === null) chrome.kill();
+      // On Windows the process and its helpers outlive this by seconds and
+      // hold the pipe and the profile: neither may keep this process open.
+      chrome.stderr.destroy();
+      chrome.unref();
+      try {
+        rmSync(profile, { recursive: true, force: true });
+      } catch {
+        // Still held: the next launch sweeps it (see sweepProfiles).
       }
     },
   };

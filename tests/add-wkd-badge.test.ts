@@ -95,3 +95,8 @@ test('an app README with a banner instead of a heading gets the badge under the 
 test('an app README with neither heading nor banner is left alone', () => {
   assert.equal(badged('Just text.\n'), 'Just text.\n');
 });
+
+test('a README with CRLF line ends keeps them', () => {
+  const out = badged(['![x](icon.png)', '', '# x', '', 'The pitch.', ''].join('\r\n'));
+  assert.equal(out, ['![x](icon.png)', '', '# x', '', BADGE, '', 'The pitch.', ''].join('\r\n'));
+});
