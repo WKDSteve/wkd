@@ -116,6 +116,7 @@ pnpm build      # static output in dist/
 pnpm preview
 pnpm verify     # biome + astro check + tests + build
 pnpm test       # node --test over tests/*.test.ts (the fight engine, the registry, the app readers)
+pnpm test:browser # the built site in a headless Chrome (tests/browser/), after pnpm build
 pnpm build:wasm # rebuild src/lib/fight-engine/fight-sim.wasm from wasm/fight-sim (Rust)
 ```
 
@@ -125,6 +126,14 @@ built binary is committed, so nothing else depends on it.
 
 The dev server does not enforce the CSP, the built site does. Anything that loads a script,
 worker, worklet or WASM file has to be checked against `pnpm build && pnpm preview`.
+
+`pnpm test:browser` checks what the unit tests cannot see: keys and focus (Escape ends a match
+but not from a search result, `:log apps`, `:play`), the filters that are pure CSS, the search
+with its area prefix, the page without script, the width on a phone, and that the console stays
+free of errors and CSP reports. It serves `dist/` itself and drives the Chrome of this machine
+(`CHROME=<path>` for another one; without a Chrome the checks are skipped). It is not part of
+`pnpm verify` and not of the deploy. Against the live site:
+`WKD_BASE=https://wkdsteve.github.io/wkd pnpm test:browser`.
 
 ## Stack and constraints
 
