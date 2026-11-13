@@ -1,0 +1,26 @@
+[
+  {
+    "file": "today.webp",
+    "width": 1600,
+    "height": 1000,
+    "caption": "Today: the next task and what could be taken instead, the decision that waits for you, what is parked, and what an AI session could take."
+  },
+  {
+    "file": "list.webp",
+    "width": 1600,
+    "height": 1000,
+    "caption": "The list: every open task in plan order with its state, priority and effort; filters for area, status and who, and the keys in one line."
+  },
+  {
+    "file": "board.webp",
+    "width": 1600,
+    "height": 1000,
+    "caption": "The board: one column per status, the cards grouped by priority and stage; moving a card sets its status."
+  },
+  {
+    "file": "plan.webp",
+    "width": 1600,
+    "height": 1000,
+    "caption": "The plan in stages: what can start now, what follows from it, and the critical path with its length in days."
+  }
+]
