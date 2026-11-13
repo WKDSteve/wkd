@@ -1,0 +1,26 @@
+[
+  {
+    "file": "console.webp",
+    "width": 1920,
+    "height": 1140,
+    "caption": "The console: one strip per input, a device or a program, with filters, gate, compressor, its sends and a fader; the three buses on the right."
+  },
+  {
+    "file": "matrix.webp",
+    "width": 1920,
+    "height": 1140,
+    "caption": "The routing matrix: a crosspoint sends an input to a bus, its dial sets the level, PRE takes the signal before the fader."
+  },
+  {
+    "file": "equalizer.webp",
+    "width": 1920,
+    "height": 1140,
+    "caption": "Per bus: a four-band equalizer with its curve, a compressor and a lookahead limiter."
+  },
+  {
+    "file": "events.webp",
+    "width": 1920,
+    "height": 1140,
+    "caption": "The event log: a device that left, one that came back, and a change pult refused, with the reason."
+  }
+]
