@@ -1,10 +1,11 @@
 # wkd
 
-wkd -- website for the `.nvim` plugin family. Everything on the site — taglines, status,
-ASCII banners, docs listings, commit counts, the activity stream — is read from the
-plugin repositories at build time. Nothing about a plugin is written twice.
+wkd -- the website of one workshop: the `.nvim` plugin family and the native apps next to
+it. Everything on the site — taglines, status, ASCII banners, icons, docs listings, commit
+counts, the activity stream — is read from the repositories at build time. Nothing about a
+plugin or an app is written twice.
 
-Live (once deployed): <https://wkdsteve.github.io/wkd/>
+Live: <https://wkdsteve.github.io/wkd/>
 
 ## Two skins, one content layer
 
@@ -35,7 +36,8 @@ skin and the sidebar of the TUI skin show the ones that have a page file, so a p
 (`play`) appears in the navigation by itself once its page exists, and never before.
 
 **Addresses that are linked from outside stay.** The READMEs of the plugins carry a badge that
-points at `/wkd/p/<slug>/`, so the plugin pages do not move. An address that does move is
+points at `/wkd/p/<slug>/`, the READMEs of the apps one that points at `/wkd/apps/<slug>/`, so
+these pages do not move. An address that does move is
 entered in `MOVED` (`src/lib/nav.ts`: `stack` is `nvim/stack` now; every entry that is no
 plugin had `p/<slug>` before it had `apps/<slug>`, which `movedEntries()` adds) and keeps a page at the old
 place that sends the visitor on (`src/components/Moved.astro`: a meta refresh, the new address
@@ -92,10 +94,18 @@ not shown (it is in German, this site is English).
 - `src/loaders/repos.ts` — the Astro content loader that scans the checkouts and fills two
   collections, `plugins` and `activity`.
 - `PLUGINS_DIR` — where the checkouts live (default: the parent directory of this repo).
-- `scripts/add-wkd-badge.mjs` — after adding a plugin here, run this once to insert a
-  badge and a one-line blockquote into *that plugin's own* README, linking back to its
-  page on this site (idempotent, `--write` to actually edit, `--only=<slug>` for one
-  repo). It edits the sibling checkouts under `PLUGINS_DIR`, never anything in this repo.
+- `scripts/add-wkd-badge.mjs` — after adding a plugin or an app here, run this once to insert a
+  badge into *that repository's own* README, linking back to its page on this site (idempotent,
+  `--write` to actually edit, `--only=<slug>` for one repo). A plugin gets the badge in its badge
+  row and a one-line blockquote under it; an app gets the badge alone under its heading, pointing
+  at `/wkd/apps/<slug>/` (a quote that early would be read as its status). Web variants and kits
+  are left out. It edits the sibling checkouts under `PLUGINS_DIR`, never anything in this repo.
+
+**Adding an app, in three steps:** an entry in `src/data/registry.json` (`kind: "app"`, an
+`appCategories` category, `platforms`, `stage`, and `family` when a plugin belongs to it); two to
+five screenshots in `public/shots/<slug>/` with a `shots.json` (a list of
+`{ file, width, height, caption }`, the build fails on a missing file); then
+`node scripts/add-wkd-badge.mjs --write --only=<slug>` and a commit in the app's repository.
 
 ## Commands
 

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
@@ -31,17 +31,67 @@ function namesTheScriptTakesOn(args: string[] = []): string[] {
   }
 }
 
-test('the badge script takes on every plugin and nothing that is not one', () => {
+test('the badge script takes on every plugin and every app, no web variant and no kit', () => {
   const taken = namesTheScriptTakesOn();
-  const plugins = entries.filter((e) => e.kind === 'plugin').map((e) => e.name);
-  const others = entries.filter((e) => e.kind !== 'plugin').map((e) => e.name);
-  assert.ok(others.length > 0, 'the registry has no app to tell apart');
-  assert.deepEqual([...taken].sort(), [...plugins].sort());
-  for (const name of others) assert.ok(!taken.includes(name), `${name} is no plugin`);
+  const wanted = entries.filter((e) => e.kind === 'plugin' || e.kind === 'app').map((e) => e.name);
+  const others = entries.filter((e) => e.kind === 'web' || e.kind === 'kit').map((e) => e.name);
+  assert.ok(others.length > 0, 'the registry has no web variant or kit to tell apart');
+  assert.deepEqual([...taken].sort(), [...wanted].sort());
 });
 
-test('--only of an app takes on nothing', () => {
+test('--only narrows the run to one entry, a web variant to none', () => {
+  const app = entries.find((e) => e.kind === 'app');
+  const web = entries.find((e) => e.kind === 'web');
+  assert.ok(app && web);
+  assert.deepEqual(namesTheScriptTakesOn([`--only=${app.slug}`]), [app.name]);
+  assert.deepEqual(namesTheScriptTakesOn([`--only=${web.slug}`]), []);
+});
+
+/** Runs the script with --write over one app README and returns what it left. */
+function badged(readme: string): string {
   const app = entries.find((e) => e.kind === 'app');
   assert.ok(app);
-  assert.deepEqual(namesTheScriptTakesOn([`--only=${app.slug}`]), []);
+  const dir = mkdtempSync(join(tmpdir(), 'wkd-badge-'));
+  try {
+    mkdirSync(join(dir, app.name));
+    const file = join(dir, app.name, 'README.md');
+    writeFileSync(file, readme);
+    const run = () =>
+      execFileSync(process.execPath, [script, '--write', `--only=${app.slug}`], {
+        env: { ...process.env, PLUGINS_DIR: dir },
+        encoding: 'utf8',
+      });
+    run();
+    const once = readFileSync(file, 'utf8');
+    run();
+    assert.equal(readFileSync(file, 'utf8'), once, 'a second run changes nothing');
+    return once.replaceAll(app.slug, 'APP');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+const BADGE =
+  '[![wkd](https://img.shields.io/badge/wkd-family-c6ff3d)](https://wkdsteve.github.io/wkd/apps/APP/)';
+
+test('an app README gets the badge under its heading, pointing at its app page', () => {
+  const out = badged('![x](icon.png)\n\n# x\n\nThe pitch.\n\n**Status: alpha.** More.\n');
+  assert.equal(
+    out,
+    `![x](icon.png)\n\n# x\n\n${BADGE}\n\nThe pitch.\n\n**Status: alpha.** More.\n`,
+  );
+  // No quote is added: the loader reads an opening quote as the status.
+  assert.ok(!out.includes('\n>'));
+});
+
+test('an app README with a banner instead of a heading gets the badge under the banner', () => {
+  const out = badged('![x](icon.png)\n\n```\n# not a heading\n```\n\n> **know**\n\nPitch.\n');
+  assert.equal(
+    out,
+    `![x](icon.png)\n\n\`\`\`\n# not a heading\n\`\`\`\n\n${BADGE}\n\n> **know**\n\nPitch.\n`,
+  );
+});
+
+test('an app README with neither heading nor banner is left alone', () => {
+  assert.equal(badged('Just text.\n'), 'Just text.\n');
 });
