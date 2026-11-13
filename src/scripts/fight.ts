@@ -356,11 +356,17 @@ function setUp(root: HTMLElement): void {
   });
 
   // Escape ends the match: back to the fighter cards, or out of an online
-  // session (its Disconnect). Without a match the key is the page's. In
-  // fullscreen the browser takes the key to leave fullscreen and none arrives.
+  // session (its Disconnect). Without a match the key is the page's. It is
+  // also someone else's in fullscreen (the browser leaves fullscreen with it,
+  // and not every browser keeps the key to itself) and inside the search
+  // (it closes the results, also from a focused result, which is a link).
+  // The search has removed that link by the time the key arrives here, so
+  // the path of the event is asked, not the place of its target.
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape' || e.repeat || e.defaultPrevented) return;
     if (e.ctrlKey || e.metaKey || e.altKey || isEditable(e.target)) return;
+    if (document.fullscreenElement) return;
+    if (e.composedPath().some((n) => n instanceof Element && n.matches('[data-search]'))) return;
     if (!match || arena.hidden) return;
     e.preventDefault();
     if (handlers.leave) handlers.leave();

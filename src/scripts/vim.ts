@@ -150,6 +150,9 @@ function init(): void {
         const area = areaOfArg(arg);
         if (!area) return fail(`E475: Invalid argument: ${arg} (plugins or apps)`);
         // The filter of the page is a radio; views.ts checks the one the address names.
+        // On the activity page itself only the fragment changes and nothing
+        // loads, so the command line has to close by itself.
+        exitCmd();
         location.href = `${href('activity', 'tui')}${area === 'all' ? '' : `#area-${area}`}`;
       },
     },

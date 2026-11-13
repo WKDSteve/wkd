@@ -1,7 +1,8 @@
 import { AREA_KINDS, type EntryArea, hitLabel, parseSearch } from '../lib/areas';
 import { BASE, href, pageOf, readPref, SKIN_KEY, SKINS, type Skin } from '../lib/site';
 
-// Static full-text search over the pages of the plugins, the apps and the play area. The index is produced by
+// Static full-text search over the pages of the plugins, the apps and the
+// play area. The index is produced by
 // Pagefind after the build (src/integrations/pagefind.ts) and loaded lazily on
 // first focus, so a visitor who never searches never downloads it.
 //
