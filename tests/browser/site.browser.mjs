@@ -112,7 +112,7 @@ describe('the built site in a browser', { skip }, () => {
     }
   });
 
-  test('no page scrolls sideways on a phone', async () => {
+  test('no page scrolls sideways on a phone or a tablet', async () => {
     const paths = [
       '/',
       '/nvim/',
@@ -126,15 +126,17 @@ describe('the built site in a browser', { skip }, () => {
       '/tui/apps/',
       '/tui/p/ui/',
     ];
-    await p.viewport(390, 800, true);
     try {
       const wide = [];
-      for (const path of paths) {
-        await p.goto(`${B}${path}`);
-        const [scroll, inner] = JSON.parse(
-          await p.eval(`JSON.stringify([document.documentElement.scrollWidth, innerWidth])`),
-        );
-        if (scroll > inner) wide.push(`${path} ${scroll}/${inner}`);
+      for (const width of [375, 768]) {
+        await p.viewport(width, 800, width < 768);
+        for (const path of paths) {
+          await p.goto(`${B}${path}`);
+          const [scroll, inner] = JSON.parse(
+            await p.eval(`JSON.stringify([document.documentElement.scrollWidth, innerWidth])`),
+          );
+          if (scroll > inner) wide.push(`${width}px ${path} ${scroll}/${inner}`);
+        }
       }
       assert.deepEqual(wide, []);
     } finally {
@@ -200,6 +202,70 @@ describe('the built site in a browser', { skip }, () => {
     await p.until(
       `/WebAssembly/.test(${$('[data-fight-core]')}.textContent)`,
       'the legend to name the WebAssembly core',
+    );
+  });
+
+  test('four fighters to pick; a match starts with full bars and a running clock', async () => {
+    await p.goto(`${B}/play/`);
+    await p.until($('[data-fighter]'), 'a fighter card');
+    assert.equal(await p.eval(`document.querySelectorAll('[data-fighter]').length`), 4);
+    await startMatch();
+    const bars = JSON.parse(
+      await p.eval(`JSON.stringify(['player', 'enemy'].map((who) => {
+        const bar = document.querySelector('[data-fight-health="' + who + '"]');
+        return Math.round((bar.getBoundingClientRect().width / bar.parentElement.getBoundingClientRect().width) * 100);
+      }))`),
+    );
+    assert.deepEqual(bars, [100, 100]);
+    const start = Number(await p.eval(`${$('[data-fight-timer]')}.textContent`));
+    assert.equal(start, 60);
+    await p.until(`Number(${$('[data-fight-timer]')}.textContent) < 60`, 'the clock to run');
+  });
+
+  test('P pauses a match against the AI: the clock stands, Resume goes on', async () => {
+    await startMatch();
+    await p.until(`Number(${$('[data-fight-timer]')}.textContent) < 60`, 'the intro to end');
+    await p.eval(`document.activeElement?.blur()`);
+    await p.key('p', { code: 'KeyP', vk: 80 });
+    await p.until(shown('[data-fight-paused]'), 'the pause panel');
+    const at = await p.eval(`${$('[data-fight-timer]')}.textContent`);
+    await p.sleep(2200);
+    assert.equal(await p.eval(`${$('[data-fight-timer]')}.textContent`), at);
+    await p.eval(`${$('[data-fight-resume]')}.click()`);
+    await p.until(`${$('[data-fight-paused]')}.hidden`, 'the pause panel to close');
+    await p.until(
+      `Number(${$('[data-fight-timer]')}.textContent) < ${Number(at)}`,
+      'the clock to run again',
+    );
+  });
+
+  test('difficulty and music are remembered over a reload', async () => {
+    const state = `JSON.stringify({
+      hard: ${$('[data-fight-difficulty="hard"]')}.getAttribute('aria-pressed'),
+      music: ${$('[data-fight-music]')}.getAttribute('aria-pressed'),
+    })`;
+    await p.goto(`${B}/play/`);
+    await p.until(`${$('[data-fight-music]')}.hasAttribute('aria-pressed')`, 'the fight script');
+    const before = JSON.parse(await p.eval(state));
+    await p.eval(
+      `${$('[data-fight-difficulty="hard"]')}.click(); ${$('[data-fight-music]')}.click()`,
+    );
+    const want = { hard: 'true', music: String(before.music !== 'true') };
+    assert.deepEqual(JSON.parse(await p.eval(state)), want);
+    await p.goto(`${B}/play/`);
+    await p.until(`${$('[data-fight-music]')}.hasAttribute('aria-pressed')`, 'the fight script');
+    assert.deepEqual(JSON.parse(await p.eval(state)), want);
+    // Back to what a fresh visitor has, for the checks that follow.
+    await p.eval(
+      `${$('[data-fight-difficulty="normal"]')}.click(); ${$('[data-fight-music]')}.click()`,
+    );
+  });
+
+  test('?net=loopback plays through the rollback netcode and says so', async () => {
+    await startMatch('?net=loopback&lag=100');
+    await p.until(
+      `!${$('[data-fight-net]')}.hidden && /rollback/i.test(${$('[data-fight-net]')}.textContent)`,
+      'the status line of the netcode',
     );
   });
 
