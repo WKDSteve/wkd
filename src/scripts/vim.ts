@@ -139,6 +139,7 @@ function init(): void {
     { name: 'ls', aliases: ['plugins'], arg: null, desc: 'all plugins', run: () => go('nvim') },
     { name: 'cd', aliases: ['start'], arg: null, desc: 'the start page', run: () => go('') },
     { name: 'apps', aliases: [], arg: null, desc: 'all apps', run: () => go('apps') },
+    { name: 'play', aliases: [], arg: null, desc: 'the play area', run: () => go('play') },
     {
       name: 'log',
       aliases: ['activity'],

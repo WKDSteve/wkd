@@ -250,16 +250,14 @@
   }
   #view-grid:checked ~ .view-tabs label[for="view-grid"],
   #view-tree:checked ~ .view-tabs label[for="view-tree"],
-  #view-orbit:checked ~ .view-tabs label[for="view-orbit"],
-  #view-fight:checked ~ .view-tabs label[for="view-fight"] {
+  #view-orbit:checked ~ .view-tabs label[for="view-orbit"] {
     background: var(--ink);
     color: var(--paper);
     border-color: var(--ink);
   }
   #view-grid:focus-visible ~ .view-tabs label[for="view-grid"],
   #view-tree:focus-visible ~ .view-tabs label[for="view-tree"],
-  #view-orbit:focus-visible ~ .view-tabs label[for="view-orbit"],
-  #view-fight:focus-visible ~ .view-tabs label[for="view-fight"] {
+  #view-orbit:focus-visible ~ .view-tabs label[for="view-orbit"] {
     outline: 2px solid var(--focus);
     outline-offset: 2px;
   }
@@ -268,7 +266,7 @@
     margin: 0;
     opacity: 0.7;
   }
-  .home:has(#view-tree:checked, #view-orbit:checked, #view-fight:checked) .view-hint {
+  .home:has(#view-tree:checked, #view-orbit:checked) .view-hint {
     display: block;
   }
   .view-hint kbd {
@@ -277,18 +275,16 @@
     padding: 0 0.4ch;
   }
   .home-tree,
-  .home-orbit,
-  .home-fight {
+  .home-orbit {
     display: none;
     padding-inline: var(--gutter);
   }
   .home:has(#view-tree:checked) .home-tree,
-  .home:has(#view-orbit:checked) .home-orbit,
-  .home:has(#view-fight:checked) .home-fight {
+  .home:has(#view-orbit:checked) .home-orbit {
     display: block;
   }
-  .home:has(#view-tree:checked, #view-orbit:checked, #view-fight:checked) .roster,
-  .home:has(#view-tree:checked, #view-orbit:checked, #view-fight:checked) .m-filter {
+  .home:has(#view-tree:checked, #view-orbit:checked) .roster,
+  .home:has(#view-tree:checked, #view-orbit:checked) .m-filter {
     display: none;
   }
 
@@ -319,19 +315,16 @@
      browser could support while still lacking @starting-style, and vice
      versa). */
   .home-tree,
-  .home-orbit,
-  .home-fight {
+  .home-orbit {
     transition: opacity var(--dur) var(--ease);
   }
   .home:has(#view-tree:checked) .home-tree,
-  .home:has(#view-orbit:checked) .home-orbit,
-  .home:has(#view-fight:checked) .home-fight {
+  .home:has(#view-orbit:checked) .home-orbit {
     opacity: 1;
   }
   @starting-style {
     .home:has(#view-tree:checked) .home-tree,
-    .home:has(#view-orbit:checked) .home-orbit,
-    .home:has(#view-fight:checked) .home-fight {
+    .home:has(#view-orbit:checked) .home-orbit {
       opacity: 0;
     }
   }
@@ -1399,6 +1392,15 @@
   }
   .m-orbit-swatch rect {
     fill: var(--ink);
+  }
+
+  /* ---- play area: one section per experiment ----------------------------- */
+  .m-play {
+    display: grid;
+    gap: var(--s-6);
+    padding: var(--s-8) var(--gutter) var(--s-12);
+    border-bottom: var(--line);
+    scroll-margin-top: var(--s-12);
   }
 
   /* ---- fight (T7) --------------------------------------------------------

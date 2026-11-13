@@ -76,9 +76,8 @@ import {
 } from '../lib/fight-engine/sim';
 import { BASE } from '../lib/site';
 
-// Same guard as search.ts's own isEditable: the search box and category
-// filter are always in the DOM regardless of which view is active, so a
-// running match's window-level keydown listener has to yield to them.
+// Same guard as search.ts's own isEditable: the search box is on the page
+// too, so a running match's window-level keydown listener has to yield to it.
 const isEditable = (t: EventTarget | null): boolean =>
   t instanceof HTMLElement && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
 
@@ -187,10 +186,8 @@ function setUp(root: HTMLElement): void {
   updateRecord(recordEl);
 
   // Matches can be started by the other side (an online `start` message), at
-  // any time -- also while the visitor is on another tab or the page is hidden.
-  const fightShown = (): boolean =>
-    !document.hidden &&
-    (document.getElementById('view-fight') as HTMLInputElement | null)?.checked === true;
+  // any time -- also while the page is hidden.
+  const fightShown = (): boolean => !document.hidden;
 
   const launch = (setup: MatchSetup): void => {
     selectPanel.hidden = true;
@@ -201,6 +198,9 @@ function setUp(root: HTMLElement): void {
     // Not visible: set up, but wait for resume() instead of playing music
     // and running a match nobody is looking at (or controlling).
     match.start(fightShown());
+    // The cards sit under the head of the page, the arena is taller than
+    // they are: bring it into view, so the match does not start below the fold.
+    if (!document.fullscreenElement) arena.scrollIntoView({ block: 'nearest' });
   };
 
   /** Stop whatever is running and go back to the fighter cards. */
@@ -345,22 +345,26 @@ function setUp(root: HTMLElement): void {
     btn.addEventListener('pointerleave', press(false));
   }
 
-  // Leaving the Fight tab (a real click, or Escape -- views.ts dispatches a
-  // 'change' event for that too, not just the .checked assignment) stops
-  // the loop -- a fighting game has no business running frames, taking
-  // input or ticking its clock while the visitor is looking at something
-  // else. setAction()'s own `!this.running` guard is the backstop for the
-  // gap between pause() (here) and stop() (only on an actual fighter
-  // re-pick) still leaving the window keydown/keyup listeners attached.
-  for (const radio of document.querySelectorAll<HTMLInputElement>('input[name="view"]')) {
-    radio.addEventListener('change', () => {
-      if (radio.id !== 'view-fight') match?.pause();
-      else match?.resume();
-    });
-  }
+  // A hidden page stops the loop -- a fighting game has no business running
+  // frames, taking input or ticking its clock while nobody looks at it.
+  // setAction()'s own `!this.running` guard is the backstop for the gap
+  // between pause() (here) and stop() (only on an actual fighter re-pick)
+  // still leaving the window keydown/keyup listeners attached.
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) match?.pause();
-    else if (fightShown()) match?.resume();
+    else match?.resume();
+  });
+
+  // Escape ends the match: back to the fighter cards, or out of an online
+  // session (its Disconnect). Without a match the key is the page's. In
+  // fullscreen the browser takes the key to leave fullscreen and none arrives.
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || e.repeat || e.defaultPrevented) return;
+    if (e.ctrlKey || e.metaKey || e.altKey || isEditable(e.target)) return;
+    if (!match || arena.hidden) return;
+    e.preventDefault();
+    if (handlers.leave) handlers.leave();
+    else versusAi.change?.();
   });
 
   requestWasmCore();
@@ -376,13 +380,6 @@ function setUp(root: HTMLElement): void {
     window.addEventListener('gamepadconnected', sync);
     window.addEventListener('gamepaddisconnected', sync);
   }
-
-  // Small reward for noticing the tab. mouseenter (not mouseover) so this
-  // fires once per hover, not on every sub-pixel pointer move inside the
-  // label.
-  document
-    .querySelector<HTMLLabelElement>('label[for="view-fight"]')
-    ?.addEventListener('mouseenter', () => playSfx('blip'));
 }
 
 function updateRecord(el: HTMLElement): void {
@@ -858,7 +855,7 @@ class Match {
     this.showPause();
   }
 
-  /** `active` false: wait for resume() -- nobody is looking at the Fight tab right now. */
+  /** `active` false: wait for resume() -- the page is hidden right now. */
   start(active = true): void {
     this.lastFrameAt = performance.now();
     this.clock.reset();
@@ -937,9 +934,8 @@ class Match {
 
   setAction(action: Action, down: boolean): void {
     // `this.running` (not just `this.over`) so a paused-but-not-stopped
-    // match -- left via a real view-tab change, not yet Escape, see
-    // views.ts -- can't keep reacting to touch buttons/keys anywhere on
-    // the page. Input during the "FIGHT!" intro is latched like any other:
+    // match can't keep reacting to touch buttons/keys anywhere on the
+    // page. Input during the "FIGHT!" intro is latched like any other:
     // the sim ignores it until the intro ends; sampleInput() keeps a tap
     // latched until then, so a quick tap early still counts on the first live
     // frame, like a button that is still held.

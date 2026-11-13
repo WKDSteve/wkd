@@ -1,7 +1,7 @@
 ---
 import { CANVAS, FIGHTERS, MATCH_SECONDS } from '../lib/fight';
-// T7: a minimal local-vs-AI fighting minigame, picked from the Grid/Tree/
-// Orbit view switcher on the homepage. Server-side this only renders the
+// A small fighting game, shown on the play page (src/pages/play.astro).
+// Server-side this only renders the
 // character-select cards and the static HUD shell -- the match itself
 // (src/scripts/fight.ts) is entirely client-side canvas, keyed off the
 // data-fight-* hooks below.
@@ -132,6 +132,7 @@ const pickCss = fightPickCss(BASE);
     <p class="fight-controls">
       <kbd>&larr;</kbd><kbd>&rarr;</kbd> move &middot; <kbd>&uarr;</kbd> jump &middot;
       <kbd>Space</kbd> light &middot; <kbd>X</kbd> heavy &middot; <kbd>C</kbd> special &middot; <kbd>P</kbd> pause
+      &middot; <kbd>Esc</kbd> end the match
     </p>
     <p class="fight-controls" data-fight-gamepad hidden>
       Gamepad: stick or d-pad move &middot; <kbd>A</kbd> jump &middot; <kbd>X</kbd> light &middot;

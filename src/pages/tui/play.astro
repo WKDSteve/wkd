@@ -1,0 +1,28 @@
+---
+import { pad2 } from '../../lib/format';
+import { PLAY } from '../../lib/play';
+import { href } from '../../lib/site';
+import Shell from '../../skins/tui/Shell.astro';
+
+// The play area in the TUI skin: the list, each entry a link to the page of
+// the modern skin. The experiments draw on a canvas and only exist there.
+---
+
+<Shell page="play" title="Play — wkd" description="The play area of the workshop." cmd="play">
+  <h1 class="tui-h1">play/</h1>
+  <p class="tui-p tui-dim">
+    Things built for the fun of building them. They draw on a canvas, so they run in the modern skin.
+  </p>
+  <div class="tui-table">
+    {
+      PLAY.map((p, i) => (
+        <a href={`${href('play', 'modern')}#${p.id}`}>
+          <span class="idx">{pad2(i + 1)}</span>
+          <span class="name">{p.name.toLowerCase()}</span>
+          <span class="cat">{p.blurb} [needs {p.needs}]</span>
+        </a>
+      ))
+    }
+  </div>
+  <p class="tui-log">opens in the modern skin · <b>:set skin=tui</b> brings you back</p>
+</Shell>

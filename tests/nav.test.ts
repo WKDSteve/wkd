@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
@@ -13,6 +13,7 @@ import {
   type RouteCheck,
   routeProblems,
 } from '../src/lib/nav.ts';
+import { PLAY } from '../src/lib/play.ts';
 
 test('a page file serves the page its path says', () => {
   assert.equal(pageOfFile('../../pages/index.astro'), '');
@@ -234,4 +235,21 @@ test('an apps page has its own route in both skins', () => {
   const pages = astroFiles(pagesDir);
   assert.ok(pages.includes('apps/[id].astro'), 'no apps/<slug>/ page');
   assert.ok(pages.includes('tui/apps/[id].astro'), 'no tui/apps/<slug>/ page');
+});
+
+test('the play area is a page of both skins, and no view of the plugin area', () => {
+  const read = (f: string): string =>
+    readFileSync(new URL(`../src/pages/${f}`, import.meta.url), 'utf8');
+  assert.ok(read('play.astro').includes('FightView'));
+  assert.ok(read('tui/play.astro').includes("href('play', 'modern')"));
+  assert.ok(
+    !read('nvim/index.astro').includes('FightView'),
+    'the fight is back in the plugin area',
+  );
+});
+
+test('every entry of the play area has an id that is an anchor of its own', () => {
+  assert.ok(PLAY.length > 0);
+  for (const p of PLAY) assert.match(p.id, /^[a-z][a-z0-9-]*$/);
+  assert.equal(new Set(PLAY.map((p) => p.id)).size, PLAY.length);
 });

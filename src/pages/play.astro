@@ -1,0 +1,47 @@
+---
+import FightView from '../components/FightView.astro';
+import { PLAY } from '../lib/play';
+import Shell from '../skins/modern/Shell.astro';
+
+// The play area: things built for the fun of building them. One entry today;
+// a further one is an entry in src/lib/play.ts and its component below.
+const VIEWS = { fight: FightView } as const;
+const items = PLAY.filter((p) => p.id in VIEWS);
+const description =
+  'The play area of the workshop: a small fighting game against an AI or a friend, in the browser.';
+---
+
+<Shell page="play" title="Play — wkd" description={description}>
+  <section class="m-hero" data-pagefind-body data-pagefind-meta="title:Play" data-pagefind-filter="kind:play">
+    <p class="m-kicker">
+      <b>{items.length} {items.length === 1 ? 'experiment' : 'experiments'}</b> · runs in your browser, nothing is sent to a server
+    </p>
+    <h1 class="display" data-kinetic>Play</h1>
+    <p class="m-lede">
+      Things built for the fun of building them. They have nothing to do with the plugins or the
+      apps, except that they come from the same workshop.
+    </p>
+    <ul class="m-list">
+      {
+        items.map((p) => (
+          <li>
+            <a href={`#${p.id}`}>{p.name}</a> — {p.blurb}
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  {
+    items.map((p) => {
+      const View = VIEWS[p.id as keyof typeof VIEWS];
+      return (
+        <section class="m-play" id={p.id} aria-labelledby={`play-${p.id}`}>
+          <h2 class="m-h2" id={`play-${p.id}`}>{p.name}</h2>
+          <View />
+          <noscript><p class="m-lede">This one needs JavaScript.</p></noscript>
+        </section>
+      );
+    })
+  }
+</Shell>

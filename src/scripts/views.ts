@@ -6,7 +6,6 @@
 const gridRadio = document.getElementById('view-grid');
 const treeRadio = document.getElementById('view-tree');
 const orbitRadio = document.getElementById('view-orbit');
-const fightRadio = document.getElementById('view-fight');
 
 if (gridRadio instanceof HTMLInputElement) {
   document.addEventListener('keydown', (e) => {
@@ -15,8 +14,7 @@ if (gridRadio instanceof HTMLInputElement) {
       // A bare property assignment doesn't fire 'change' (only real input
       // does -- see the idle-timer's own comment on this further down).
       // Escape is a deliberate exit though, unlike that timer's own
-      // automated move, so it should still reach anything keyed off
-      // 'change' -- namely fight.ts pausing a running match.
+      // automated move, so it still reaches anything keyed off 'change'.
       gridRadio.dispatchEvent(new Event('change', { bubbles: true }));
     }
   });
@@ -28,19 +26,13 @@ const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').match
 // One-shot, and only ever toward a view the visitor never picked themselves:
 // setting .checked from here doesn't fire 'change' (only real input does),
 // so this can't mistake its own move for the visitor having touched the tabs.
-// Fight is deliberately never a reveal candidate -- a fighting game taking
-// over the page because the visitor stepped away for 20s would be a bad
-// surprise, not a delightful one -- but picking it still counts as having
-// touched the switcher, same as Tree/Orbit.
 if (
   !reduceMotion &&
   gridRadio instanceof HTMLInputElement &&
   treeRadio instanceof HTMLInputElement &&
   orbitRadio instanceof HTMLInputElement
 ) {
-  const allRadios = [gridRadio, treeRadio, orbitRadio, fightRadio].filter(
-    (r): r is HTMLInputElement => r instanceof HTMLInputElement,
-  );
+  const allRadios = [gridRadio, treeRadio, orbitRadio];
   const revealCandidates = [treeRadio, orbitRadio];
   const IDLE_EVENTS = ['mousemove', 'keydown', 'scroll', 'touchstart'] as const;
   let touchedByUser = false;
