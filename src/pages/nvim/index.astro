@@ -10,7 +10,7 @@ import { alsoAs, formMark } from '../../lib/apps';
 import { COMBOS, combosFor } from '../../lib/combos';
 import { approx, byDateDesc, CATEGORIES, categoryLabel, pad2 } from '../../lib/format';
 import { orbitLayout } from '../../lib/orbit';
-import { href } from '../../lib/site';
+import { BASE, href } from '../../lib/site';
 import { buildStack, treeLayout } from '../../lib/stack';
 import Shell from '../../skins/modern/Shell.astro';
 
@@ -144,7 +144,12 @@ const statsPool = [
               <span>{pad2(i + 1)}</span>
               <span class="m-card-cat">{categoryLabel(p.data.category)}</span>
             </span>
-            <strong class="m-card-name">{p.data.name}</strong>
+            <span class="m-app-title m-plugin-title">
+              {p.data.icon ? (
+                <img class="m-app-icon" src={`${BASE}${p.data.icon}`} alt="" width="128" height="128" loading="lazy" />
+              ) : null}
+              <strong class="m-card-name">{p.data.name}</strong>
+            </span>
             <span class="m-card-tag">{p.data.tagline}</span>
             {markOf.get(p.id) ? <span class="m-card-also">also as {markOf.get(p.id)}</span> : null}
             {

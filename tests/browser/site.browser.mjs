@@ -100,6 +100,34 @@ describe('the built site in a browser', { skip }, () => {
     assert.ok(await p.eval(`!!${$('.m-strip a[href$="/play/"]')}`));
   });
 
+  test('every plugin shows its icon on the roster and on its page, and the file is served as a PNG', async () => {
+    await p.goto(`${B}/nvim/`);
+    const tiles = JSON.parse(
+      await p.eval(`JSON.stringify([...document.querySelectorAll('.roster .m-card')].map((t) => ({
+        slug: t.dataset.nav.replace('p/', ''),
+        src: t.querySelector('.m-app-icon')?.getAttribute('src') ?? null,
+      })))`),
+    );
+    assert.ok(tiles.length > 30, 'the roster lists the plugins');
+    assert.deepEqual(
+      tiles.filter((t) => !t.src?.endsWith(`/app-icons/${t.slug}.png`)).map((t) => t.slug),
+      [],
+    );
+    // The lazy images of a tile far down are not loaded yet, so the files are asked for directly.
+    const served = JSON.parse(
+      await p.eval(`Promise.all([...document.querySelectorAll('.roster .m-app-icon')].map(async (i) => {
+        const r = await fetch(i.src);
+        return r.ok && r.headers.get('content-type') === 'image/png' && (await r.arrayBuffer()).byteLength > 200;
+      })).then((all) => JSON.stringify(all.filter((ok) => !ok).length))`),
+    );
+    assert.equal(served, 0, 'every icon is a PNG that is served');
+    await p.goto(`${B}/p/hover/`);
+    await p.until(
+      `!!${$('.m-apppage-icon')} && ${$('.m-apppage-icon')}.naturalWidth > 0`,
+      'the icon of the plugin page',
+    );
+  });
+
   test('without script the start page shows its content', async () => {
     await p.noScript(true);
     try {

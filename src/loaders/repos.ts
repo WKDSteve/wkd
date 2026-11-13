@@ -17,6 +17,7 @@ import {
   detectTech,
   englishParagraph,
   ICON_MAX_BYTES,
+  iconId,
   installSnippet,
   isPngIcon,
   latestVersionTag,
@@ -547,14 +548,15 @@ function techInput(dir: string): { paths: string[]; cargoManifests: string[] } {
 }
 
 /**
- * Copies an app's icon (`assets/icons/<name>/png/<name>-128.png`, the place
- * every app repository keeps it) to public/app-icons/<slug>.png and returns
+ * Copies the icon of an app or a plugin (`assets/icons/<id>/png/<id>-128.png`, the
+ * place every repository keeps it; `iconId` names the id) to public/app-icons/<slug>.png and returns
  * the site-relative path, or null without a usable one. The file comes from
  * a repository and ends up under the site's origin, so it must be a regular
  * file (a symlink is not followed) and a PNG of icon size by its content.
  */
 function copyIcon(dir: string, entry: Entry, logger: Logger): string | null {
-  const src = join(dir, 'assets', 'icons', entry.name, 'png', `${entry.name}-128.png`);
+  const id = iconId(entry.name);
+  const src = join(dir, 'assets', 'icons', id, 'png', `${id}-128.png`);
   const stat = lstatSync(src, { throwIfNoEntry: false });
   if (!stat?.isFile() || stat.size > ICON_MAX_BYTES) return null;
   const bytes = readFileSync(src);
@@ -649,7 +651,8 @@ async function scanOne(
 
   const url = `https://github.com/${OWNER}/${entry.name}`;
   const isApp = entry.kind === 'app';
-  const icon = isApp ? copyIcon(dir, entry, logger) : null;
+  // A plugin has its icon too, in the same place; a web variant and a kit show none.
+  const icon = isApp || entry.kind === 'plugin' ? copyIcon(dir, entry, logger) : null;
   const tech = isApp ? detectTech(techInput(dir)) : [];
   const install = isApp ? installSnippet(readme) : null;
   const rollingUrl = isApp && mentionsRolling(readme) ? `${url}/releases/tag/latest` : null;

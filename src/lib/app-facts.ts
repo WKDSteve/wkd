@@ -214,6 +214,15 @@ export function detectTech({ paths, cargoManifests }: TechInput): string[] {
 }
 
 const PNG_MAGIC = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+/**
+ * The id of a repository's icon, which names its folder and its files:
+ * `assets/icons/<id>/png/<id>-128.png`. A plugin `x.nvim` keeps it as `x-nvim`
+ * (the icon tool of the workshop has no dot in an id); an app is its own id.
+ */
+export function iconId(repoName: string): string {
+  return repoName.replace(/.nvim$/, '-nvim');
+}
+
 /** An icon is a tile-sized picture; anything larger is not one. */
 export const ICON_MAX_BYTES = 512 * 1024;
 

@@ -779,6 +779,13 @@
     overflow-wrap: anywhere;
     align-self: end;
   }
+  /* A plugin tile: the icon beside the name, the pair at the bottom of its row as the name alone was. */
+  .m-plugin-title {
+    align-self: end;
+  }
+  .m-plugin-title .m-card-name {
+    align-self: auto;
+  }
   .m-card-tag {
     font-size: 0.95rem;
     line-height: 1.3;

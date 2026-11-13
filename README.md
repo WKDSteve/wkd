@@ -64,6 +64,8 @@ An entry of kind `app` is read for a few things more, located by convention like
 ```
 ../<app>/
   assets/icons/<app>/png/<app>-128.png → icon (copied to public/app-icons/, a PNG by its content)
+                (a plugin has its icon too, from assets/icons/<name>-nvim/png/<name>-nvim-128.png:
+                the dot of .nvim is a dash in the id; web variants and kits show none)
   Cargo.toml, CMakeLists.txt, *.csproj, tauri.conf.json → what it is built with ("Rust · egui")
   README.md   → status (the paragraph or quote that opens with **Status**),
                 install (first code block under an "Install" heading),

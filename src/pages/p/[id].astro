@@ -10,7 +10,7 @@ import { alsoAs, FORM_LABELS } from '../../lib/apps';
 import { combosFor } from '../../lib/combos';
 import { categoryLabel, lazySnippet } from '../../lib/format';
 import { entryPage } from '../../lib/nav';
-import { href } from '../../lib/site';
+import { BASE, href } from '../../lib/site';
 import Shell from '../../skins/modern/Shell.astro';
 
 export async function getStaticPaths() {
@@ -58,9 +58,12 @@ const nameOf = (slug: string): string => allPlugins.find((p) => p.id === slug)?.
         {d.nvimMin ? <span data-pagefind-ignore> · Neovim {d.nvimMin}+</span> : null}
         <span data-pagefind-ignore> · {d.commitCount} commits</span>
       </p>
-      <h1 class="display display--name" data-kinetic>
-        {nameBase}<wbr /><span class="m-suffix">{nameSuffix}</span>
-      </h1>
+      <div class="m-apppage-title">
+        {d.icon ? <img class="m-apppage-icon" src={`${BASE}${d.icon}`} alt="" width="128" height="128" /> : null}
+        <h1 class="display display--name" data-kinetic>
+          {nameBase}<wbr /><span class="m-suffix">{nameSuffix}</span>
+        </h1>
+      </div>
       <p class="m-lede">{d.description}</p>
       <p class="m-actions" data-pagefind-ignore>
         <a class="m-btn" data-primary href={d.url} rel="noopener">Repository</a>

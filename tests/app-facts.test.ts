@@ -4,6 +4,7 @@ import {
   detectTech,
   englishParagraph,
   ICON_MAX_BYTES,
+  iconId,
   installSnippet,
   isPngIcon,
   latestVersionTag,
@@ -266,6 +267,15 @@ test('a dependency whose name only starts like a toolkit does not count', () => 
 
 test('a repository without a known build file has no tech, rather than a guess', () => {
   assert.deepEqual(detectTech({ paths: ['README.md', 'tasks.html'], cargoManifests: [] }), []);
+});
+
+test('the id of an icon: a plugin keeps the dot of .nvim as a dash, an app is its own', () => {
+  assert.equal(iconId('hover.nvim'), 'hover-nvim');
+  assert.equal(iconId('color_my_ascii.nvim'), 'color_my_ascii-nvim');
+  assert.equal(iconId('tasks-desktop'), 'tasks-desktop');
+  assert.equal(iconId('pult'), 'pult');
+  // Only the suffix: a name that has .nvim inside stays as it is.
+  assert.equal(iconId('a.nvim-x'), 'a.nvim-x');
 });
 
 const PNG = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
