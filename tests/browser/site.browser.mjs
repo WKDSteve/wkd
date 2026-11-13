@@ -4,7 +4,8 @@
 //   pnpm build && pnpm test:browser               against dist/
 //   WKD_BASE=https://wkdsteve.github.io/wkd pnpm test:browser   against the live site
 //
-// Needs a Chrome on this machine (or $CHROME); without one every check is skipped.
+// Needs a Chrome on this machine (or $CHROME); without one every check is skipped,
+// unless WKD_BROWSER_REQUIRED is set (the deploy workflow): then that is a failure.
 import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
 import { after, before, describe, test } from 'node:test';
@@ -74,6 +75,11 @@ async function command(text) {
 
 const areasShown = `JSON.stringify([...new Set([...document.querySelectorAll('li[data-area]')]
   .filter((l) => getComputedStyle(l).display !== 'none').map((l) => l.dataset.area))].sort())`;
+
+// Where the checks gate a deploy, a skip must not pass for a green run.
+test('the browser checks can run here', { skip: !process.env.WKD_BROWSER_REQUIRED }, () => {
+  assert.equal(skip, false);
+});
 
 describe('the built site in a browser', { skip }, () => {
   before(async () => {

@@ -132,7 +132,9 @@ but not from a search result, `:log apps`, `:play`), the filters that are pure C
 with its area prefix, the page without script, the width on a phone, and that the console stays
 free of errors and CSP reports. It serves `dist/` itself and drives the Chrome of this machine
 (`CHROME=<path>` for another one; without a Chrome the checks are skipped). It is not part of
-`pnpm verify` and not of the deploy. Against the live site:
+`pnpm verify`, which has to run on a machine without a browser, but it is a gate of the deploy:
+the workflow runs it against the fresh build, and a red check keeps the site as it is. Against
+the live site:
 `WKD_BASE=https://wkdsteve.github.io/wkd pnpm test:browser`.
 
 ## Stack and constraints

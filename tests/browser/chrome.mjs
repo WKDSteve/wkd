@@ -93,6 +93,9 @@ export async function launch({ width = 1280, height = 900 } = {}) {
     '--no-first-run',
     '--mute-audio',
     '--autoplay-policy=no-user-gesture-required',
+    // A hosted runner forbids the user namespaces Chrome's sandbox needs, and
+    // its /dev/shm is small. The pages loaded there are this repo's own build.
+    ...(process.env.CI ? ['--no-sandbox', '--disable-dev-shm-usage'] : []),
     'about:blank',
   ]);
   // Chrome prints the port it took to stderr.

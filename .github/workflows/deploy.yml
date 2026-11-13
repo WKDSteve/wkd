@@ -95,6 +95,16 @@ jobs:
       - name: Test
         run: node --test "tests/*.test.ts"
 
+      # Second gate: the built site in the runner's Chrome (tests/browser/):
+      # keys and focus, the pure-CSS filters, the search, the page without
+      # script, the width on a phone, and a console free of errors and CSP
+      # reports. It reads dist/, which the action above has just built.
+      # WKD_BROWSER_REQUIRED turns "no Chrome, skipped" into a failure.
+      - name: Browser checks
+        run: node --test tests/browser/site.browser.mjs
+        env:
+          WKD_BROWSER_REQUIRED: '1'
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
