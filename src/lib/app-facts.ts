@@ -220,7 +220,7 @@ const PNG_MAGIC = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
  * (the icon tool of the workshop has no dot in an id); an app is its own id.
  */
 export function iconId(repoName: string): string {
-  return repoName.replace(/.nvim$/, '-nvim');
+  return repoName.replace(/\.nvim$/, '-nvim');
 }
 
 /** An icon is a tile-sized picture; anything larger is not one. */

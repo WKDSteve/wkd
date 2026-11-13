@@ -276,6 +276,9 @@ test('the id of an icon: a plugin keeps the dot of .nvim as a dash, an app is it
   assert.equal(iconId('pult'), 'pult');
   // Only the suffix: a name that has .nvim inside stays as it is.
   assert.equal(iconId('a.nvim-x'), 'a.nvim-x');
+  // The dot is a dot: a name that merely ends in "nvim" is no plugin of the family.
+  assert.equal(iconId('hoverXnvim'), 'hoverXnvim');
+  assert.equal(iconId('xnvim'), 'xnvim');
 });
 
 const PNG = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
