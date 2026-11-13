@@ -16,9 +16,11 @@ import registry from '../data/registry.json';
 import {
   detectTech,
   englishParagraph,
+  GRAPH_MAX_BYTES,
   ICON_MAX_BYTES,
   iconId,
   installSnippet,
+  isPng,
   isPngIcon,
   latestVersionTag,
   leadingQuote,
@@ -173,6 +175,8 @@ export const pluginSchema = z.object({
   stage: z.enum(STAGES).nullable(),
   /** the app's icon, copied to public/ (site-relative path); null without one */
   icon: z.string().nullable(),
+  /** the picture of how the repo builds on others and is built on, copied to public/ (site-relative path); null without one */
+  graph: z.string().nullable(),
   /** what an app is built with ("Rust", "egui"), read from its build files */
   tech: z.array(z.string()),
   /** newest version tag `vX.Y.Z` of the repository */
@@ -574,6 +578,29 @@ function copyIcon(dir: string, entry: Entry, logger: Logger): string | null {
   return `app-icons/${entry.slug}.png`;
 }
 
+/**
+ * Copies the picture of a repository's connections (`assets/graphs/<name>.png`, written by the
+ * app-icons tool of the workshop) to public/graphs/repo/<slug>.png and returns the site-relative
+ * path, or null without a usable one. Like an icon it comes from a repository and ends up under the
+ * site's origin: a regular file (a symlink is not followed) and a PNG by its content.
+ */
+function copyGraph(dir: string, entry: Entry, logger: Logger): string | null {
+  const src = join(dir, 'assets', 'graphs', `${entry.name}.png`);
+  const stat = lstatSync(src, { throwIfNoEntry: false });
+  if (!stat?.isFile() || stat.size > GRAPH_MAX_BYTES) return null;
+  const bytes = readFileSync(src);
+  if (!isPng(bytes, GRAPH_MAX_BYTES)) {
+    logger.warn(`${entry.name}: ${src} is not a PNG -- left out`);
+    return null;
+  }
+  const outDir = resolve('public/graphs/repo');
+  mkdirSync(outDir, { recursive: true });
+  const out = join(outDir, `${entry.slug}.png`);
+  const old = lstatSync(out, { throwIfNoEntry: false })?.isFile() ? readFileSync(out) : null;
+  if (!old?.equals(bytes)) writeFileSync(out, bytes);
+  return `graphs/repo/${entry.slug}.png`;
+}
+
 /** lua/<module>/ directory name -> plugin slug, for directories unique to one plugin. */
 function moduleMap(root: string): Map<string, string> {
   const owners = new Map<string, string[]>();
@@ -653,6 +680,7 @@ async function scanOne(
   const isApp = entry.kind === 'app';
   // A plugin has its icon too, in the same place; a web variant and a kit show none.
   const icon = isApp || entry.kind === 'plugin' ? copyIcon(dir, entry, logger) : null;
+  const graph = copyGraph(dir, entry, logger);
   const tech = isApp ? detectTech(techInput(dir)) : [];
   const install = isApp ? installSnippet(readme) : null;
   const rollingUrl = isApp && mentionsRolling(readme) ? `${url}/releases/tag/latest` : null;
@@ -690,6 +718,7 @@ async function scanOne(
       platforms: entry.platforms,
       stage: entry.stage,
       icon,
+      graph,
       tech,
       release,
       rollingUrl,

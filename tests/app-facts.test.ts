@@ -3,9 +3,11 @@ import { test } from 'node:test';
 import {
   detectTech,
   englishParagraph,
+  GRAPH_MAX_BYTES,
   ICON_MAX_BYTES,
   iconId,
   installSnippet,
+  isPng,
   isPngIcon,
   latestVersionTag,
   leadingQuote,
@@ -291,4 +293,18 @@ test('an icon is a PNG by its content and of icon size', () => {
   const big = new Uint8Array(ICON_MAX_BYTES + 1);
   big.set(PNG);
   assert.ok(!isPngIcon(big));
+});
+
+test('the picture of the connections is a PNG by its content, up to a megabyte, and an icon stays small', () => {
+  const png = (n: number) => {
+    const b = new Uint8Array(n);
+    b.set(PNG);
+    return b;
+  };
+  assert.ok(GRAPH_MAX_BYTES > ICON_MAX_BYTES);
+  assert.ok(isPng(png(300 * 1024), GRAPH_MAX_BYTES), 'a large picture is one');
+  assert.ok(!isPngIcon(png(300 * 1024 + ICON_MAX_BYTES)), 'but not an icon');
+  assert.ok(!isPng(png(GRAPH_MAX_BYTES + 1), GRAPH_MAX_BYTES));
+  assert.ok(!isPng(new TextEncoder().encode('<svg onload="x()"></svg>'), GRAPH_MAX_BYTES));
+  assert.ok(!isPng(Uint8Array.from(PNG.slice(0, 7)), GRAPH_MAX_BYTES));
 });

@@ -86,6 +86,14 @@ const nameOf = (slug: string): string => allPlugins.find((p) => p.id === slug)?.
       ) : null
     }
 
+
+    {d.graph ? (
+      <section class="m-graph" data-pagefind-ignore>
+        <h2 class="m-h2">Connections</h2>
+        <img src={`${BASE}${d.graph}`} alt={`${d.name}: what it uses and what uses it`} loading="lazy" />
+      </section>
+    ) : null}
+
     <div class="m-cols">
       <section data-pagefind-ignore>
         <h2 class="m-h2">Install</h2>

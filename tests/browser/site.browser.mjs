@@ -128,6 +128,34 @@ describe('the built site in a browser', { skip }, () => {
     );
   });
 
+  test('the pictures of the connections are served as PNGs: the overviews and the neighbourhood of a repo', async () => {
+    const served = async (url, selector) => {
+      await p.goto(`${B}${url}`);
+      return JSON.parse(
+        await p.eval(`Promise.all([...document.querySelectorAll(${JSON.stringify(selector)})].map(async (i) => {
+          const r = await fetch(i.src);
+          return { ok: r.ok, type: r.headers.get('content-type'), bytes: (await r.arrayBuffer()).byteLength, alt: i.alt.length > 20 };
+        })).then((all) => JSON.stringify(all))`),
+      );
+    };
+    const cases = [
+      ['/', '.m-graph img'],
+      ['/nvim/', '.m-graph img'],
+      ['/apps/', '.m-graph img'],
+      ['/p/hover/', '.m-graph img'],
+      ['/apps/tasks-desktop/', '.m-graph img'],
+    ];
+    for (const [url, selector] of cases) {
+      const found = await served(url, selector);
+      assert.equal(found.length, 1, `${url} has one picture of connections`);
+      assert.deepEqual(
+        [found[0].ok, found[0].type, found[0].bytes > 5000, found[0].alt],
+        [true, 'image/png', true, true],
+        url,
+      );
+    }
+  });
+
   test('without script the start page shows its content', async () => {
     await p.noScript(true);
     try {

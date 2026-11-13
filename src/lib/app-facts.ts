@@ -226,12 +226,20 @@ export function iconId(repoName: string): string {
 /** An icon is a tile-sized picture; anything larger is not one. */
 export const ICON_MAX_BYTES = 512 * 1024;
 
+/** The picture of the connections of a repo is larger than an icon, but still a page's worth, not a download. */
+export const GRAPH_MAX_BYTES = 1024 * 1024;
+
 /**
- * Whether these bytes are a PNG small enough to be an icon. The loader copies
- * the file from a repository into what the site serves, so it is checked by
- * content, not by its name.
+ * Whether these bytes are a PNG of at most `maxBytes`. The loader copies a file
+ * from a repository into what the site serves, so it is checked by content,
+ * not by its name.
  */
-export function isPngIcon(bytes: Uint8Array): boolean {
-  if (bytes.length < PNG_MAGIC.length || bytes.length > ICON_MAX_BYTES) return false;
+export function isPng(bytes: Uint8Array, maxBytes: number): boolean {
+  if (bytes.length < PNG_MAGIC.length || bytes.length > maxBytes) return false;
   return PNG_MAGIC.every((b, i) => bytes[i] === b);
+}
+
+/** Whether these bytes are a PNG small enough to be an icon. */
+export function isPngIcon(bytes: Uint8Array): boolean {
+  return isPng(bytes, ICON_MAX_BYTES);
 }

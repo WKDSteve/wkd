@@ -17,6 +17,11 @@ demos/out/
 # build (src/loaders/repos.ts, copyIcon), never to be committed
 public/app-icons/
 
+# the pictures of the connections of each repo: copied from the repositories by the content loader
+# (src/loaders/repos.ts, copyGraph); the three overviews in public/graphs/ are committed (written by the
+# app-icons tool: graphs.mjs install-repos)
+public/graphs/repo/
+
 # demo fixtures may be .log files
 !demos/fixtures/*.log
 

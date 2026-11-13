@@ -6,7 +6,7 @@ import registry from '../data/registry.json';
 import { byDateDesc } from '../lib/format';
 import { entryPage } from '../lib/nav';
 import { PLAY } from '../lib/play';
-import { href } from '../lib/site';
+import { BASE, href } from '../lib/site';
 import { doorExamples, SHOWN_STATS, workshopStats } from '../lib/start';
 import Shell from '../skins/modern/Shell.astro';
 
@@ -98,6 +98,11 @@ const description =
     <a class="m-btn" data-primary href={href('play')} data-nav="play" data-astro-prefetch>
       {PLAY.length === 1 ? `Play ${PLAY[0]?.name}` : 'To the play area'}
     </a>
+  </section>
+
+  <section class="m-plugin m-graph">
+    <h2 class="m-h2">One idea, several forms</h2>
+    <img src={`${BASE}graphs/matrix.png`} alt="Every family of the workshop and the forms it comes in: Neovim plugin, desktop app, web page and phone page, pale where a form is planned" loading="lazy" />
   </section>
 
   <section class="m-plugin" aria-label="Recent activity">
