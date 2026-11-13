@@ -3,18 +3,18 @@
     "file": "rule.webp",
     "width": 1360,
     "height": 850,
-    "caption": "The rules: every rule with its severity, its check and its data class, filters and a search; beside the list one rule with its source line, its text and the check it carries."
+    "caption": "The rules: every rule of the vault with its severity, check and class; an open rule shows its source, its version, its text and the check it comes with."
   },
   {
     "file": "coverage.webp",
     "width": 1360,
     "height": 850,
-    "caption": "Coverage: per family how many rules have a check that runs by itself, how many are only a question for an agent, and how many stay manual."
+    "caption": "Coverage by family: how many rules have a check that runs by itself, how many are a question for an agent, and how many stay manual."
   },
   {
     "file": "sources.webp",
     "width": 1360,
     "height": 850,
-    "caption": "Sources: the rule sets of the vault and the data class of each, which decides what may leave this device."
+    "caption": "The sources: the rule sets of the vault and the class of each one, public, internal or private, which decides what may leave the hub."
   }
 ]
