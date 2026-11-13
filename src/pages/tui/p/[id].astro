@@ -5,6 +5,7 @@ import Demo from '../../../components/Demo.astro';
 import Moved from '../../../components/Moved.astro';
 import RecentCommits from '../../../components/RecentCommits.astro';
 import Shots from '../../../components/Shots.astro';
+import { alsoAs, FORM_LABELS } from '../../../lib/apps';
 import { categoryLabel, lazySnippet } from '../../../lib/format';
 import { entryPage } from '../../../lib/nav';
 import { href } from '../../../lib/site';
@@ -12,11 +13,19 @@ import Shell from '../../../skins/tui/Shell.astro';
 
 export async function getStaticPaths() {
   const plugins = await getCollection('plugins');
-  return plugins.map((plugin) => ({ params: { id: plugin.id }, props: { plugin } }));
+  return plugins.map((plugin) => ({
+    params: { id: plugin.id },
+    props: { plugin, allPlugins: plugins },
+  }));
 }
 type Props = InferGetStaticPropsType<typeof getStaticPaths>;
-const { plugin } = Astro.props as Props;
+const { plugin, allPlugins } = Astro.props as Props;
 const d = plugin.data;
+// The same product in another form: the app and the web variant of the family.
+const also = alsoAs(
+  allPlugins.map((p) => p.data),
+  d,
+);
 // An app, a web variant or a kit had this address before it had a page of its
 // own kind under apps/; the address stays and sends on (MOVED in the build check).
 const movedTo = d.kind === 'plugin' ? null : entryPage({ kind: d.kind, slug: plugin.id });
@@ -51,6 +60,21 @@ const movedTo = d.kind === 'plugin' ? null : entryPage({ kind: d.kind, slug: plu
 
   <h2 class="tui-h2">install</h2>
   <pre class="tui-code"><code>{lazySnippet(d.owner, d.name)}</code></pre>
+
+  {also.length > 0 ? <h2 class="tui-h2">also as</h2> : null}
+  {
+    also.length > 0 ? (
+      <ul class="tui-list">
+        {also.map((v) => (
+          <li>
+            <span class="tui-dim">{FORM_LABELS[v.role].toLowerCase()}:</span>{' '}
+            <a href={href(entryPage(v.item), 'tui')} data-nav={entryPage(v.item)}>{v.item.name}</a>{' '}
+            <span class="tui-dim">— {v.item.tagline}</span>
+          </li>
+        ))}
+      </ul>
+    ) : null
+  }
 
   {d.docs.length > 0 ? <h2 class="tui-h2">docs/</h2> : null}
   {

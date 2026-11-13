@@ -3,8 +3,10 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import {
   type AppLike,
+  alsoAs,
   appMeta,
   appSections,
+  formMark,
   getLinks,
   kits,
   NOTE_MAX,
@@ -211,4 +213,42 @@ test('a first sentence longer than the limit is cut at a word', () => {
   assert.ok(short.endsWith(' …'));
   assert.ok(short.length <= 52);
   assert.ok(!short.includes('wor …'), 'cut inside a word');
+});
+
+test('a plugin whose family has three members names the app, then its web variant', () => {
+  const plugin = item('tasks', { kind: 'plugin', family: 'tasks', stage: null });
+  const items = [
+    item('tasks-web', { kind: 'web', family: 'tasks', variantOf: 'tasks-desktop', stage: null }),
+    plugin,
+    item('tasks-desktop', { family: 'tasks', stage: 'companion' }),
+    item('rules-desktop', { family: 'rules', stage: 'companion' }),
+  ];
+  const also = alsoAs(items, plugin);
+  assert.deepEqual(
+    also.map((v) => [v.role, v.item.slug]),
+    [
+      ['native', 'tasks-desktop'],
+      ['web', 'tasks-web'],
+    ],
+  );
+  assert.equal(formMark(also.map((v) => v.item)), 'app · web');
+});
+
+test('a family of one shows nothing, and so does a plugin without a family', () => {
+  const alone = item('ai', { kind: 'plugin', family: 'ai', stage: null });
+  const none = item('cascade', { kind: 'plugin', stage: null });
+  const items = [alone, none, item('pult')];
+  assert.deepEqual(alsoAs(items, alone), []);
+  assert.deepEqual(alsoAs(items, none), []);
+  assert.equal(formMark([]), '');
+  // The app side of the same rule: an app whose family has no other member.
+  assert.deepEqual(
+    variantsOf([item('pult', { family: 'pult' })], item('pult', { family: 'pult' })),
+    [],
+  );
+});
+
+test('only a plugin has an "also as": an app shows its variants instead', () => {
+  const app = item('tasks-desktop', { family: 'tasks' });
+  assert.deepEqual(alsoAs([app, item('tasks', { kind: 'plugin', family: 'tasks' })], app), []);
 });

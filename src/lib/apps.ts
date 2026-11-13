@@ -185,3 +185,31 @@ export function shortNote(note: string, max = NOTE_MAX): string {
   const cut = text.slice(0, max);
   return `${cut.slice(0, cut.lastIndexOf(' ') > 0 ? cut.lastIndexOf(' ') : max)} …`;
 }
+
+/**
+ * The other forms of a plugin: the native apps of its family, each followed
+ * by its web variants. Empty for a plugin without a family and for a family
+ * that has no member but the plugin, so its page shows no block and its tile
+ * no mark. This is not a combo: a combo names plugins that work together, a
+ * family the same product in another form.
+ */
+export function alsoAs<T extends AppLike>(
+  items: readonly T[],
+  plugin: AppLike,
+): { role: Exclude<FormRole, 'plugin'>; item: T }[] {
+  if (plugin.kind !== 'plugin' || plugin.family === null) return [];
+  const apps = items.filter((i) => i.kind === 'app' && i.family === plugin.family).sort(byName);
+  return apps.flatMap((app) => [
+    { role: 'native' as const, item: app },
+    ...items
+      .filter((i) => i.kind === 'web' && i.variantOf === app.slug)
+      .sort(byName)
+      .map((item) => ({ role: 'web' as const, item })),
+  ]);
+}
+
+/** The short mark of a tile: "app", "app · web", "plugin · web"; '' when there is no other form. */
+export function formMark(forms: readonly { kind: Kind }[]): string {
+  const words: Record<Kind, string> = { plugin: 'plugin', app: 'app', web: 'web', kit: 'kit' };
+  return [...new Set(forms.map((f) => words[f.kind]))].join(' · ');
+}

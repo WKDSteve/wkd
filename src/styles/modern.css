@@ -770,6 +770,17 @@
     line-height: 1.3;
     text-wrap: pretty;
   }
+  /* The mark of a tile whose plugin also exists as an app or in a browser tab. */
+  .m-card-also {
+    align-self: start;
+    font-family: var(--font-mono), monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0 var(--s-1);
+    border: 1px solid currentColor;
+    opacity: 0.75;
+  }
   /* Fuller description, revealed on hover/focus as a flyout below the tile
      rather than growing the tile itself -- an absolutely positioned panel
      doesn't take part in the grid row's own height, so revealing it can't

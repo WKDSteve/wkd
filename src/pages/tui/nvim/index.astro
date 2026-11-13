@@ -2,12 +2,15 @@
 import { getCollection } from 'astro:content';
 import CategoryFilter from '../../../components/CategoryFilter.astro';
 import CommitLine from '../../../components/CommitLine.astro';
+import { alsoAs, formMark } from '../../../lib/apps';
 import { approx, byDateDesc, categoryLabel, pad2 } from '../../../lib/format';
 import { href } from '../../../lib/site';
 import Shell from '../../../skins/tui/Shell.astro';
 
 // The area of the Neovim plugins: apps, web variants and kits have their own.
-const plugins = (await getCollection('plugins'))
+const entries = await getCollection('plugins');
+const allData = entries.map((e) => e.data);
+const plugins = entries
   .filter((p) => p.data.kind === 'plugin')
   .sort((a, b) => a.data.name.localeCompare(b.data.name));
 const pluginIds = new Set(plugins.map((p) => p.id));
@@ -16,6 +19,10 @@ const activity = (await getCollection('activity'))
   .filter((c) => pluginIds.has(c.data.plugin))
   .sort(byDateDesc)
   .slice(0, 8);
+// The mark of a row whose plugin also exists as an app or in a browser tab.
+const markOf = new Map(
+  plugins.map((p) => [p.id, formMark(alsoAs(allData, p.data).map((f) => f.item))]),
+);
 const features = plugins.reduce((n, p) => n + p.data.featureCount, 0);
 const counts: Record<string, number> = {};
 for (const p of plugins) counts[p.data.category] = (counts[p.data.category] ?? 0) + 1;
@@ -49,7 +56,10 @@ const banner = [
             <span class="idx">{pad2(i + 1)}</span>
             <span class="name">{p.data.name}</span>
             <span class="stat" data-status={p.data.status}>{p.data.status}</span>
-            <span class="cat">{categoryLabel(p.data.category).toLowerCase()} — {p.data.tagline}</span>
+            <span class="cat">
+              {categoryLabel(p.data.category).toLowerCase()} — {p.data.tagline}
+              {markOf.get(p.id) ? ` (also: ${markOf.get(p.id)})` : ''}
+            </span>
           </a>
         ))
       }

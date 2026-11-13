@@ -6,6 +6,7 @@ import FamilyTree from '../../components/FamilyTree.astro';
 import FightView from '../../components/FightView.astro';
 import OrbitView from '../../components/OrbitView.astro';
 import registry from '../../data/registry.json';
+import { alsoAs, formMark } from '../../lib/apps';
 import { COMBOS, combosFor } from '../../lib/combos';
 import { approx, byDateDesc, CATEGORIES, categoryLabel, pad2 } from '../../lib/format';
 import { orbitLayout } from '../../lib/orbit';
@@ -14,7 +15,9 @@ import { buildStack, treeLayout } from '../../lib/stack';
 import Shell from '../../skins/modern/Shell.astro';
 
 // The area of the Neovim plugins: apps, web variants and kits have their own.
-const plugins = (await getCollection('plugins'))
+const entries = await getCollection('plugins');
+const allData = entries.map((e) => e.data);
+const plugins = entries
   .filter((p) => p.data.kind === 'plugin')
   .sort((a, b) => a.data.name.localeCompare(b.data.name));
 const pluginIds = new Set(plugins.map((p) => p.id));
@@ -47,6 +50,10 @@ const countWhere = (f: (p: (typeof plugins)[number]) => boolean) => plugins.filt
 // Computed once and reused below (render loop + statsPool) instead of
 // re-filtering COMBOS for the same slug up to three times per plugin.
 const combosByPlugin = new Map(plugins.map((p) => [p.id, combosFor(p.id)]));
+// The mark of a tile whose plugin also exists as an app or in a browser tab.
+const markOf = new Map(
+  plugins.map((p) => [p.id, formMark(alsoAs(allData, p.data).map((f) => f.item))]),
+);
 const statsPool = [
   { label: 'plugins', value: String(pluginCount) },
   { label: 'features', value: approx(features) },
@@ -170,6 +177,7 @@ const statsPool = [
             </span>
             <strong class="m-card-name">{p.data.name}</strong>
             <span class="m-card-tag">{p.data.tagline}</span>
+            {markOf.get(p.id) ? <span class="m-card-also">also as {markOf.get(p.id)}</span> : null}
             {
               (combosByPlugin.get(p.id)?.length ?? 0) > 0 && (
                 <span class="m-card-combos">

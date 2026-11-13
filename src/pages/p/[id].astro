@@ -6,6 +6,7 @@ import Moved from '../../components/Moved.astro';
 import RecentCommits from '../../components/RecentCommits.astro';
 import ShotComposite from '../../components/ShotComposite.astro';
 import Shots from '../../components/Shots.astro';
+import { alsoAs, FORM_LABELS } from '../../lib/apps';
 import { combosFor } from '../../lib/combos';
 import { categoryLabel, lazySnippet } from '../../lib/format';
 import { entryPage } from '../../lib/nav';
@@ -33,6 +34,11 @@ const [nameBase, nameSuffix] = d.name.endsWith('.nvim')
   ? [d.name.slice(0, -5), '.nvim']
   : [d.name, ''];
 const combos = combosFor(plugin.id);
+// The same product in another form: the app and the web variant of the family.
+const also = alsoAs(
+  allPlugins.map((p) => p.data),
+  d,
+);
 const nameOf = (slug: string): string => allPlugins.find((p) => p.id === slug)?.data.name ?? slug;
 ---
 
@@ -96,6 +102,23 @@ const nameOf = (slug: string): string => allPlugins.find((p) => p.id === slug)?.
           {d.docs.length === 0 ? <li>See the README.</li> : null}
         </ul>
       </section>
+      {
+        also.length > 0 ? (
+          <section>
+            <h2 class="m-h2">Also as</h2>
+            <ul class="m-list m-variants">
+              {also.map((v) => (
+                <li>
+                  <span class="m-variant-role">{FORM_LABELS[v.role]}</span>
+                  <a href={href(entryPage(v.item))} data-nav={entryPage(v.item)}>{v.item.name}</a>
+                  {' — '}
+                  {v.item.tagline}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null
+      }
       <section data-pagefind-ignore>
         <h2 class="m-h2">Recent commits</h2>
         <RecentCommits commits={d.recent} skin="modern" limit={8} />
