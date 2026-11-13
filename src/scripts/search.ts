@@ -1,11 +1,14 @@
+import { AREA_KINDS, type EntryArea, hitLabel, parseSearch } from '../lib/areas';
 import { BASE, href, pageOf, readPref, SKIN_KEY, SKINS, type Skin } from '../lib/site';
 
-// Static full-text search over the plugin pages. The index is produced by
+// Static full-text search over the pages of the plugins, the apps and the play area. The index is produced by
 // Pagefind after the build (src/integrations/pagefind.ts) and loaded lazily on
 // first focus, so a visitor who never searches never downloads it.
 //
 // Only the modern-skin pages are indexed (otherwise every plugin would show up
-// twice); result URLs are mapped back onto the skin the visitor is in.
+// twice); result URLs are mapped back onto the skin the visitor is in. A hit
+// says whether it is a plugin or an app, and `app:` or `plugin:` in front of
+// the query keeps the search in one area (the `kind` filter of the index).
 
 interface PagefindData {
   url: string;
@@ -19,7 +22,10 @@ interface PagefindResult {
 }
 interface Pagefind {
   options(opts: Record<string, unknown>): Promise<void>;
-  search(query: string): Promise<{ results: PagefindResult[] }>;
+  search(
+    query: string,
+    opts?: { filters?: Record<string, { any: readonly string[] }> },
+  ): Promise<{ results: PagefindResult[] }>;
 }
 
 const MAX_RESULTS = 8;
@@ -79,12 +85,13 @@ function init(form: HTMLFormElement): void {
     panel.hidden = false;
   };
 
-  const render = (items: PagefindData[], query: string): void => {
+  const render = (items: PagefindData[], query: string, area: EntryArea | null): void => {
+    const where = area ? ` in the ${area}` : '';
     const skin = targetSkin();
     list.replaceChildren(...items.map((d) => resultItem(d, skin)));
     status.textContent = items.length
-      ? `${items.length} result${items.length === 1 ? '' : 's'} for “${query}”`
-      : `no plugin matches “${query}”`;
+      ? `${items.length} result${items.length === 1 ? '' : 's'} for “${query}”${where}`
+      : `nothing matches “${query}”${where}`;
     open();
   };
 
@@ -116,7 +123,7 @@ function init(form: HTMLFormElement): void {
     title.textContent = d.meta.title ?? pageOf(d.url);
     const cat = document.createElement('span');
     cat.className = 's-cat';
-    cat.textContent = d.filters.category?.[0] ?? '';
+    cat.textContent = hitLabel(d.filters.kind?.[0], d.filters.category?.[0]);
     a.append(title, cat, excerptNode(d.excerpt));
     li.append(a);
     return li;
@@ -124,7 +131,7 @@ function init(form: HTMLFormElement): void {
 
   const run = async (): Promise<void> => {
     if (form.dataset.mode === 'cmd') return; // the debounce fired after `:`
-    const query = input.value.trim();
+    const { query, area } = parseSearch(input.value);
     const mine = ++seq;
     if (!query) {
       close();
@@ -143,11 +150,14 @@ function init(form: HTMLFormElement): void {
       open();
       return;
     }
-    const { results } = await pf.search(query);
+    const { results } = await pf.search(
+      query,
+      area ? { filters: { kind: { any: AREA_KINDS[area] } } } : undefined,
+    );
     if (stale()) return;
     const items = await Promise.all(results.slice(0, MAX_RESULTS).map((r) => r.data()));
     if (stale()) return;
-    render(items, query);
+    render(items, query, area);
   };
 
   input.addEventListener('focus', () => {

@@ -47,6 +47,7 @@ const indexed = skin === 'modern';
   class="vd"
   data-pagefind-body={indexed ? '' : undefined}
   data-pagefind-meta={indexed ? `title:${doc.pluginName} :help ${doc.file}` : undefined}
+  data-pagefind-filter={indexed ? 'kind:help' : undefined}
 >
   <p class="vd-source" data-pagefind-ignore>
     <a href={raw} rel="noopener">doc/{doc.file}.txt</a> — rendered from the plugin's own vimdoc

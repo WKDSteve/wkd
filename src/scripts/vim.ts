@@ -1,3 +1,4 @@
+import { AREA_LABELS, areaOfArg } from '../lib/areas';
 import { href, pageOf, SKIN_KEY, type Skin, THEMES } from '../lib/site';
 
 // Vim-style operation of the TUI skin. Everything here is progressive: the
@@ -18,7 +19,7 @@ type ModeName = 'NORMAL' | 'INSERT' | 'COMMAND';
 interface Command {
   name: string;
   aliases: string[];
-  arg: 'plugin' | 'theme' | 'skin' | null;
+  arg: 'plugin' | 'theme' | 'skin' | 'area' | null;
   desc: string;
   run: (arg: string) => void;
 }
@@ -143,9 +144,14 @@ function init(): void {
     {
       name: 'log',
       aliases: ['activity'],
-      arg: null,
-      desc: 'activity stream',
-      run: () => go('activity'),
+      arg: 'area',
+      desc: 'activity stream: all, plugins or apps',
+      run: (arg) => {
+        const area = areaOfArg(arg);
+        if (!area) return fail(`E475: Invalid argument: ${arg} (plugins or apps)`);
+        // The filter of the page is a radio; views.ts checks the one the address names.
+        location.href = `${href('activity', 'tui')}${area === 'all' ? '' : `#area-${area}`}`;
+      },
     },
     {
       name: 'colorscheme',
@@ -223,6 +229,10 @@ function init(): void {
           text: t,
           desc: 'colorscheme',
         }));
+      case 'area':
+        return (Object.keys(AREA_LABELS) as (keyof typeof AREA_LABELS)[])
+          .filter((a) => a.startsWith(arg))
+          .map((a) => ({ text: a, desc: `commits of the ${a}` }));
       case 'skin':
         return ['skin=modern', 'skin=tui']
           .filter((s) => s.startsWith(arg))

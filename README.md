@@ -27,7 +27,7 @@ the same page in the other skin; `src/scripts/prefs.ts` remembers the choice in
 | A plugin | `/wkd/p/<slug>/` | its page, with a block "Also as" when its family has an app or a web variant; its help at `/wkd/p/<slug>/help/` |
 | An app, a web variant or a kit | `/wkd/apps/<slug>/` | screenshots first, then how to get it (newest version tag, the rolling build `latest`, the install block of the README), the variants (native, web, plugin) and the latest commits; no `lazy.nvim` spec, no `:help` |
 | Play | `/wkd/play/` | experiments, as a list (`src/lib/play.ts`): today the fight. In the TUI skin the list links to the modern page |
-| Activity | `/wkd/activity/` | every recent commit |
+| Activity | `/wkd/activity/` | every recent commit, each line with the mark of its area; a filter All, Plugins, Apps in pure CSS (`src/components/AreaFilter.astro`). `/wkd/activity/#area-apps` opens it on one area, and so does `:log apps` in the TUI skin |
 
 Every page exists in both skins (`tests/nav.test.ts` holds each modern page to a twin under
 `src/pages/tui/`). The areas are listed in `src/lib/nav.ts` (`AREAS`); the header of the modern
@@ -160,12 +160,15 @@ worker, worklet or WASM file has to be checked against `pnpm build && pnpm previ
   part of the client bundle. The deploy workflow runs `node --test` before it publishes.
 - **Search** is Pagefind, built into `dist/pagefind/` after `astro build` by
   `src/integrations/pagefind.ts` (which also serves that bundle in `astro dev` once a build
-  exists). Only the modern-skin plugin pages carry `data-pagefind-body`, so each plugin is
-  indexed once; results are mapped onto whichever skin the visitor is in. Press `/` anywhere.
+  exists). Only pages of the modern skin carry `data-pagefind-body` (plugins, their help,
+  apps, the play area), so each is indexed once; results are mapped onto whichever skin the
+  visitor is in. Every indexed page names its `kind` as a filter (`plugin`, `help`, `app`,
+  `web`, `kit`, `play`): a hit says what it is ("app · Tooling"), and `app:` or `plugin:` in
+  front of the query keeps the search in one area (`src/lib/areas.ts`). Press `/` anywhere.
 - **Vim operation** of the TUI skin (`src/scripts/vim.ts`, progressive — everything is a
   plain link underneath): `j`/`k`/`gg`/`G` move a cursor line over the links in `<main>`,
   `:` opens a command line in the footer that shares the search field (`:help x`, `:e x`,
-  `:ls`, `:apps`, `:cd`, `:stack`, `:log`, `:colorscheme x`, `:set skin=modern|tui`, `:q`; `Tab` / `Shift+Tab` cycle
+  `:ls`, `:apps`, `:play`, `:cd`, `:stack`, `:log [plugins|apps]`, `:colorscheme x`, `:set skin=modern|tui`, `:q`; `Tab` / `Shift+Tab` cycle
   through the completions of commands, plugin names and themes; `:help x` on a plugin
   without `doc/*.txt` fails with E149 instead of landing on a 404), `?` opens the key help,
   and the statusline shows NORMAL / INSERT / COMMAND.
@@ -318,4 +321,4 @@ To rebuild the site on every plugin push, add this to each plugin repo's CI:
 | 3 | Demo pipeline: VHS `.tape` scripts recorded in CI → webm/mp4 + poster on the plugin pages | **pipeline done**; tapes: cascade, emojis, replacer, spotlight, data, diff, markdown, color_my_ascii, hover, insights, fileops, buffer-ctx, recommender, sessions, ui, gopath, runtime-analysis, docmap, pickers, cmdlog |
 | 4 | TUI skin: vim motions (`j`/`k`/`gg`/`G`), `:` command line with completion, `?` help | **done** |
 | 5 | Vimdoc renderer (`doc/*.txt` → HTML with `\|tag\|` links; `:help` opens it), `/stack` dependency graph | **done** |
-| 6 | From the site of the plugins to the site of the workshop: kinds and families in the registry, the plugin area at `/nvim/`, an area and pages for the apps, a new start page, the fight on a page of its own | **done**; open: screenshots of the apps, the filter of search and activity by area |
+| 6 | From the site of the plugins to the site of the workshop: kinds and families in the registry, the plugin area at `/nvim/`, an area and pages for the apps, a new start page, the fight on a page of its own | **done**; open: screenshots of the apps |

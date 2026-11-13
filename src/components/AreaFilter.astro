@@ -1,0 +1,31 @@
+---
+import { AREA_LABELS, type EntryArea } from '../lib/areas';
+
+// Pure-CSS filter by area, the twin of CategoryFilter.astro: radio buttons and
+// `:has()` rules in src/styles/filter.css. Without script and before any
+// click it shows everything. The wrapping element must carry class "home",
+// the lines `data-area`, a group of lines that can run empty class "area-group".
+// src/scripts/views.ts checks a radio named by the address (#area-apps).
+interface Props {
+  counts: Record<EntryArea, number>;
+}
+const { counts } = Astro.props;
+const areas = (Object.keys(AREA_LABELS) as EntryArea[]).filter((a) => counts[a] > 0);
+const total = areas.reduce((n, a) => n + counts[a], 0);
+---
+
+<fieldset class="filter">
+  <legend class="visually-hidden">Filter commits by area</legend>
+  <input class="visually-hidden" type="radio" name="area" id="area-all" checked />
+  <label for="area-all">all <span class="filter-n">{total}</span></label>
+  {
+    areas.map((a) => (
+      <>
+        <input class="visually-hidden" type="radio" name="area" id={`area-${a}`} />
+        <label for={`area-${a}`}>
+          {AREA_LABELS[a].toLowerCase()} <span class="filter-n">{counts[a]}</span>
+        </label>
+      </>
+    ))
+  }
+</fieldset>

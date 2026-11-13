@@ -12,7 +12,7 @@ const { placeholder = 'search' } = Astro.props;
 <form class="search" role="search" data-search autocomplete="off">
   <label class="search-label" for="search-q">
     <span class="search-prefix" aria-hidden="true"></span>
-    <span class="visually-hidden">Search plugins</span>
+    <span class="visually-hidden">Search plugins and apps</span>
   </label>
   <input
     class="search-input"
@@ -28,6 +28,6 @@ const { placeholder = 'search' } = Astro.props;
   <div class="search-panel" id="search-panel" data-panel hidden>
     <p class="search-status" id="search-status" data-status role="status" aria-live="polite"></p>
     <ol class="search-results" data-results></ol>
-    <p class="search-keys" aria-hidden="true">↑↓ move · ⏎ open · esc close</p>
+    <p class="search-keys" aria-hidden="true">↑↓ move · ⏎ open · esc close · app: or plugin: narrows</p>
   </div>
 </form>

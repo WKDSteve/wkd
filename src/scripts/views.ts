@@ -3,6 +3,19 @@
 // Escape back to Grid, and revealing a non-Grid view once, after the
 // visitor has sat idle a while without ever touching the switcher. Both are
 // additions on top of a page that already works without this file.
+import { areaOfHash } from '../lib/areas';
+
+// The area filter of the activity page is CSS too. An address can name the
+// area (#area-apps, what `:log apps` of the TUI skin opens): check its radio.
+// A link to another area on the page itself loads nothing: follow the address.
+const checkAreaOfHash = (): void => {
+  const area = areaOfHash(location.hash);
+  const radio = area ? document.getElementById(`area-${area}`) : null;
+  if (radio instanceof HTMLInputElement) radio.checked = true;
+};
+checkAreaOfHash();
+window.addEventListener('hashchange', checkAreaOfHash);
+
 const gridRadio = document.getElementById('view-grid');
 const treeRadio = document.getElementById('view-tree');
 const orbitRadio = document.getElementById('view-orbit');

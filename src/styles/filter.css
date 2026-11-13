@@ -24,6 +24,15 @@
     display: none;
   }
 
+  /* The same by area, on the activity page: a commit line carries `data-area`.
+     A day the chosen area leaves empty goes too, heading included. */
+  .home:has(#area-plugins:checked) li[data-area]:not([data-area="plugins"]),
+  .home:has(#area-apps:checked) li[data-area]:not([data-area="apps"]),
+  .home:has(#area-plugins:checked) .area-group:not(:has(li[data-area="plugins"])),
+  .home:has(#area-apps:checked) .area-group:not(:has(li[data-area="apps"])) {
+    display: none;
+  }
+
   .filter {
     border: 0;
     padding: 0;

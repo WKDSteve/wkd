@@ -1,10 +1,15 @@
 ---
 import { getCollection } from 'astro:content';
+import AreaFilter from '../components/AreaFilter.astro';
 import CommitLine from '../components/CommitLine.astro';
+import { areaOfSlug } from '../lib/entries';
 import { byDateDesc, isoDay } from '../lib/format';
 import Shell from '../skins/modern/Shell.astro';
 
 const activity = (await getCollection('activity')).sort(byDateDesc);
+// How many commits each area has: the figures on the filter.
+const counts = { plugins: 0, apps: 0 };
+for (const c of activity) counts[areaOfSlug(c.data.plugin)]++;
 const days = new Map<string, typeof activity>();
 for (const c of activity) {
   const day = isoDay(c.data.date);
@@ -17,9 +22,13 @@ for (const c of activity) {
     <p class="m-kicker"><b>{activity.length} commits</b> · newest first · all repositories</p>
     <h1 class="display" data-kinetic>Activity</h1>
   </section>
+  <div class="home">
+  <div class="m-filter">
+    <AreaFilter counts={counts} />
+  </div>
   {
     [...days.entries()].map(([day, items]) => (
-      <section class="m-day">
+      <section class="m-day area-group">
         <h2>{day}</h2>
         <ol class="m-list">
           {items.map((c) => (
@@ -29,4 +38,5 @@ for (const c of activity) {
       </section>
     ))
   }
+  </div>
 </Shell>
