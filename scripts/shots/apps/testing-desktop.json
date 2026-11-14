@@ -1,0 +1,38 @@
+{
+  "kind": "hub",
+  "exe": "$REPOS_DIR/testing-desktop/target/debug/testing-hub.exe",
+  "prefix": "TESTING_DESKTOP",
+  "api": "testing",
+  "session": "testing-desktop.session",
+  "width": 1360,
+  "height": 850,
+  "dark": true,
+  "demo": ["node", "$HERE/make-demo-tests.mjs", "$DEMO"],
+  "config": {
+    "config.json": {
+      "vault": "$DEMO/repos",
+      "engine_dir": "$REPOS_DIR/testing.nvim",
+      "state_dir": "$DEMO/state",
+      "areas": "$DEMO/areas.json",
+      "ask_github": false
+    }
+  },
+  "env": {
+    "TESTING_TRUST_ROOTS": "$DEMO/repos",
+    "LIB_NVIM_DIR": "$REPOS_DIR/lib.nvim"
+  },
+  "shots": [
+    {
+      "name": "repos",
+      "steps": ["wait=6000"]
+    },
+    {
+      "name": "red",
+      "steps": ["click=lumen-export.nvim", "wait=2500"]
+    },
+    {
+      "name": "green",
+      "steps": ["click=← All repositories", "wait=1500", "click=lumen-preview.nvim", "wait=2500"]
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "kind": "hub",
+  "exe": "$REPOS_DIR/rules-desktop/target/debug/rules-hub.exe",
+  "prefix": "RULES_DESKTOP",
+  "api": "rules",
+  "session": "rules-desktop.session",
+  "width": 1360,
+  "height": 850,
+  "demo": ["node", "$HERE/make-demo-rules.mjs", "$DEMO"],
+  "config": {
+    "config.json": {
+      "vault": "$DEMO",
+      "project": "$ROOT/project"
+    },
+    "sources.json": {
+      "schema": 1,
+      "sources": {
+        "lua": {
+          "class": "public"
+        },
+        "release": {
+          "class": "internal"
+        }
+      }
+    }
+  },
+  "env": {
+    "RULES_ENGINE_DIR": "$REPOS_DIR/rules.nvim",
+    "LIB_NVIM_DIR": "$REPOS_DIR/lib.nvim"
+  },
+  "shots": [
+    {
+      "name": "rule",
+      "steps": [
+        "click=Theme",
+        "click=dark",
+        "hash=view=rules",
+        "wait=800",
+        "click=No bare pcall without a reason"
+      ]
+    },
+    {
+      "name": "coverage",
+      "steps": ["hash=view=coverage"]
+    },
+    {
+      "name": "sources",
+      "steps": ["hash=view=sources"]
+    }
+  ]
+}

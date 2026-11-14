@@ -1,0 +1,23 @@
+{
+  "kind": "hub",
+  "exe": "$REPOS_DIR/tasks-desktop/target/debug/tasks-hub.exe",
+  "prefix": "TASKS_DESKTOP",
+  "api": "tasks",
+  "session": "tasks-desktop.session",
+  "width": 1600,
+  "height": 1000,
+  "demo": ["bash", "$HERE/make-demo-vault.sh", "$DEMO"],
+  "config": {
+    "config.json": { "vault": "$DEMO" }
+  },
+  "env": {
+    "TASKS_ENGINE_DIR": "$REPOS_DIR/tasks.nvim",
+    "LIB_NVIM_DIR": "$REPOS_DIR/lib.nvim"
+  },
+  "shots": [
+    { "name": "today", "steps": ["click=View", "click=Dark"] },
+    { "name": "list", "steps": ["click=View", "click=List"] },
+    { "name": "board", "steps": ["click=View", "click=Board"] },
+    { "name": "plan", "steps": ["click=View", "click=Plan"] }
+  ]
+}

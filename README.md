@@ -311,6 +311,20 @@ holds the files plus a `shots.json` (an ordered list of `{ file, width, height, 
 loader reads the manifest and fails the build on a missing file or on anything that is not a plain
 image file name; both skins render the list under the demo. Keep them to the editor area and free of personal data, the page is public.
 
+The pictures of the desktop apps (tasks-desktop, rules-desktop, testing-desktop, docmap-desktop)
+are taken by a script, so they can be taken again after an interface changed:
+
+```bash
+REPOS_DIR=<folder of the checkouts> node scripts/shots/shot-app.mjs tasks-desktop
+```
+
+It starts the built hub of the app with a config folder of its own and invented data (a plugin
+"lumen.nvim" that does not exist), drives it in a headless Chrome through the steps of
+`scripts/shots/apps/<slug>.json` and writes each picture as PNG and WebP to `out/shots/<slug>/`.
+Only invented data gets into a picture: no real vault, no real rule set, no results of a real
+repository. What each app needs, the fields of an app file and how to find the steps to a view
+are in [`scripts/shots/README.md`](scripts/shots/README.md).
+
 ## Deployment
 
 `.github/workflows/deploy.yml` builds and publishes to GitHub Pages on push, on a 6-hour

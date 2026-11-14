@@ -1,0 +1,22 @@
+{
+  "kind": "preview",
+  "app": "$REPOS_DIR/docmap-desktop",
+  "map": "$REPOS_DIR/docmap.nvim/docs/map",
+  "width": 1360,
+  "height": 850,
+  "dark": true,
+  "settle": 3000,
+  "stubPatch": [
+    [
+      "const info = TRAFFIC[id] || { status: \"no_remote\" };",
+      "const info = { status: \"no_remote\" };"
+    ],
+    ["traffic_info: (a) => TRAFFIC[a.id] || {", "traffic_info: (a) => null || {"]
+  ],
+  "shots": [
+    { "name": "projects", "steps": ["click=Close"], "shot": false },
+    { "name": "map", "steps": ["has=docmap.nvimup to date", "wait=6000"] },
+    { "name": "treemap", "steps": ["frame=Treemap", "wait=2500"] },
+    { "name": "analysis", "steps": ["frame=Analysis", "wait=2500"] }
+  ]
+}
