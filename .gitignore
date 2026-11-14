@@ -22,6 +22,9 @@ public/app-icons/
 # app-icons tool: graphs.mjs install-repos)
 public/graphs/repo/
 
+# pictures the test sheets take (TESTS/sheets, `shot` steps): written on every run
+TESTS/sheets/out/
+
 # demo fixtures may be .log files
 !demos/fixtures/*.log
 

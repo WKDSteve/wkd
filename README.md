@@ -139,6 +139,35 @@ the workflow runs it against the fresh build, and a red check keeps the site as 
 the live site:
 `WKD_BASE=https://wkdsteve.github.io/wkd pnpm test:browser`.
 
+### Test sheets
+
+What a person once checked by hand on the live site and a machine can check as well is a test
+sheet: `TESTS/sheets/*.sheet.lua`, run by [testing.nvim](https://github.com/WKDSteve/testing.nvim)
+(its `docs/SHEETS.md`) in the Chrome of this machine. A sheet is data: the steps a visitor takes,
+and what must be true after each one.
+
+```bash
+pnpm build
+pnpm --dir tools/sheets install          # once: playwright-core, at a fixed version
+testing sheets run --all --engine browser
+testing sheets step skin-preference --headed   # one sheet, step by step, in a window
+```
+
+| Sheet | Checks |
+|---|---|
+| `mobile-views` | grid, tree, orbit, the stack and a plugin page at 375 and 768 px: the page is never wider than the screen |
+| `skin-preference` | with the TUI skin remembered, a node of the tree and a spoke of the orbit lead into it; with the modern skin remembered, the TUI page shows its hint bar and keeps its layout |
+| `filter-keyboard` | a filter pill reached by keyboard gets a new neon colour picked, shows its focus ring and filters |
+| `fight-result` | a match ends with the verdict its health bars show, the record counts it, Space on Rematch starts the next one |
+| `fight-bad-code` | a mistyped invitation or reply code is refused as not valid and costs nothing |
+
+`.testing.lua` names the app the sheets open: `scripts/serve-dist.mjs` serves `dist/` under `/wkd`,
+as GitHub Pages does, and refuses to start without a build. Pictures of the `shot` steps land in
+`TESTS/sheets/out/` (ignored). The sheets are not part of the deploy: its gate stays
+`pnpm test:browser`, which needs nothing but a Chrome. `tools/sheets/` holds the one dependency of
+the sheets; the site does not read that folder. The folder is `TESTS/sheets` in capitals, because that is
+where testing.nvim looks; on Windows and macOS it is the same folder as `tests/`, on Linux one next to it.
+
 ## Stack and constraints
 
 - **Astro 7**, zero client JS by default. One client bundle (`src/scripts/client.ts`,
