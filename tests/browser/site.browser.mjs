@@ -146,28 +146,31 @@ describe('the built site in a browser', { skip }, () => {
         })).then((all) => JSON.stringify(all))`),
       );
     };
+    // The start page shows two: the matrix of the families and the map of everything.
     const cases = [
-      ['/', '.m-graph img'],
-      ['/nvim/', '.m-graph img'],
-      ['/apps/', '.m-graph img'],
-      ['/p/hover/', '.m-graph img'],
-      ['/apps/tasks-desktop/', '.m-graph img'],
+      ['/', '.m-graph img', 2],
+      ['/nvim/', '.m-graph img', 1],
+      ['/apps/', '.m-graph img', 1],
+      ['/p/hover/', '.m-graph img', 1],
+      ['/apps/tasks-desktop/', '.m-graph img', 1],
     ];
-    for (const [url, selector] of cases) {
+    for (const [url, selector, count] of cases) {
       const found = await served(url, selector);
-      assert.equal(found.length, 1, `${url} has one picture of connections`);
-      assert.deepEqual(
-        [
-          found[0].ok,
-          found[0].type,
-          found[0].bytes > 5000,
-          found[0].alt,
-          found[0].linked,
-          found[0].hint,
-        ],
-        [true, 'image/png', true, true, true, true],
-        url,
-      );
+      assert.equal(found.length, count, `${url} has ${count} picture(s) of connections`);
+      for (const [n, picture] of found.entries()) {
+        assert.deepEqual(
+          [
+            picture.ok,
+            picture.type,
+            picture.bytes > 5000,
+            picture.alt,
+            picture.linked,
+            picture.hint,
+          ],
+          [true, 'image/png', true, true, true, true],
+          `${url}, picture ${n + 1}`,
+        );
+      }
     }
   });
 
