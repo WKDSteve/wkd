@@ -241,6 +241,36 @@ describe('the built site in a browser', { skip }, () => {
     }
   });
 
+  test('on a phone the subject of a commit has the width of its line, not a column one word wide', async () => {
+    try {
+      await p.viewport(375, 800, true);
+      const narrow = [];
+      for (const path of ['/', '/nvim/', '/activity/']) {
+        await p.goto(`${B}${path}`);
+        const rows = JSON.parse(
+          await p.eval(`JSON.stringify([...document.querySelectorAll('.m-list li')]
+            .filter((l) => l.querySelector('.cplug') && l.querySelector('.csubj'))
+            .slice(0, 12)
+            .map((l) => {
+              const s = l.querySelector('.csubj').getBoundingClientRect();
+              const line = l.getBoundingClientRect();
+              return [s.left - line.left, s.top - l.querySelector('time').getBoundingClientRect().bottom];
+            }))`),
+        );
+        assert.ok(rows.length > 0, `${path} lists commits with their repository`);
+        // The subject is a flex item as wide as its text, so a short one is
+        // narrow anywhere. What says it has the line: it starts at the left
+        // edge, below the date, instead of to the right of date, mark and name.
+        for (const [indent, below] of rows) {
+          if (indent > 2 || below < 0) narrow.push(`${path} indent ${Math.round(indent)}`);
+        }
+      }
+      assert.deepEqual(narrow, []);
+    } finally {
+      await p.send('Emulation.clearDeviceMetricsOverride');
+    }
+  });
+
   test('the activity filter shows one area, by click and by address', async () => {
     await p.goto(`${B}/activity/`);
     assert.deepEqual(JSON.parse(await p.eval(areasShown)), ['apps', 'plugins']);

@@ -1074,6 +1074,17 @@
   .m-list .csubj {
     overflow-wrap: anywhere;
   }
+  @media (width < 40rem) {
+    /* Date, area mark, repository and type already fill a phone's width: the
+       subject would be left a column one word wide. It gets a line of its own.
+       A line without the repository (a plugin's own page) still fits in one. */
+    .m-list li:has(> .cplug) {
+      flex-wrap: wrap;
+    }
+    .m-list li:has(> .cplug) > .csubj {
+      flex-basis: 100%;
+    }
+  }
   .m-banner {
     font-size: clamp(0.5rem, 1.4vw, 0.95rem);
     line-height: 1.15;
