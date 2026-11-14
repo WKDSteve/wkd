@@ -2,11 +2,12 @@ import type { CollectionEntry } from 'astro:content';
 
 // The dependency picture of the family, from the require() edges the loader
 // found under each plugin's lua/ tree (Lua comments excluded; a pcall-guarded
-// require -- also pcall(require, "x") -- is an optional edge).
+// require -- also pcall(require, "x") -- and a load through one of the soft
+// loaders are optional edges, see lua-requires.ts).
 
 export interface Edge {
   slug: string;
-  /** every require() of it is pcall-guarded: an optional integration */
+  /** every place that loads it is guarded: an optional integration */
   optional: boolean;
 }
 

@@ -15,7 +15,8 @@ const { bars, tree } = renderTuiStack(nodes, (slug) => href(`p/${slug}`, 'tui'))
   <h1 class="tui-h1">stack — {edges} require() edges · {nodes.length} plugins</h1>
   <p class="tui-p tui-dim">
     What a plugin require()s from another plugin of the family, read from every file under lua/.
-    (optional) = the require sits inside pcall: an integration, not a hard dependency.
+    (optional) = the require sits inside pcall or behind a loader that answers "not installed":
+    an integration, not a hard dependency.
   </p>
 
   <h2 class="tui-h2">depended on</h2>

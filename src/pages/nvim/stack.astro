@@ -22,8 +22,9 @@ const tree = treeLayout(nodes);
     <p class="m-lede">
       What a plugin <code>require()</code>s from another plugin of the family. Most of it is one
       direction: everything stands on {base[0] ? name(base[0].slug) : 'the foundation'}.
-      <em>optional</em> marks a require inside <code>pcall</code> — an integration that is used
-      when the other plugin is installed, not a hard dependency.
+      <em>optional</em> marks a require inside <code>pcall</code> or behind a loader that answers
+      "not installed" — an integration that is used when the other plugin is there, not a hard
+      dependency.
     </p>
   </section>
 
@@ -31,7 +32,7 @@ const tree = treeLayout(nodes);
     <h2 class="m-h2">Family tree</h2>
     <p class="m-lede">
       Depth is how many hard <code>require()</code> hops a plugin sits above something with
-      none of its own -- <em>optional</em> edges (pcall-guarded integrations) are drawn but
+      none of its own -- <em>optional</em> edges (guarded integrations) are drawn but
       don't count toward it, since a few run the other way, back down from the root. The
       lit node is {name(base[0]?.slug ?? '')}, the one thing everything above it stands on.
       {

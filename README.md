@@ -203,7 +203,10 @@ the live site:
   work site-wide.
 - **Stack** (`/nvim/stack`): the `require()` edges between the plugins, read from every file of each
   `lua/` tree (Lua comments excluded); a require inside `pcall` -- `pcall(require, …)` included --
-  counts as *optional*. "Depended on" ranking plus a per-plugin tree.
+  counts as *optional*, and so does a load through a loader that answers "not installed" instead of
+  raising: `probe("x")` (docmap.nvim's `soft_require`), `safe("x")` (`lib.nvim.require`) and
+  `package.loaded["x"]`. One plain `require` anywhere makes the edge a hard one
+  (`src/lib/lua-requires.ts`). "Depended on" ranking plus a per-plugin tree.
 - **Category filter** of the plugin area is pure CSS: radio inputs plus `:has()` rules in
   `src/styles/filter.css`. Adding a category to the registry (`categories` or `appCategories`)
   means adding one rule there; the build and `tests/registry.test.ts` fail without it.

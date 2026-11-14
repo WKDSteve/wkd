@@ -29,6 +29,7 @@ import {
   shownStatusNote,
   statusParagraph,
 } from '../lib/app-facts';
+import { collectRequires } from '../lib/lua-requires';
 import {
   type Entry,
   KINDS,
@@ -206,7 +207,7 @@ export const pluginSchema = z.object({
   vimdocs: z.array(z.object({ file: z.string(), title: z.string(), main: z.boolean() })),
   /** slugs of other registry plugins this one require()s from its lua/ tree */
   uses: z.array(z.string()),
-  /** like uses, but every require() is pcall-guarded: an optional integration */
+  /** like uses, but every place that loads it is guarded (pcall or a soft loader): an optional integration */
   usesOptional: z.array(z.string()),
   /** recordings found in public/demos/ (fetched from the demo-assets branch), in manifest order */
   demos: z.array(demoSchema),
@@ -268,13 +269,6 @@ function vimdocTitle(text: string, fallback: string): string {
     .trim();
   return t || fallback;
 }
-
-// require("mod"), require "mod" and the family's optional-dependency idiom
-// pcall(require, "mod"); `\b` keeps a `my_require(...)` helper out.
-const REQUIRE = /\brequire\s*(?:\(\s*|,\s*)?['"]([\w.-]+)/g;
-// Block comments and full-line comments (including `---` doc comments, whose
-// example code would otherwise count as dependencies).
-const LUA_COMMENT = /--\[(=*)\[[\s\S]*?\]\1\]|^[ \t]*--.*$/gm;
 
 // Everything under lua/ is on the runtimepath, so every file counts: the
 // family keeps its tests outside lua/, and a module named test/ or spec/
@@ -348,37 +342,14 @@ function countTestFiles(dir: string): number {
 }
 
 /**
- * Whether the require at `at` sits inside a pcall(...): only a pcall( whose
- * parenthesis is still open at that point guards it -- an earlier, already
- * closed pcall on the same lines does not.
- */
-function guardedBy(src: string, at: number): boolean {
-  const window = src.slice(Math.max(0, at - 160), at);
-  const last = [...window.matchAll(/pcall\s*\(/g)].pop();
-  if (!last) return false;
-  let depth = 1;
-  for (const ch of window.slice((last.index ?? 0) + last[0].length)) {
-    if (ch === '(') depth++;
-    else if (ch === ')') depth--;
-  }
-  return depth > 0;
-}
-
-/**
- * Module roots require()d under lua/, e.g. "lib" from require("lib.nvim.fs"),
- * mapped to whether every occurrence sits inside a pcall (an optional
- * integration rather than a hard dependency).
+ * Module roots loaded under lua/, e.g. "lib" from require("lib.nvim.fs"),
+ * mapped to whether every place that loads one is guarded (an optional
+ * integration rather than a hard dependency); see src/lib/lua-requires.ts.
  */
 function requiredRoots(dir: string): Map<string, boolean> {
   const roots = new Map<string, boolean>();
   for (const file of walkLua(join(dir, 'lua'))) {
-    const src = readFileSync(file, 'utf8').replace(LUA_COMMENT, '');
-    for (const m of src.matchAll(REQUIRE)) {
-      const root = m[1]?.split('.')[0];
-      if (!root) continue;
-      const guarded = guardedBy(src, m.index ?? 0);
-      roots.set(root, (roots.get(root) ?? true) && guarded);
-    }
+    collectRequires(readFileSync(file, 'utf8'), roots);
   }
   return roots;
 }
