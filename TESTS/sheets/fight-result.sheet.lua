@@ -1,8 +1,9 @@
 -- T7 and its follow-up round of the live list, and "Space on buttons" of the review: a match against the
 -- AI ends by knockout or after 60 s, the result text says what happened, the record between the health
 -- bars counts it, and Space on the focused Rematch button starts the next match (in a running match
--- Space stays the light attack). Read from the DOM, not from the canvas. The AI is set to
--- "unwinnable", so the match ends by knockout within seconds; the wait still covers a full 60 s match.
+-- Space stays the light attack), and the record is still there after the page is loaded anew. Read
+-- from the DOM, not from the canvas. The AI is set to "unwinnable", so the match ends by knockout
+-- within seconds; the wait still covers a full 60 s match.
 --   testing sheets step fight-result --headed
 local q = "document.querySelector"
 local hidden = function(sel)
@@ -103,6 +104,21 @@ return {
     },
     { press = "Escape", note = "Esc ends the match" },
     { wait = shown("[data-fight-select]"), timeout = 8000, note = "back at the fighter cards" },
+
+    {
+      expect = "(sessionStorage.setItem('sheet:record', " .. counts .. ".join(',')), true)",
+      note = "the record as it stands, kept across the reload",
+    },
+    { open = "${link}/play/", note = "the page is loaded anew" },
+    { wait = "!!" .. q .. "('[data-fighter]')", timeout = 8000, note = "the fighter cards again" },
+    {
+      expect = counts .. ".join(',') === sessionStorage.getItem('sheet:record')",
+      note = "the record is still there: it lives in localStorage",
+    },
+    {
+      expect = "(() => { const [w, l] = " .. counts .. "; return w + l > 0; })()",
+      note = "and it is not an empty one",
+    },
   },
   judge = {
     "result: the result box reads well over the arena, and the record sits between the health bars",
