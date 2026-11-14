@@ -171,6 +171,26 @@ describe('the built site in a browser', { skip }, () => {
     }
   });
 
+  test('on a phone the picture of the connections is drawn across the column, not shrunk to nothing', async () => {
+    // Served is not yet shown: the picture sits in a link and loads lazily, so check it is drawn at phone width.
+    try {
+      await p.viewport(375, 800, true);
+      for (const url of ['/nvim/', '/p/hover/']) {
+        await p.goto(`${B}${url}`);
+        await p.eval(`document.querySelector('.m-graph img').scrollIntoView({ block: 'center' })`);
+        const width = await p.until(
+          `(() => { const i = document.querySelector('.m-graph img'); return i.naturalWidth > 0 && Math.round(i.getBoundingClientRect().width); })()`,
+          `the picture on ${url} loads and has a width`,
+        );
+        assert.ok(width > 300, `${url}: drawn ${width} px wide`);
+        const hint = await p.eval(`getComputedStyle(document.querySelector('.m-graph-hint')).display`);
+        assert.equal(hint, 'block', `${url}: the phone is told to tap it`);
+      }
+    } finally {
+      await p.send('Emulation.clearDeviceMetricsOverride');
+    }
+  });
+
   test('without script the start page shows its content', async () => {
     await p.noScript(true);
     try {
