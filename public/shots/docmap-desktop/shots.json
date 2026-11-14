@@ -1,0 +1,20 @@
+[
+  {
+    "file": "map.webp",
+    "width": 1360,
+    "height": 850,
+    "caption": "The map of a project, here docmap.nvim itself: its modules as a hierarchy, with the views for dependencies, calls, types and the tree one click away."
+  },
+  {
+    "file": "treemap.webp",
+    "width": 1360,
+    "height": 850,
+    "caption": "The treemap: every folder and file by its lines of code; a click on a group zooms in."
+  },
+  {
+    "file": "analysis.webp",
+    "width": 1360,
+    "height": 850,
+    "caption": "The analysis: test coverage by module, next to documentation, API surface, complexity, duplicates and more."
+  }
+]
