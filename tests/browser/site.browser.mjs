@@ -183,7 +183,9 @@ describe('the built site in a browser', { skip }, () => {
           `the picture on ${url} loads and has a width`,
         );
         assert.ok(width > 300, `${url}: drawn ${width} px wide`);
-        const hint = await p.eval(`getComputedStyle(document.querySelector('.m-graph-hint')).display`);
+        const hint = await p.eval(
+          `getComputedStyle(document.querySelector('.m-graph-hint')).display`,
+        );
         assert.equal(hint, 'block', `${url}: the phone is told to tap it`);
       }
     } finally {
