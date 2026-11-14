@@ -134,7 +134,15 @@ describe('the built site in a browser', { skip }, () => {
       return JSON.parse(
         await p.eval(`Promise.all([...document.querySelectorAll(${JSON.stringify(selector)})].map(async (i) => {
           const r = await fetch(i.src);
-          return { ok: r.ok, type: r.headers.get('content-type'), bytes: (await r.arrayBuffer()).byteLength, alt: i.alt.length > 20 };
+          return {
+            ok: r.ok,
+            type: r.headers.get('content-type'),
+            bytes: (await r.arrayBuffer()).byteLength,
+            alt: i.alt.length > 20,
+            // on a phone the picture is shrunk to a quarter: it opens on its own at full size
+            linked: i.closest('a')?.href === i.src,
+            hint: !!i.closest('section').querySelector('.m-graph-hint'),
+          };
         })).then((all) => JSON.stringify(all))`),
       );
     };
@@ -149,8 +157,15 @@ describe('the built site in a browser', { skip }, () => {
       const found = await served(url, selector);
       assert.equal(found.length, 1, `${url} has one picture of connections`);
       assert.deepEqual(
-        [found[0].ok, found[0].type, found[0].bytes > 5000, found[0].alt],
-        [true, 'image/png', true, true],
+        [
+          found[0].ok,
+          found[0].type,
+          found[0].bytes > 5000,
+          found[0].alt,
+          found[0].linked,
+          found[0].hint,
+        ],
+        [true, 'image/png', true, true, true, true],
         url,
       );
     }

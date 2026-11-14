@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import CommitLine from '../components/CommitLine.astro';
+import GraphPicture from '../components/GraphPicture.astro';
 import Ticker from '../components/Ticker.astro';
 import registry from '../data/registry.json';
 import { byDateDesc } from '../lib/format';
@@ -102,7 +103,7 @@ const description =
 
   <section class="m-plugin m-graph">
     <h2 class="m-h2">One idea, several forms</h2>
-    <img src={`${BASE}graphs/matrix.png`} alt="Every family of the workshop and the forms it comes in: Neovim plugin, desktop app, web page and phone page, pale where a form is planned" loading="lazy" />
+    <GraphPicture src={`${BASE}graphs/matrix.png`} alt="Every family of the workshop and the forms it comes in: Neovim plugin, desktop app, web page and phone page, pale where a form is planned" />
   </section>
 
   <section class="m-plugin" aria-label="Recent activity">

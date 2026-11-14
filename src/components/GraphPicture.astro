@@ -1,0 +1,17 @@
+---
+// A picture of the connections, linked to itself at full size. The pictures are
+// drawn for a wide screen (the ring is 1420 px); on a phone the page shrinks them
+// to a quarter, so the text is only readable in the file opened on its own,
+// where the phone can zoom. The hint says so only where the picture is shrunk.
+interface Props {
+  /** site-relative URL of the PNG, BASE included */
+  src: string;
+  alt: string;
+}
+const { src, alt } = Astro.props;
+---
+
+<a class="m-graph-link" href={src}>
+  <img src={src} alt={alt} loading="lazy" />
+</a>
+<p class="m-graph-hint">Tap the picture to open it at full size.</p>

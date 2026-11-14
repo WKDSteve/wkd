@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import type { InferGetStaticPropsType } from 'astro';
 import Demo from '../../components/Demo.astro';
+import GraphPicture from '../../components/GraphPicture.astro';
 import Moved from '../../components/Moved.astro';
 import RecentCommits from '../../components/RecentCommits.astro';
 import ShotComposite from '../../components/ShotComposite.astro';
@@ -90,7 +91,7 @@ const nameOf = (slug: string): string => allPlugins.find((p) => p.id === slug)?.
     {d.graph ? (
       <section class="m-graph" data-pagefind-ignore>
         <h2 class="m-h2">Connections</h2>
-        <img src={`${BASE}${d.graph}`} alt={`${d.name}: what it uses and what uses it`} loading="lazy" />
+        <GraphPicture src={`${BASE}${d.graph}`} alt={`${d.name}: what it uses and what uses it`} />
       </section>
     ) : null}
 

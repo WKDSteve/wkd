@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import CategoryFilter from '../../components/CategoryFilter.astro';
 import CommitLine from '../../components/CommitLine.astro';
 import FamilyTree from '../../components/FamilyTree.astro';
+import GraphPicture from '../../components/GraphPicture.astro';
 import OrbitView from '../../components/OrbitView.astro';
 import Ticker from '../../components/Ticker.astro';
 import registry from '../../data/registry.json';
@@ -186,7 +187,7 @@ const statsPool = [
 
   <section class="m-plugin m-graph">
     <h2 class="m-h2">How they build on each other</h2>
-    <img src={`${BASE}graphs/ring.png`} alt="All plugins on a ring by category, a line for every use of one plugin by another, and lib.nvim in the middle as the base of them all" loading="lazy" />
+    <GraphPicture src={`${BASE}graphs/ring.png`} alt="All plugins on a ring by category, a line for every use of one plugin by another, and lib.nvim in the middle as the base of them all" />
   </section>
 
   <section class="m-plugin" aria-label="Recent activity">

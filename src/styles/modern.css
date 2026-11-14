@@ -979,6 +979,24 @@
     height: auto;
     border-radius: 14px;
   }
+  .m-graph-link {
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    border-radius: 14px;
+  }
+  /* Only where the picture is shrunk well below its drawn size is the text too small to read. */
+  .m-graph-hint {
+    display: none;
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  @media (max-width: 48rem) {
+    .m-graph-hint {
+      display: block;
+    }
+  }
   .m-apppage-icon.m-app-noicon {
     font-size: clamp(1.5rem, 4vw, 2.5rem);
   }

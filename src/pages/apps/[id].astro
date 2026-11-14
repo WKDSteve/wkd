@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import type { InferGetStaticPropsType } from 'astro';
+import GraphPicture from '../../components/GraphPicture.astro';
 import RecentCommits from '../../components/RecentCommits.astro';
 import Shots from '../../components/Shots.astro';
 import { appMeta, FORM_LABELS, getLinks, KIND_LABELS, shortNote, variantsOf } from '../../lib/apps';
@@ -75,7 +76,7 @@ const note = d.statusNote ? shortNote(d.statusNote) : null;
     {d.graph ? (
       <section class="m-graph" data-pagefind-ignore>
         <h2 class="m-h2">Connections</h2>
-        <img src={`${BASE}${d.graph}`} alt={`${d.name}: what it uses and what uses it`} loading="lazy" />
+        <GraphPicture src={`${BASE}${d.graph}`} alt={`${d.name}: what it uses and what uses it`} />
       </section>
     ) : null}
 
