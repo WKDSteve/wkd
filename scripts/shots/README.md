@@ -33,7 +33,7 @@ What has to be there:
 
 | App | Needs |
 |---|---|
-| tasks-desktop | `target/debug/tasks-hub.exe` (`pnpm --dir ui build`, then `cargo build`), tasks.nvim, lib.nvim, `bash`, `nvim` |
+| tasks-desktop | `target/debug/tasks-hub.exe` (`pnpm --dir ui build`, then `cargo build`), tasks.nvim, lib.nvim, `nvim` |
 | rules-desktop | `target/debug/rules-hub.exe` (the same two steps), rules.nvim, lib.nvim |
 | testing-desktop | `target/debug/testing-hub.exe` (the same two steps), testing.nvim, lib.nvim, `nvim` |
 | docmap-desktop | its checkout (no build) and docmap.nvim with its generated map in `docs/map/` |
@@ -68,7 +68,7 @@ A Chrome is needed for all of them (`CHROME=<path>` for another one than the ins
 | `prefix` | hub | e.g. `RULES_DESKTOP`: the hub reads `<prefix>_CONFIG_DIR`, `_PORT`, `_EDITOR_LOG` |
 | `api` | hub | e.g. `rules`: `GET /api/<api>/hello` says when the engine is ready |
 | `session` | hub | the key of the token in `sessionStorage` |
-| `demo` | hub | the command that makes the invented data, run before the hub starts |
+| `demo` | hub | the command that makes the invented data, run before the hub starts; a `node` script, never a shell (on Windows `bash` may be the one of WSL) |
 | `config` | hub | files written into the config folder, by name |
 | `env` | hub | further environment of the hub |
 | `app`, `map` | preview | the checkout of the app, and the folder of the generated map |

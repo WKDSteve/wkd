@@ -84,6 +84,19 @@ test('a step that cannot run fails the file, and an app file must take a picture
     /no shot is taken/,
   );
   assert.throws(() => validateApp(hub({ demo: 'bash make.sh' }), 'x'), /demo must be a command/);
+  // A shell differs per machine (on Windows `bash` may be the one of WSL): node runs the demo.
+  assert.throws(
+    () => validateApp(hub({ demo: ['bash', 'make.sh'] }), 'x'),
+    /demo must be run by node/,
+  );
+  assert.equal(validateApp(hub({ demo: ['node', 'make.mjs', '$DEMO'] }), 'x').demo[0], 'node');
+  assert.throws(() => validateApp(hub({ stubPatch: [['a']] }), 'x'), /pairs/);
+  assert.throws(
+    () => validateApp(hub({ stubPatch: [['a', 'b']] }), 'x'),
+    /stubPatch is for a preview/,
+  );
+  assert.throws(() => validateApp(hub({ env: ['A=b'] }), 'x'), /env must be an object/);
+  assert.throws(() => validateApp(hub({ config: 'x' }), 'x'), /config must be an object/);
   assert.throws(() => validateApp(hub({ width: 1360.5 }), 'x'), /width must be/);
 });
 

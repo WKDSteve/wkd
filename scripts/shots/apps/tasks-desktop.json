@@ -6,7 +6,7 @@
   "session": "tasks-desktop.session",
   "width": 1600,
   "height": 1000,
-  "demo": ["bash", "$HERE/make-demo-vault.sh", "$DEMO"],
+  "demo": ["node", "$HERE/make-demo-vault.mjs", "$DEMO"],
   "config": {
     "config.json": { "vault": "$DEMO" }
   },

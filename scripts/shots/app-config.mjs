@@ -78,6 +78,26 @@ export function validateApp(raw, slug) {
   if (app.kind === 'preview' && app.demo) problems.push('a preview has no demo command');
   if (app.demo && !(Array.isArray(app.demo) && app.demo.every((a) => typeof a === 'string'))) {
     problems.push('demo must be a command as a list of strings');
+  } else if (app.demo && app.demo[0] !== 'node') {
+    // A shell is not the same program everywhere: on Windows `bash` may be the one of WSL,
+    // which does not take the paths of this side.
+    problems.push('demo must be run by node');
+  }
+  const pairs = app.stubPatch ?? [];
+  const isPair = (p) => Array.isArray(p) && p.length === 2 && p.every((s) => typeof s === 'string');
+  if (!Array.isArray(pairs) || !pairs.every(isPair)) {
+    problems.push('stubPatch must be a list of [search, replace] pairs');
+  } else if (pairs.length > 0 && app.kind !== 'preview') {
+    problems.push('stubPatch is for a preview');
+  }
+  for (const field of ['config', 'env']) {
+    const value = app[field];
+    if (
+      value !== undefined &&
+      (value === null || typeof value !== 'object' || Array.isArray(value))
+    ) {
+      problems.push(`${field} must be an object`);
+    }
   }
   for (const side of ['width', 'height']) {
     if (app[side] !== undefined && !(Number.isInteger(app[side]) && app[side] >= 320)) {
