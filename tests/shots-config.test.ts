@@ -60,6 +60,32 @@ test('an app file is checked before anything is started, with every problem at o
   assert.throws(() => validateApp(null, 'x'), /kind must be/);
 });
 
+test('a harness app names the test harness of its repository and the binary, nothing of a hub', () => {
+  const harness = (over: Record<string, unknown> = {}) => ({
+    kind: 'harness',
+    harness: '$REPOS_DIR/x/tests/helpers/server.mjs',
+    exe: '$REPOS_DIR/x/build/x.exe',
+    dark: true,
+    shots: [{ name: 'one' }],
+    ...over,
+  });
+  assert.equal(validateApp(harness(), 'x').kind, 'harness');
+  assert.throws(
+    () => validateApp(harness({ harness: '', exe: undefined }), 'x'),
+    /x: harness is missing; exe is missing/,
+  );
+  // The harness makes its own throw-away data and config folder.
+  assert.throws(
+    () => validateApp(harness({ demo: ['node', 'make.mjs'] }), 'x'),
+    /demo is for a hub/,
+  );
+  assert.throws(() => validateApp(harness({ config: {} }), 'x'), /config is for a hub/);
+  assert.throws(
+    () => validateApp(harness({ shots: [{ name: 'a', steps: ['frame=Tree'] }] }), 'x'),
+    /frame= is for a preview/,
+  );
+});
+
 test('the name of a shot is a plain file name, once', () => {
   for (const name of ['../up', 'a/b', 'A', 'with space', '', '-lead', 7]) {
     assert.throws(() => validateApp(hub({ shots: [{ name }] }), 'x'), /plain name/, String(name));

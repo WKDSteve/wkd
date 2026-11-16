@@ -2,7 +2,7 @@
 
 The screenshots under `public/shots/<slug>/` of tasks-desktop, rules-desktop, testing-desktop and
 docmap-desktop are taken by `shot-app.mjs`, so they can be taken again after the interface of an
-app changed.
+app changed. So is the picture of ai-desktop (its dashboard), which is not online yet.
 
 **Only invented data gets into a picture.** The site is public. No real vault, no real rule set,
 no test results of a real repository, no path that names a person. The data is made by the
@@ -24,7 +24,7 @@ file that `shots.json` names and that is not there.
 | Option | Meaning |
 |---|---|
 | `--out=<folder>` | write there instead of `out/shots/<slug>/` |
-| `--exe=<binary>` | a hub built somewhere else than `target/debug/` of its checkout |
+| `--exe=<binary>` | a hub (or the binary of a harness app) built somewhere else than the app file says |
 | `--explore` | print the menus, links, buttons and headings after each step: how to find the steps to a view |
 
 Without `REPOS_DIR` (or `PLUGINS_DIR`) the checkouts are looked for next to this repository.
@@ -37,10 +37,11 @@ What has to be there:
 | rules-desktop | `target/debug/rules-hub.exe` (the same two steps), rules.nvim, lib.nvim |
 | testing-desktop | `target/debug/testing-hub.exe` (the same two steps), testing.nvim, lib.nvim, `nvim` |
 | docmap-desktop | its checkout (no build) and docmap.nvim with its generated map in `docs/map/` |
+| ai-desktop | `build/ai-desktop.exe` (`cmake -B build`, `cmake --build build`, see its README) |
 
 A Chrome is needed for all of them (`CHROME=<path>` for another one than the installed).
 
-## The two kinds of app
+## The three kinds of app
 
 - **`hub`**: the app is a local web interface served by a hub. The script starts the built hub
   the way the e2e harness of its repository does: a config folder of its own
@@ -54,23 +55,29 @@ A Chrome is needed for all of them (`CHROME=<path>` for another one than the ins
   (docmap.nvim), and the invented traffic numbers are off (`stubPatch`), so no made-up numbers
   about a real repository go online. Real is everything in the map pane; the sidebar and the
   status line come from the stub.
+- **`harness`**: ai-desktop is started by the test harness of its own repository (`harness`, a
+  module whose `startServer({ bin })` resolves to `{ port, stop() }`): a free port, a throw-away
+  config folder, no API keys, an unreachable Ollama. The harness hands its environment on to the
+  program, so while it starts the program the script has only the short list of variables a hub
+  gets. The dashboard shows no data of its own: what is on it is the empty state of a new install.
 
 ## An app file (`apps/<slug>.json`)
 
 | Field | Kind | Meaning |
 |---|---|---|
-| `kind` | both | `hub` or `preview` |
-| `width`, `height` | both | the size of the picture, 1360×850 when absent |
-| `dark` | both | `true` makes the system say dark, for an app without a theme menu |
-| `settle` | both | milliseconds to wait after the page loaded (1500) |
-| `shots` | both | the pictures in order: `{ name, steps, shot }`; `"shot": false` only runs the steps |
-| `exe` | hub | the built hub |
+| `kind` | all | `hub`, `preview` or `harness` |
+| `width`, `height` | all | the size of the picture, 1360×850 when absent |
+| `dark` | all | `true` makes the system say dark, for an app without a theme menu |
+| `settle` | all | milliseconds to wait after the page loaded (1500) |
+| `shots` | all | the pictures in order: `{ name, steps, shot }`; `"shot": false` only runs the steps |
+| `exe` | hub, harness | the built hub, or the built program |
 | `prefix` | hub | e.g. `RULES_DESKTOP`: the hub reads `<prefix>_CONFIG_DIR`, `_PORT`, `_EDITOR_LOG` |
 | `api` | hub | e.g. `rules`: `GET /api/<api>/hello` says when the engine is ready |
 | `session` | hub | the key of the token in `sessionStorage` |
 | `demo` | hub | the command that makes the invented data, run before the hub starts; a `node` script, never a shell (on Windows `bash` may be the one of WSL) |
 | `config` | hub | files written into the config folder, by name |
-| `env` | hub | further environment of the hub |
+| `env` | hub, harness | further environment of the hub or the program |
+| `harness` | harness | the module of the repository that starts the program for its tests |
 | `app`, `map` | preview | the checkout of the app, and the folder of the generated map |
 | `stubPatch` | preview | `[search, replace]` pairs applied to `stub.js`; a search that is not found fails the run |
 

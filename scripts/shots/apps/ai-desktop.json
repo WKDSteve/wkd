@@ -1,0 +1,14 @@
+{
+  "kind": "harness",
+  "harness": "$REPOS_DIR/ai-desktop/tests/helpers/server.mjs",
+  "exe": "$REPOS_DIR/ai-desktop/build/ai-desktop.exe",
+  "width": 1360,
+  "height": 850,
+  "dark": true,
+  "settle": 2500,
+  "shots": [
+    {
+      "name": "dashboard"
+    }
+  ]
+}

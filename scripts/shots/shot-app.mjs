@@ -11,6 +11,8 @@
 //   preview  docmap-desktop, a Tauri window: the browser preview its repository uses to
 //            look at the window (tools/preview), served here, with the map of a public
 //            repository in the map pane.
+//   harness  ai-desktop: the built binary, started by the test harness of its repository
+//            (a free port, a throw-away config folder, no keys), which the app file names.
 // Every picture is written as PNG and as WebP to out/shots/<slug>/ (ignored by git).
 // Look at them, then copy the .webp files into public/shots/<slug>/.
 //
@@ -21,7 +23,7 @@ import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } 
 import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { dirname, extname, join, normalize, resolve, sep } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { launch } from '../../tests/browser/chrome.mjs';
 import { expand, parseStep, validateApp } from './app-config.mjs';
 
@@ -207,6 +209,39 @@ async function startPreview() {
   };
 }
 
+/**
+ * Starts the app through the test harness of its repository: a module whose
+ * `startServer({ bin })` starts the binary hermetically and resolves to `{ port, stop() }`.
+ * The harness hands its own environment on to the binary, so while it starts the binary
+ * this process has the short list of `cleanEnv`, nothing more.
+ */
+async function startHarness() {
+  const exe = resolve(flag('exe') ?? app.exe);
+  if (!existsSync(exe))
+    throw new Error(`no binary at ${exe}: build the app first, or name one with --exe=`);
+  const { startServer } = await import(pathToFileURL(resolve(app.harness)).href);
+  if (typeof startServer !== 'function') throw new Error(`${app.harness} has no startServer`);
+  const saved = { ...process.env };
+  const clean = { ...cleanEnv(), ...app.env };
+  for (const key of Object.keys(process.env)) delete process.env[key];
+  Object.assign(process.env, clean);
+  let server;
+  try {
+    server = await startServer({ bin: exe });
+  } finally {
+    for (const key of Object.keys(process.env)) delete process.env[key];
+    Object.assign(process.env, saved);
+  }
+  const origin = `http://127.0.0.1:${server.port}`;
+  console.log('app at', origin);
+  return {
+    url: `${origin}/`,
+    ready: `document.readyState === 'complete'`,
+    before: null,
+    stop: () => server.stop(),
+  };
+}
+
 /** The click on the element with this label; a preview only looks among what is visible. */
 function pick(want, exact, doc = 'document') {
   const visible = app.kind === 'preview' ? '.filter((x) => x.offsetParent !== null)' : '';
@@ -246,7 +281,8 @@ let page;
 rmSync(root, { recursive: true, force: true });
 mkdirSync(root, { recursive: true });
 try {
-  started = await (app.kind === 'hub' ? startHub() : startPreview());
+  const start = { hub: startHub, preview: startPreview, harness: startHarness }[app.kind];
+  started = await start();
   mkdirSync(out, { recursive: true });
   page = await launch({ width: W, height: H });
   await page.viewport(W, H);

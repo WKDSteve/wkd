@@ -57,6 +57,9 @@ export function parseStep(step) {
 
 const HUB_FIELDS = ['exe', 'prefix', 'api', 'session'];
 const PREVIEW_FIELDS = ['app', 'map'];
+const HARNESS_FIELDS = ['harness', 'exe'];
+/** The kinds of app and the fields each one needs. */
+const KINDS = { hub: HUB_FIELDS, preview: PREVIEW_FIELDS, harness: HARNESS_FIELDS };
 
 /**
  * Checks an app file and returns it; throws with every problem at once.
@@ -66,16 +69,18 @@ const PREVIEW_FIELDS = ['app', 'map'];
 export function validateApp(raw, slug) {
   const problems = [];
   const app = /** @type {Record<string, any>} */ (raw && typeof raw === 'object' ? raw : {});
-  if (app.kind !== 'hub' && app.kind !== 'preview')
-    problems.push('kind must be "hub" or "preview"');
-  for (const field of app.kind === 'hub'
-    ? HUB_FIELDS
-    : app.kind === 'preview'
-      ? PREVIEW_FIELDS
-      : []) {
+  const fields = Object.hasOwn(KINDS, app.kind) ? KINDS[app.kind] : null;
+  if (!fields) problems.push('kind must be "hub", "preview" or "harness"');
+  for (const field of fields ?? []) {
     if (typeof app[field] !== 'string' || !app[field]) problems.push(`${field} is missing`);
   }
   if (app.kind === 'preview' && app.demo) problems.push('a preview has no demo command');
+  // A harness makes its own throw-away data and config folder.
+  if (app.kind === 'harness') {
+    for (const field of ['demo', 'config']) {
+      if (app[field] !== undefined) problems.push(`${field} is for a hub`);
+    }
+  }
   if (app.demo && !(Array.isArray(app.demo) && app.demo.every((a) => typeof a === 'string'))) {
     problems.push('demo must be a command as a list of strings');
   } else if (app.demo && app.demo[0] !== 'node') {
