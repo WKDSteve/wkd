@@ -1,8 +1,8 @@
 # Pictures of the apps
 
-The screenshots under `public/shots/<slug>/` of tasks-desktop, rules-desktop, testing-desktop and
-docmap-desktop are taken by `shot-app.mjs`, so they can be taken again after the interface of an
-app changed. So is the picture of ai-desktop (its dashboard), which is not online yet.
+The screenshots under `public/shots/<slug>/` of tasks-desktop, rules-desktop, testing-desktop,
+docmap-desktop and ai-desktop (its dashboard) are taken by `shot-app.mjs`, so they can be taken
+again after the interface of an app changed.
 
 **Only invented data gets into a picture.** The site is public. No real vault, no real rule set,
 no test results of a real repository, no path that names a person. The data is made by the

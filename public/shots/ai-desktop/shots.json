@@ -1,0 +1,8 @@
+[
+  {
+    "file": "dashboard.webp",
+    "width": 1360,
+    "height": 850,
+    "caption": "The dashboard: the agents and their last step, which backends answer, a prompt sent to Ollama or a cloud model picked by the prefix of its name, and the usage per provider without the text of a prompt or an answer."
+  }
+]
