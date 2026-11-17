@@ -6,7 +6,7 @@
 //   pnpm build && node scripts/serve-dist.mjs
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { serve } from '../tests/browser/chrome.mjs';
+import { serve } from '../test/browser/chrome.mjs';
 
 const dist = fileURLToPath(new URL('../dist', import.meta.url));
 if (!existsSync(`${dist}/index.html`)) {

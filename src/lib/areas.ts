@@ -1,5 +1,5 @@
 // The two areas an entry can belong to, and how a search names them. Free of
-// imports on purpose: the client bundle and tests/areas.test.ts both use it.
+// imports on purpose: the client bundle and test/areas.test.ts both use it.
 
 /** An app, a web variant and a kit are all in the apps area. */
 export type EntryArea = 'plugins' | 'apps';

@@ -6,7 +6,7 @@
 //! it.
 //!
 //! Deliberately no wasm-bindgen: three exports and a shared buffer are the
-//! whole interface. `tests/fight-wasm.test.ts` holds the two implementations
+//! whole interface. `test/fight-wasm.test.ts` holds the two implementations
 //! to bit-identical state on every frame; change one and it fails until the
 //! other follows.
 #![no_std]

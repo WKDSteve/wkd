@@ -24,7 +24,7 @@ import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { dirname, extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { launch } from '../../tests/browser/chrome.mjs';
+import { launch } from '../../test/browser/chrome.mjs';
 import { expand, parseStep, validateApp } from './app-config.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));

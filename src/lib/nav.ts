@@ -1,6 +1,6 @@
 // The areas of the site and the addresses that moved. Free of Astro and of
 // other project imports on purpose: the shells and the build check use it,
-// and tests/nav.test.ts runs it under plain `node --test`.
+// and test/nav.test.ts runs it under plain `node --test`.
 
 export interface Area {
   /** site-relative page path, '' for the start page */

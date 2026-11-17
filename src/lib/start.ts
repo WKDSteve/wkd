@@ -1,6 +1,6 @@
 // What the start page says about the workshop as a whole: the figures of its
 // statistics and the examples behind its two doors. Free of Astro on purpose,
-// so tests/start.test.ts runs it under plain `node --test`.
+// so test/start.test.ts runs it under plain `node --test`.
 import { approx } from './approx.ts';
 import type { Kind, Stage } from './registry';
 

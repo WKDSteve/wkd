@@ -30,7 +30,7 @@ the same page in the other skin; `src/scripts/prefs.ts` remembers the choice in
 | Play | `/wkd/play/` | experiments, as a list (`src/lib/play.ts`): today the fight. In the TUI skin the list links to the modern page |
 | Activity | `/wkd/activity/` | every recent commit, each line with the mark of its area; a filter All, Plugins, Apps in pure CSS (`src/components/AreaFilter.astro`). `/wkd/activity/#area-apps` opens it on one area, and so does `:log apps` in the TUI skin |
 
-Every page exists in both skins (`tests/nav.test.ts` holds each modern page to a twin under
+Every page exists in both skins (`test/nav.test.ts` holds each modern page to a twin under
 `src/pages/tui/`). The areas are listed in `src/lib/nav.ts` (`AREAS`); the header of the modern
 skin and the sidebar of the TUI skin show the ones that have a page file, so a planned area
 (`play`) appears in the navigation by itself once its page exists, and never before.
@@ -91,7 +91,7 @@ not shown (it is in German, this site is English).
   | `stage` | required for an app, on nothing else: `showcase`, `companion` or `building`, the section of the apps page |
 
   The rules are in `src/lib/registry.ts` (`validateRegistry`), which the loader runs when it
-  loads and `tests/registry.test.ts` runs against the real file; the readers of the app fields
+  loads and `test/registry.test.ts` runs against the real file; the readers of the app fields
   are in `src/lib/app-facts.ts`. Both are free of Astro imports so that `pnpm test` covers them.
 - `src/loaders/repos.ts` — the Astro content loader that scans the checkouts and fills two
   collections, `plugins` and `activity`.
@@ -117,8 +117,8 @@ pnpm dev        # http://127.0.0.1:4321/wkd/
 pnpm build      # static output in dist/
 pnpm preview
 pnpm verify     # biome + astro check + tests + build
-pnpm test       # node --test over tests/*.test.ts (the fight engine, the registry, the app readers)
-pnpm test:browser # the built site in a headless Chrome (tests/browser/), after pnpm build
+pnpm test       # node --test over test/*.test.ts (the fight engine, the registry, the app readers)
+pnpm test:browser # the built site in a headless Chrome (test/browser/), after pnpm build
 pnpm build:wasm # rebuild src/lib/fight-engine/fight-sim.wasm from wasm/fight-sim (Rust)
 ```
 
@@ -166,7 +166,8 @@ as GitHub Pages does, and refuses to start without a build. Pictures of the `sho
 `TESTS/sheets/out/` (ignored). The sheets are not part of the deploy: its gate stays
 `pnpm test:browser`, which needs nothing but a Chrome. `tools/sheets/` holds the one dependency of
 the sheets; the site does not read that folder. The folder is `TESTS/sheets` in capitals, because that is
-where testing.nvim looks; on Windows and macOS it is the same folder as `tests/`, on Linux one next to it.
+where testing.nvim looks. The node tests live in `test/` (singular), not `tests/`: on Windows and
+macOS `tests/` and `TESTS/` would be one folder, and `astro check` refused the file seen under both names.
 
 ## Stack and constraints
 
@@ -181,7 +182,7 @@ where testing.nvim looks; on Windows and macOS it is the same folder as `tests/`
   - `ai.ts`, `gamepad.ts`: the opponent and controllers as input sources. The opponent has
     four difficulty profiles, picked on the fighter cards and remembered: easy, normal, hard,
     and unwinnable, which reads the state every frame, never throws a swing away and hits
-    three times as hard (`tests/fight-ai.test.ts` plays thirteen scripted strategies against
+    three times as hard (`test/fight-ai.test.ts` plays thirteen scripted strategies against
     it; none wins a match).
   - Four fighters, each with one special move of its own (`C`, pad `Y`, touch `S`): a ground
     wave that a jump clears, a slow heavy orb, a pistol shot, and a teleport behind the
@@ -196,7 +197,7 @@ where testing.nvim looks; on Windows and macOS it is the same folder as `tests/`
     knockout, so the fall and the winner's last swing are played by the view afterwards.
   - `wasm/fight-sim` → `fight-sim.wasm`: the same `step()` in Rust. `?sim=wasm` swaps it in
     for matches against the AI (a match against a friend, or behind `?net=loopback`, always
-    runs the TypeScript step); `tests/fight-wasm.test.ts` holds both to bit-identical state.
+    runs the TypeScript step); `test/fight-wasm.test.ts` holds both to bit-identical state.
   - `rollback.ts`, `net.ts`, `src/scripts/fight-online.ts`: rollback netcode and a WebRTC
     link between two browsers, set up by swapping two codes by hand (no server, and no STUN
     server configured, so same network only for now). `?net=loopback&lag=100&jitter=30&loss=5`
@@ -238,7 +239,7 @@ where testing.nvim looks; on Windows and macOS it is the same folder as `tests/`
   (`src/lib/lua-requires.ts`). "Depended on" ranking plus a per-plugin tree.
 - **Category filter** of the plugin area is pure CSS: radio inputs plus `:has()` rules in
   `src/styles/filter.css`. Adding a category to the registry (`categories` or `appCategories`)
-  means adding one rule there; the build and `tests/registry.test.ts` fail without it.
+  means adding one rule there; the build and `test/registry.test.ts` fail without it.
 - **The statistics of the plugin area** (modern skin) are derived from the checkouts, never typed in, and shown
   as rounded floors ("900+", `approx()` in `src/lib/format.ts`) so they stay true as the family
   grows: *features* = `##` sections across every `docs/FEATURES/*.md` or a single

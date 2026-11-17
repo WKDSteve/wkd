@@ -1,6 +1,6 @@
 // The description of one app for shot-app.mjs (apps/<slug>.json): what is checked before
 // anything is started, and how its placeholders become paths. No I/O here, so
-// `pnpm test` covers it (tests/shots-config.test.ts).
+// `pnpm test` covers it (test/shots-config.test.ts).
 
 /** The placeholders an app file may use instead of a path of one machine. */
 export const PLACEHOLDERS = ['REPOS_DIR', 'ROOT', 'DEMO', 'HERE'];

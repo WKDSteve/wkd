@@ -4,7 +4,7 @@
 
 return {
   sheets = {
-    -- the Chrome of the machine, as tests/browser/ uses it; playwright-core at a fixed version from tools/sheets
+    -- the Chrome of the machine, as test/browser/ uses it; playwright-core at a fixed version from tools/sheets
     browser = { playwright_dir = "tools/sheets", channel = "chrome" },
     apps = {
       -- The built site under /wkd, as GitHub Pages serves it. No build step here: the sheets check the

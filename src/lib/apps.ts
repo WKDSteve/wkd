@@ -1,5 +1,5 @@
 // How the apps page orders what the registry knows. Free of Astro on purpose,
-// so tests/apps.test.ts runs it under plain `node --test`.
+// so test/apps.test.ts runs it under plain `node --test`.
 import type { Kind, Platform, Stage } from './registry';
 
 /** The fields of an entry this module looks at; a page passes its own richer type through. */

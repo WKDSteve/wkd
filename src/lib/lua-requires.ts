@@ -1,5 +1,5 @@
 // Which Lua modules a source text loads, and whether it can do without them.
-// Free of Astro imports, so `pnpm test` covers it (tests/lua-requires.test.ts).
+// Free of Astro imports, so `pnpm test` covers it (test/lua-requires.test.ts).
 
 // require("mod"), require "mod" and the family's optional-dependency idiom
 // pcall(require, "mod"); `\b` keeps a `my_require(...)` helper out.

@@ -94,7 +94,7 @@ export interface AiProfile {
 // hard 8 and unwinnable 2. Unwinnable is not a fair fight and is not meant
 // to be: it reads the state on every frame, never throws a swing away, walks
 // faster than the player and hits three times as hard, so even a trade of
-// blows is a loss. tests/fight-ai.test.ts plays a set of scripted strategies
+// blows is a loss. test/fight-ai.test.ts plays a set of scripted strategies
 // against it; none of them wins a single match.
 export const AI_PROFILES = {
   easy: {

@@ -1,6 +1,6 @@
 // What the play area holds. A list on purpose: a further experiment is one
 // more entry here (and its component in src/pages/play.astro), under the same
-// address. Free of Astro, so tests/nav.test.ts runs it under `node --test`.
+// address. Free of Astro, so test/nav.test.ts runs it under `node --test`.
 
 export interface PlayItem {
   /** anchor on the page: /play/#<id> */

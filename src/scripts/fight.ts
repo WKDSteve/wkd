@@ -678,7 +678,7 @@ const KO_OUTRO_FRAMES = 80;
 const TIME_UP_OUTRO_FRAMES = 50;
 
 // `?sim=wasm` swaps the TypeScript step() for its Rust/WebAssembly twin
-// (wasm/fight-sim). Same rules, bit for bit -- tests/fight-wasm.test.ts
+// (wasm/fight-sim). Same rules, bit for bit -- test/fight-wasm.test.ts
 // holds them to that -- so this is a switch for comparing the two, not a
 // feature; the TypeScript core stays the default.
 type WasmCore = Pick<typeof import('../lib/fight-engine/wasm-loader'), 'instantiateSim'> & {

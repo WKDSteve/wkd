@@ -88,7 +88,7 @@ whose text contains it), `frame=<label>` (a control of the map in its iframe, pr
 No path of one machine belongs in an app file. The placeholders are `$REPOS_DIR` (the folder of
 the checkouts), `$ROOT` (the temporary folder of the run, removed at its end), `$DEMO` (the
 folder the `demo` command fills, inside `$ROOT`) and `$HERE` (this folder).
-`tests/shots-config.test.ts` checks every app file: its shape, its steps, and that it names no
+`test/shots-config.test.ts` checks every app file: its shape, its steps, and that it names no
 drive, home folder or `AppData`.
 
 ## Traps the script already knows

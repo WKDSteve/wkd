@@ -1,6 +1,6 @@
 // The shape of src/data/registry.json and the rules it must keep. Free of
 // Astro and of other project imports on purpose: the loader validates the
-// real file with this at build time, and tests/registry.test.ts runs the same
+// real file with this at build time, and test/registry.test.ts runs the same
 // code under plain `node --test`.
 
 /** What an entry is: a Neovim plugin, a native app, the web variant of an app, or a shared foundation. */

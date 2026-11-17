@@ -10,7 +10,7 @@ import { type RawRegistry, validateRegistry } from '../lib/registry';
 // Those are the plugin pages (the READMEs of the plugins link to them), the
 // areas the navigation shows and the addresses that moved (among them the old
 // p/<slug>/ of every app, web variant and kit). The rules are in
-// routeProblems() (src/lib/nav.ts), where tests/nav.test.ts covers them.
+// routeProblems() (src/lib/nav.ts), where test/nav.test.ts covers them.
 
 /** Every .astro file under a directory, as paths relative to it with forward slashes. */
 function astroFiles(dir: string): string[] {

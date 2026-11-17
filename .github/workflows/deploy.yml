@@ -93,15 +93,15 @@ jobs:
       # bit, and nothing else in CI would catch a stale binary. Runs on the
       # Node the action set up (24; the tests need >= 22.18 to run .ts files).
       - name: Test
-        run: node --test "tests/*.test.ts"
+        run: node --test "test/*.test.ts"
 
-      # Second gate: the built site in the runner's Chrome (tests/browser/):
+      # Second gate: the built site in the runner's Chrome (test/browser/):
       # keys and focus, the pure-CSS filters, the search, the page without
       # script, the width on a phone, and a console free of errors and CSP
       # reports. It reads dist/, which the action above has just built.
       # WKD_BROWSER_REQUIRED turns "no Chrome, skipped" into a failure.
       - name: Browser checks
-        run: node --test tests/browser/site.browser.mjs
+        run: node --test test/browser/site.browser.mjs
         env:
           WKD_BROWSER_REQUIRED: '1'
 

@@ -1,6 +1,6 @@
 // What the loader reads about a native app from its checkout, as pure
 // functions over text and file lists. Free of Astro and of other project
-// imports on purpose, so tests/app-facts.test.ts runs them under plain
+// imports on purpose, so test/app-facts.test.ts runs them under plain
 // `node --test`; src/loaders/repos.ts does the file and git access.
 
 /** Marks a code span set aside by plainMarkdown(): a private-use character, in no README. */
