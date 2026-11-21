@@ -70,13 +70,13 @@ const note = d.statusNote ? shortNote(d.statusNote) : null;
       </p>
     </header>
 
-    {d.shots.length > 0 ? <Shots slug={d.id} name={d.name} shots={d.shots} skin="modern" /> : null}
+    {d.shots.length > 0 ? <Shots slug={d.id} name={d.name} shots={d.shots} skin="modern" priority /> : null}
 
 
     {d.graph ? (
       <section class="m-graph" data-pagefind-ignore>
         <h2 class="m-h2">Connections</h2>
-        <GraphPicture src={`${BASE}${d.graph}`} alt={`${d.name}: what it uses and what uses it`} />
+        <GraphPicture src={`${BASE}${d.graph}`} alt={`${d.name}: what it uses and what uses it`} priority={d.shots.length === 0} />
       </section>
     ) : null}
 

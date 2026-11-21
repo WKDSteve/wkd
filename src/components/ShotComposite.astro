@@ -28,7 +28,9 @@ const { slug, shots } = Astro.props;
             <div class="shot-composite-seg">
               <img
                 src={`${BASE}shots/${slug}/${encodeURIComponent(s.file)}`}
-                loading="eager"
+                width={s.width}
+                height={s.height}
+                fetchpriority={i === 0 ? 'high' : undefined}
                 decoding="async"
                 alt={`${slug}.nvim: ${s.caption}`}
               />

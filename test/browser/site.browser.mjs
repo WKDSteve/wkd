@@ -415,6 +415,111 @@ describe('the built site in a browser', { skip }, () => {
     await p.until(`location.pathname.endsWith('/tui/play/')`, 'the play page');
   });
 
+  test('every picture has a size, and none of them is both lazy and fetched with high priority', async () => {
+    // One page of each kind, in both skins: a start page, an area, a plugin, an app with
+    // screenshots, an app with a picture of its connections, a page of its own.
+    const pages = [
+      '/',
+      '/nvim/',
+      '/apps/',
+      '/activity/',
+      '/play/',
+      '/p/hover/',
+      '/p/ui/',
+      '/p/lib/',
+    ];
+    pages.push('/apps/tasks-desktop/', '/apps/hub-desktop/', '/apps/pult/');
+    const urls = pages.flatMap((u) => [u, `/tui${u}`]);
+    for (const url of urls) {
+      await p.goto(`${B}${url}`);
+      const bad = JSON.parse(
+        await p.eval(`JSON.stringify([...document.images].flatMap((i) => {
+          const why = [];
+          if (!i.getAttribute('width') || !i.getAttribute('height')) why.push('no width/height');
+          if (i.getAttribute('fetchpriority') === 'high' && i.getAttribute('loading') === 'lazy') why.push('high and lazy');
+          return why.map((w) => i.getAttribute('src') + ': ' + w);
+        }))`),
+      );
+      assert.deepEqual(bad, [], url);
+      const high = await p.eval(`document.querySelectorAll('img[fetchpriority="high"]').length`);
+      assert.ok(high <= 2, `${url}: ${high} pictures with fetchpriority=high`);
+    }
+  });
+
+  test('where a picture is the largest paint of the page, it is fetched with high priority and not lazy', async () => {
+    // Measured on the built site (a PerformanceObserver for largest-contentful-paint): the first
+    // screenshot of an app page and the picture of the connections of an app without screenshots.
+    // The text pages have no picture to prioritise, so they are not part of this.
+    const lcp = `new Promise((resolve) => {
+      new PerformanceObserver((list) => {
+        const e = list.getEntries().at(-1);
+        const i = e?.element;
+        resolve(JSON.stringify({
+          tag: i?.tagName ?? '',
+          src: i?.getAttribute('src') ?? '',
+          priority: i?.getAttribute('fetchpriority') ?? '',
+          loading: i?.getAttribute('loading') ?? '',
+        }));
+      }).observe({ type: 'largest-contentful-paint', buffered: true });
+    })`;
+    for (const skin of ['', '/tui']) {
+      await p.goto(`${B}${skin}/apps/tasks-desktop/`);
+      const shot = JSON.parse(await p.eval(lcp));
+      assert.equal(
+        shot.tag,
+        'IMG',
+        `${skin}/apps/tasks-desktop/: the largest paint is a screenshot`,
+      );
+      assert.equal(shot.priority, 'high', shot.src);
+      assert.notEqual(shot.loading, 'lazy', shot.src);
+    }
+    await p.goto(`${B}/apps/hub-desktop/`);
+    const graph = JSON.parse(await p.eval(lcp));
+    assert.equal(
+      graph.tag,
+      'IMG',
+      'the largest paint of /apps/hub-desktop/ is the picture of its connections',
+    );
+    assert.equal(graph.priority, 'high', graph.src);
+    assert.notEqual(graph.loading, 'lazy', graph.src);
+  });
+
+  test('the pause box of the ticker is a visible native checkbox: focus ring, Space toggles, the band stops', async () => {
+    await p.goto(`${B}/`);
+    const box = `${$('#ticker-pause')}`;
+    const seen = JSON.parse(
+      await p.eval(`(() => {
+        const e = ${box}, r = e.getBoundingClientRect(), c = getComputedStyle(e);
+        return JSON.stringify({ type: e.type, opacity: c.opacity, w: r.width, h: r.height, appearance: c.appearance, accent: c.accentColor });
+      })()`),
+    );
+    assert.equal(seen.type, 'checkbox');
+    assert.notEqual(seen.opacity, '0', 'the box is not hidden by opacity');
+    assert.ok(seen.w >= 12 && seen.h >= 12, 'the box has a size');
+    assert.notEqual(seen.accent, 'auto', 'it is coloured with accent-color');
+    const state = () =>
+      p.eval(`JSON.stringify({
+      on: ${box}.checked,
+      play: getComputedStyle(${$('.ticker-track')}).animationPlayState,
+      ring: getComputedStyle(${$('.ticker-pause')}).outlineStyle,
+    })`);
+    // The band pauses itself while it is off screen (prefs.ts), so bring it on screen first.
+    await p.eval(`${$('.ticker')}.scrollIntoView()`);
+    await p.until(`!${$('.ticker-track')}.classList.contains('is-off')`, 'the band on screen');
+    assert.equal(JSON.parse(await state()).play, 'running', 'the band runs by default');
+    // A key before the focus, so that :focus-visible applies as it does for a keyboard user.
+    await p.key('Shift', { code: 'ShiftLeft', vk: 16 });
+    await p.eval(`${box}.focus()`);
+    assert.deepEqual(JSON.parse(await state()), { on: false, play: 'paused', ring: 'solid' });
+    await p.key(' ', { code: 'Space', vk: 32, text: ' ' });
+    await p.eval(`${box}.blur()`);
+    assert.deepEqual(JSON.parse(await state()), { on: true, play: 'paused', ring: 'none' });
+    await p.eval(`${box}.focus()`);
+    await p.key(' ', { code: 'Space', vk: 32, text: ' ' });
+    await p.eval(`${box}.blur()`);
+    assert.deepEqual(JSON.parse(await state()), { on: false, play: 'running', ring: 'none' });
+  });
+
   test('nothing was reported to the console: no error, no CSP violation', () => {
     const bad = p.logs.filter((l) => /^(error|exception)|Content Security Policy/i.test(l));
     assert.deepEqual(bad, []);

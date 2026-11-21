@@ -3,15 +3,36 @@
 // drawn for a wide screen (the ring is 1420 px); on a phone the page shrinks them
 // to a quarter, so the text is only readable in the file opened on its own,
 // where the phone can zoom. The hint says so only where the picture is shrunk.
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { pngSize } from '../lib/png-size';
+import { BASE } from '../lib/site';
+
 interface Props {
   /** site-relative URL of the PNG, BASE included */
   src: string;
   alt: string;
+  /** the picture is the first large thing of the page (the LCP): fetched early, never lazy */
+  priority?: boolean;
 }
-const { src, alt } = Astro.props;
+const { src, alt, priority = false } = Astro.props;
+
+// The size is read from the file (the build runs in the repository root), so the browser keeps the room before the picture has loaded.
+// A file that is not there (a dev server before the first copy) just has no size.
+let size: { width: number; height: number } | null = null;
+try {
+  size = pngSize(readFileSync(join(process.cwd(), 'public', src.slice(BASE.length))));
+} catch {}
 ---
 
 <a class="m-graph-link" href={src}>
-  <img src={src} alt={alt} loading="lazy" />
+  <img
+    src={src}
+    alt={alt}
+    width={size?.width}
+    height={size?.height}
+    loading={priority ? undefined : 'lazy'}
+    fetchpriority={priority ? 'high' : undefined}
+  />
 </a>
 <p class="m-graph-hint">Tap the picture to open it at full size.</p>

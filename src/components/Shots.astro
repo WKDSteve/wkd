@@ -3,26 +3,30 @@ import { BASE, type Skin } from '../lib/site';
 import type { Shot } from '../loaders/repos';
 
 // Screenshots from public/shots/<slug>/ (see the loader's readShots): the
-// features a recording cannot show. Lazy, sized up front, one figure each.
+// features a recording cannot show. Lazy, sized up front, one figure each; with
+// `priority` the first one is the exception (the page's LCP).
 interface Props {
   slug: string;
   /** name of the plugin or app, for the alt text */
   name: string;
   shots: Shot[];
   skin: Skin;
+  /** the first picture is the LCP of the page: fetched early, never lazy */
+  priority?: boolean;
 }
-const { slug, name, shots, skin } = Astro.props;
+const { slug, name, shots, skin, priority = false } = Astro.props;
 ---
 
 <div class:list={['shots', skin === 'tui' ? 'tui-shots' : 'm-shots']}>
   {
-    shots.map((s) => (
+    shots.map((s, i) => (
       <figure>
         <img
           src={`${BASE}shots/${slug}/${encodeURIComponent(s.file)}`}
           width={s.width}
           height={s.height}
-          loading="lazy"
+          loading={priority && i === 0 ? undefined : 'lazy'}
+          fetchpriority={priority && i === 0 ? 'high' : undefined}
           decoding="async"
           alt={`${name}: ${s.caption}`}
         />

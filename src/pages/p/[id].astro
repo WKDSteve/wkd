@@ -83,7 +83,7 @@ const nameOf = (slug: string): string => allPlugins.find((p) => p.id === slug)?.
       plugin.id === 'ui' ? (
         d.shots.length > 0 && <ShotComposite slug={plugin.id} shots={d.shots} />
       ) : d.shots.length > 0 ? (
-        <Shots slug={plugin.id} name={d.name} shots={d.shots} skin="modern" />
+        <Shots slug={plugin.id} name={d.name} shots={d.shots} skin="modern" priority={d.demos.length === 0} />
       ) : null
     }
 
