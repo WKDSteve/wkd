@@ -25,6 +25,7 @@ const canonical = new URL(href(to), Astro.site);
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Moved — wkd</title>
     <meta name="robots" content="noindex" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <meta http-equiv="refresh" content={`0; url=${target}`} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href={`${BASE}favicon.svg`} type="image/svg+xml" />

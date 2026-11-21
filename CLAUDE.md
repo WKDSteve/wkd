@@ -29,3 +29,14 @@ content is read from the sibling repositories at build time. Nothing about a plu
   the guide; the `[ ]` brackets of the labels switch with `opacity`. Check each other finding against `keepWhen`/`dropWhen`.
 - `.claude/settings.json` turns the tool's telemetry off and allows only `npx -y modern-web-guidance@latest *`.
 - Rules: the maintainer's ruleset for the web platform (private, so not named or cited here by id).
+
+## Security headers
+
+GitHub Pages sends no custom headers, so the policy lives in `<meta>` tags, which Astro writes and `src/integrations/head.ts`
+moves to the top of every `<head>` (right after `<meta charset>`, then the referrer policy). Known and accepted: the
+Mozilla HTTP Observatory fails `X-Content-Type-Options` and `X-Frame-Options` (note B, 75 points, 21.11.2026), because
+both exist only as HTTP headers (`frame-ancestors` does not work in a `<meta>` either). The CSP carries
+`require-trusted-types-for 'script'`; the `default` policy in `src/scripts/trusted-types.ts` lets only same-origin
+script URLs through (the Pagefind worker, the audio worklet), and the search excerpt goes through its own escaping
+policy (`src/scripts/search.ts`). A new script sink that takes a string (`innerHTML`, `eval`, a foreign `Worker` URL) is
+refused by the browser; `test:browser` fails on it.

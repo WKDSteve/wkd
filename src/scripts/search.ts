@@ -1,5 +1,6 @@
 import { AREA_KINDS, type EntryArea, hitLabel, parseSearch } from '../lib/areas';
 import { BASE, href, pageOf, readPref, SKIN_KEY, SKINS, type Skin } from '../lib/site';
+import { trustedTypes } from '../lib/trusted-types';
 
 // Static full-text search over the pages of the plugins, the apps and the
 // play area. The index is produced by
@@ -99,10 +100,18 @@ function init(form: HTMLFormElement): void {
   // Pagefind's excerpt is escaped text plus <mark> tags. Rebuild it as DOM
   // nodes instead of trusting it as HTML: an inert DOMParser document is
   // walked and only text and <mark> survive.
+  // With Trusted Types enforced (the CSP of the site), the parser takes only what a policy made. This one
+  // escapes every `<` that does not open or close a <mark>, so what it makes cannot contain anything else.
+  const excerptPolicy = trustedTypes()?.createPolicy('wkd-excerpt', {
+    createHTML: (input: string) => input.replace(/<(?!\/?mark>)/g, '&lt;'),
+  });
+  const markOnly = (html: string): string =>
+    excerptPolicy ? excerptPolicy.createHTML(html) : html;
+
   const excerptNode = (html: string): HTMLSpanElement => {
     const span = document.createElement('span');
     span.className = 's-excerpt';
-    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const doc = new DOMParser().parseFromString(markOnly(html), 'text/html');
     for (const node of doc.body.childNodes) {
       if (node instanceof Element && node.tagName === 'MARK') {
         const mark = document.createElement('mark');

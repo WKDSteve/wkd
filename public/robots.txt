@@ -1,0 +1,4 @@
+# Crawlers read robots.txt only at the root of a host (https://wkdsteve.github.io/robots.txt), which belongs to a
+# repository of its own; this copy is for the day the site has a host of its own.
+User-agent: *
+Allow: /
