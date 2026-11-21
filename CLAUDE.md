@@ -19,7 +19,7 @@ content is read from the sibling repositories at build time. Nothing about a plu
 ## Web platform
 
 - Browser Support: Baseline Widely available (`.mwgrc`, `browserslist` in `package.json`). Newer features only behind
-  feature detection with a fallback; polyfills only via dynamic `import()`. The site must also work without script.
+  feature detection with a fallback; polyfills where browsers still in use need them (rather one too many), run only after the check: dynamic `import()`, or bundled in a `file://` page (rules-vault `BASE-02`). The site must also work without script.
 - Before writing or changing HTML, CSS or client-side JS, use the `modern-web-guidance` skill (`search` → `retrieve` →
   verify). Not for build config, CI or the content loaders.
 - `legacy-scan`: `DISABLE_TELEMETRY=1 pnpm exec modern-web-guidance legacy-scan src --json` (exact devDependency); CI
