@@ -16,6 +16,11 @@ content is read from the sibling repositories at build time. Nothing about a plu
 `dist/`. The test sheets in `TESTS/sheets` run with testing.nvim (`.testing.lua`, engine `browser`). CI:
 `.github/workflows/deploy.yml`.
 
+`pnpm lhci` (after `pnpm build`, about 5 minutes): Lighthouse CI over `dist/`, one page per kind in both skins, three runs,
+median; budgets in `lighthouserc.cjs` (LCP <= 2.5 s and CLS <= 0.1 are errors, TBT <= 300 ms a warning); reports go to
+`.lighthouseci/` (no service, no token). Chrome: `$CHROME_PATH` or the one `test/browser/chrome.mjs` finds. In CI the step is
+informative and uploads the reports as an artifact. Without the plugin checkouts only the pages the build has are measured.
+
 ## Web platform
 
 - Browser Support: Baseline Widely available (`.mwgrc`, `browserslist` in `package.json`). Newer features only behind
