@@ -30,6 +30,9 @@ importers:
       '@webgpu/types':
         specifier: ^0.1.74
         version: 0.1.74
+      modern-web-guidance:
+        specifier: 1.0.0
+        version: 1.0.0
       pagefind:
         specifier: ^1.5.2
         version: 1.5.2
@@ -1294,6 +1297,11 @@ packages:
 
   micromark-util-types@2.0.2:
     resolution: {integrity: sha512-Yw0ECSpJoViF1qTU4DC6NwtC4aWGt1EkzaQB8KPPyCRR8z9TWeV0HbEFGTO+ZY1wB22zmxnJqhPyTpOVCpeHTA==}
+
+  modern-web-guidance@1.0.0:
+    resolution: {integrity: sha512-vafIZwC8AS6QjM2yyoflZbnc7n3/TVOMLbEMRdPTwcFy0f9/Tq8s5rJQ8UIqRt2KPl9ixravyaMR4nTGuUrcmg==}
+    engines: {node: '>=22.0.0', vscode: ^1.90.0}
+    hasBin: true
 
   mrmime@2.0.1:
     resolution: {integrity: sha512-Y3wQdFg2Va6etvQ5I82yUhGdsKrcYox6p7FfL1LbK2J4V01F9TGlepTIhnK24t7koZibmg82KGglhA1XK5IsLQ==}
@@ -2984,6 +2992,8 @@ snapshots:
   micromark-util-symbol@2.0.1: {}
 
   micromark-util-types@2.0.2: {}
+
+  modern-web-guidance@1.0.0: {}
 
   mrmime@2.0.1: {}
 
