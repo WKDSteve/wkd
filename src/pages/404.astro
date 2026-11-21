@@ -1,0 +1,31 @@
+---
+import { href } from '../lib/site';
+import Shell from '../skins/modern/Shell.astro';
+
+// The page GitHub Pages answers with (status 404) for any address under /wkd/ that has no file: served as
+// 404.html at the root of the project site. It says what happened and leads back to content; the header around it
+// has the search and the areas. Not indexed, no canonical address (see Base.astro). The TUI skin has its twin in
+// src/pages/tui/404.astro; GitHub Pages serves only this one, and prefs.ts rewrites the links to the skin of the visitor.
+---
+
+<Shell
+  page="404"
+  error
+  title="Page not found — wkd"
+  description="This address has no page on the site of the workshop."
+>
+  <section class="m-hero">
+    <p class="m-kicker"><b>404</b> · there is no page at this address</p>
+    <h1 class="display">Page not found</h1>
+    <p class="m-lede">
+      The address may have a typo, or the page left. The start page has the way into the plugins
+      and the apps; the search above finds a page by what is on it.
+    </p>
+    <ul class="m-list">
+      <li><a href={href('')} data-nav="">Start page</a></li>
+      <li><a href={href('nvim')} data-nav="nvim">Neovim plugins</a></li>
+      <li><a href={href('apps')} data-nav="apps">Apps</a></li>
+      <li><a href={href('404', 'tui')}>The same page in the TUI skin</a></li>
+    </ul>
+  </section>
+</Shell>

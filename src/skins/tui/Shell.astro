@@ -14,9 +14,12 @@ interface Props {
   description: string;
   mode?: string;
   cmd?: string;
+  /** an error page: not indexed, no canonical address */
+  error?: boolean;
 }
-const { page, title, description, mode = 'NORMAL', cmd = '' } = Astro.props;
-const modernHref = href(page, 'modern');
+const { page, title, description, mode = 'NORMAL', cmd = '', error = false } = Astro.props;
+// The modern 404 is the file 404.html (the one GitHub Pages answers with), not a folder.
+const modernHref = error ? `${href('', 'modern')}404.html` : href(page, 'modern');
 
 // Every entry is in the sidebar (the command line completes from it); the
 // plugin categories come first, the categories of the apps after them.
@@ -37,7 +40,7 @@ const current = page.match(/^(?:p|apps)\/([^/]+)$/)?.[1] ?? null;
 const file = page ? `~/wkd/${page}` : '~/wkd';
 ---
 
-<Base skin="tui" page={page} title={title} description={description}>
+<Base skin="tui" page={page} title={title} description={description} noindex={error}>
   <a class="skip-link" href="#main">Skip to content</a>
   <div class="tui">
     <header class="tui-status" aria-label="Statusline">

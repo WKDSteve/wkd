@@ -562,6 +562,60 @@ describe('the built site in a browser', { skip }, () => {
     assert.doesNotMatch(text, /^Sitemap:/im);
   });
 
+  test('a missing address gets the 404 page, in the modern and in the TUI skin, with a way back', async () => {
+    const res = await fetch(`${B}/there/is/no/such/page/`);
+    assert.equal(res.status, 404);
+    for (const [url, twin, h1] of [
+      [`${B}/404.html`, `${B}/tui/404/`, 'Page not found'],
+      [`${B}/tui/404/`, `${B}/404.html`, 'E404: page not found'],
+    ]) {
+      const html = await (await fetch(url)).text();
+      assert.ok(html.includes(h1), `${url} says what happened`);
+      assert.match(html, /<meta name="robots" content="noindex">/, `${url} is not indexed`);
+      assert.doesNotMatch(html, /rel="canonical"/, `${url} has no canonical address`);
+      assert.ok(html.includes(`href="${new URL(twin).pathname}"`), `${url} links to its twin`);
+      assert.match(html, /data-nav="nvim"/, `${url} leads back to content`);
+    }
+    // The page that answers a missing address is the modern one.
+    assert.ok((await res.text()).includes('Page not found'));
+  });
+
+  test('every page names a favicon.ico besides the svg, and the file is an icon', async () => {
+    await p.goto(`${B}/`);
+    assert.deepEqual(
+      JSON.parse(
+        await p.eval(`JSON.stringify([...document.querySelectorAll('link[rel="icon"]')]
+        .map((l) => l.getAttribute('href').split('/').pop()))`),
+      ),
+      ['favicon.ico', 'favicon.svg'],
+    );
+    const ico = new Uint8Array(await (await fetch(`${B}/favicon.ico`)).arrayBuffer());
+    assert.deepEqual([...ico.slice(0, 4)], [0, 0, 1, 0], 'the signature of an icon file');
+  });
+
+  test('every page has one h1 and no heading that skips a level, a skip link to the main content, a language and a theme colour', async () => {
+    const pages = live
+      ? ['/', '/tui/', '/play/', '/tui/play/', '/nvim/', '/apps/', '/activity/', '/tui/activity/']
+      : indexPages(dist).map((f) => `/${f}`);
+    const bad = [];
+    for (const page of pages) {
+      const html = await (await fetch(`${B}${page}`)).text();
+      if (/<meta http-equiv="refresh"/.test(html)) continue; // an address that moved: no content of its own
+      const levels = [...html.matchAll(/<h([1-6])[\s>]/g)].map((m) => Number(m[1]));
+      const jumps = levels.filter((l, i) => l > (levels[i - 1] ?? 0) + 1);
+      const skip =
+        /<a class="skip-link" href="#main">/.test(html) && /<main[^>]* id="main"/.test(html);
+      const lang = /<html lang="[a-z-]+"/.test(html);
+      const theme = /<meta name="theme-color" content="#/.test(html);
+      if (levels.filter((l) => l === 1).length !== 1 || jumps.length || !skip || !lang || !theme) {
+        bad.push(
+          `${page}: h1=${levels.filter((l) => l === 1).length} jumps=${jumps} skip=${skip} lang=${lang} theme=${theme}`,
+        );
+      }
+    }
+    assert.deepEqual(bad, []);
+  });
+
   test('under Trusted Types the page works: search and the fight load, and no string reaches a script or HTML sink', async () => {
     await p.send('Page.addScriptToEvaluateOnNewDocument', {
       source: `window.__csp = [];

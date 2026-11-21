@@ -46,6 +46,10 @@ build `src/integrations/routes.ts` checks that every plugin page, every area and
 address is in the output, in both skins, and fails the build otherwise, so a deploy cannot
 break a link that is already out in the world.
 
+**A missing address** gets `404.html` (GitHub Pages answers with it, under status 404; `src/pages/404.astro`, its TUI twin is
+`/wkd/tui/404/`). It is not indexed and has no canonical address. `public/favicon.ico` is made from `public/favicon.svg`
+by `scripts/favicon-ico.mjs`.
+
 ## How content gets in
 
 ```

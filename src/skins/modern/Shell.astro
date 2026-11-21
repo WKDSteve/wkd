@@ -10,8 +10,10 @@ interface Props {
   page: string;
   title: string;
   description: string;
+  /** an error page: not indexed, no canonical address */
+  error?: boolean;
 }
-const { page, title, description } = Astro.props;
+const { page, title, description, error = false } = Astro.props;
 const tuiHref = href(page, 'tui');
 // The areas that have a page file; the brand is the link to the start page.
 // Only the keys are used: nothing is imported, a planned area without a page
@@ -21,7 +23,7 @@ const areas = builtAreas(Object.keys(import.meta.glob('../../pages/**/*.astro'))
 );
 ---
 
-<Base skin="modern" page={page} title={title} description={description}>
+<Base skin="modern" page={page} title={title} description={description} noindex={error}>
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="m-header">
     <a class="m-brand" href={href('')} data-nav="" data-astro-prefetch>wkd</a>

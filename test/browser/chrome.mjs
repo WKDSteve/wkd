@@ -29,6 +29,7 @@ const TYPES = {
   '.css': 'text/css',
   '.json': 'application/json',
   '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
   '.png': 'image/png',
   '.webp': 'image/webp',
   '.wasm': 'application/wasm',
@@ -39,7 +40,7 @@ const TYPES = {
 
 /**
  * Serves a built site the way GitHub Pages does: under its base path, a
- * folder answers with its index.html, nothing else is rewritten.
+ * folder answers with its index.html, a missing address with 404.html (status 404), nothing else is rewritten.
  * @returns {Promise<{ url: string, close: () => Promise<void> }>}
  */
 export function serve(dist, base = '/wkd') {
@@ -57,7 +58,13 @@ export function serve(dist, base = '/wkd') {
     }
     if (existsSync(file) && statSync(file).isDirectory()) file = join(file, 'index.html');
     if (!existsSync(file)) {
-      res.writeHead(404).end();
+      // GitHub Pages answers a missing address with the 404.html of the site, under status 404.
+      const page = join(root, '404.html');
+      if (existsSync(page)) {
+        res.writeHead(404, { 'content-type': TYPES['.html'] }).end(readFileSync(page));
+      } else {
+        res.writeHead(404).end();
+      }
       return;
     }
     res.writeHead(200, { 'content-type': TYPES[extname(file)] ?? 'application/octet-stream' });
