@@ -628,6 +628,8 @@ describe('the built site in a browser', { skip }, () => {
     await startMatch();
     reported.push(...JSON.parse(await p.eval(`JSON.stringify(window.__csp)`)));
     // The browser enforces the directive: a string in an HTML sink and a foreign script URL are refused.
+    // The refusals are logged by the browser; they are this test's own probes, not a report about the page.
+    const probed = p.logs.length;
     assert.equal(
       await p.eval(
         `(() => { try { document.body.innerHTML = 'x'; return 'allowed'; } catch (e) { return e.name; } })()`,
@@ -640,6 +642,7 @@ describe('the built site in a browser', { skip }, () => {
       ),
       'TypeError',
     );
+    p.logs.splice(probed);
     assert.deepEqual(reported, [], 'nothing the page itself did was reported');
   });
 
