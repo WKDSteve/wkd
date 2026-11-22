@@ -45,3 +45,4 @@ both exist only as HTTP headers (`frame-ancestors` does not work in a `<meta>` e
 script URLs through (the Pagefind worker, the audio worklet), and the search excerpt goes through its own escaping
 policy (`src/scripts/search.ts`). A new script sink that takes a string (`innerHTML`, `eval`, a foreign `Worker` URL) is
 refused by the browser; `test:browser` fails on it.
+- Git: in a cloud session (`CLAUDE_CODE_REMOTE` is set) never push to `main`, only to your own `claude/…` branch; a local session lands it by rebase and the device key re-signs it (`GIT-09`). "Push to main" (`GIT-01`) applies locally only.
