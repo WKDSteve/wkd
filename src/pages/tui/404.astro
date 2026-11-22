@@ -1,0 +1,37 @@
+---
+import { href } from '../../lib/site';
+import Shell from '../../skins/tui/Shell.astro';
+
+// The TUI skin's twin of src/pages/404.astro: an error line, where the Neovim window would say E-something.
+// GitHub Pages answers with the modern 404.html; this one is the address of the TUI skin for the same page.
+---
+
+<Shell
+  page="404"
+  error
+  title="Page not found — wkd"
+  description="This address has no page on the site of the workshop."
+  cmd="404"
+>
+  <h1 class="tui-h1">E404: page not found</h1>
+  <p class="tui-p tui-dim">
+    There is no page at this address. The address may have a typo, or the page left.
+  </p>
+  <div class="tui-table">
+    <a href={href('', 'tui')} data-nav="">
+      <span class="idx">01</span>
+      <span class="name">~/wkd/</span>
+      <span class="cat">the start page</span>
+    </a>
+    <a href={href('nvim', 'tui')} data-nav="nvim">
+      <span class="idx">02</span>
+      <span class="name">nvim/</span>
+      <span class="cat">the plugins</span>
+    </a>
+    <a href={href('apps', 'tui')} data-nav="apps">
+      <span class="idx">03</span>
+      <span class="name">apps/</span>
+      <span class="cat">the apps</span>
+    </a>
+  </div>
+</Shell>

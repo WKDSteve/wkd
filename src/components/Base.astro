@@ -11,8 +11,10 @@ interface Props {
   page: string;
   title: string;
   description: string;
+  /** an error page: no canonical address, and no index entry */
+  noindex?: boolean;
 }
-const { skin, page, title, description } = Astro.props;
+const { skin, page, title, description, noindex = false } = Astro.props;
 const other = otherSkin(skin);
 const canonical = new URL(href(page), Astro.site);
 ---
@@ -25,7 +27,8 @@ const canonical = new URL(href(page), Astro.site);
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
-    <link rel="canonical" href={canonical} />
+    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
+    <link rel="icon" href={`${BASE}favicon.ico`} sizes="32x32" />
     <link rel="icon" href={`${BASE}favicon.svg`} type="image/svg+xml" />
     <meta name="color-scheme" content={skin === 'tui' ? 'dark' : 'light dark'} />
     {

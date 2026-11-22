@@ -28,6 +28,7 @@ const canonical = new URL(href(to), Astro.site);
     <meta name="referrer" content="strict-origin-when-cross-origin" />
     <meta http-equiv="refresh" content={`0; url=${target}`} />
     <link rel="canonical" href={canonical} />
+    <link rel="icon" href={`${BASE}favicon.ico`} sizes="32x32" />
     <link rel="icon" href={`${BASE}favicon.svg`} type="image/svg+xml" />
   </head>
   <body>
