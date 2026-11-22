@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { defineConfig, fontProviders } from 'astro/config';
+import { headIntegration } from './src/integrations/head';
 import { pagefindIntegration } from './src/integrations/pagefind';
 import { routesIntegration } from './src/integrations/routes';
 import { BOOT } from './src/lib/boot';
@@ -32,7 +33,7 @@ export default defineConfig({
   // No markdown is rendered yet; Shiki's inline styles would break the hashed CSP.
   markdown: { syntaxHighlight: false },
   // routesIntegration fails a build that misses an address linked from outside.
-  integrations: [pagefindIntegration(), routesIntegration()],
+  integrations: [pagefindIntegration(), headIntegration(), routesIntegration()],
   security: {
     // Static output: Astro emits a hashed <meta http-equiv> CSP. GitHub Pages
     // cannot send headers, so this is the only CSP we can ship there.
@@ -49,6 +50,7 @@ export default defineConfig({
         "base-uri 'none'",
         "form-action 'none'",
         'upgrade-insecure-requests',
+        "require-trusted-types-for 'script'",
       ],
       scriptDirective: {
         // Pagefind runs a WebAssembly search core; the bundle itself is same-origin.

@@ -7,7 +7,8 @@
 // Needs a Chrome on this machine (or $CHROME); without one every check is skipped,
 // unless WKD_BROWSER_REQUIRED is set (the deploy workflow): then that is a failure.
 import assert from 'node:assert/strict';
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { after, before, describe, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { chromePath, launch, serve } from './chrome.mjs';
@@ -23,6 +24,15 @@ let p;
 /** @type {{ url: string, close: () => Promise<void> } | undefined} */
 let server;
 let B = live ?? '';
+
+/** Every page of the build as its address below the base ("tui/play/"), from its index.html files. */
+function indexPages(dir, rel = '') {
+  return readdirSync(join(dir, rel), { withFileTypes: true }).flatMap((e) => {
+    const sub = `${rel}${e.name}`;
+    if (e.isDirectory()) return indexPages(dir, `${sub}/`);
+    return e.name === 'index.html' ? [rel] : [];
+  });
+}
 
 const $ = (sel) => `document.querySelector(${JSON.stringify(sel)})`;
 const shown = (sel) => `(() => { const e = ${$(sel)}; return !!e && !e.hidden; })()`;
@@ -518,6 +528,65 @@ describe('the built site in a browser', { skip }, () => {
     await p.key(' ', { code: 'Space', vk: 32, text: ' ' });
     await p.eval(`${box}.blur()`);
     assert.deepEqual(JSON.parse(await state()), { on: false, play: 'running', ring: 'none' });
+  });
+
+  test('every page opens with the charset, then the CSP, then the referrer policy, before any style or preload', async () => {
+    // Every page type of the build (both skins, the moved addresses included); the live site: the fixed pages.
+    const pages = live
+      ? ['/', '/tui/', '/play/', '/tui/play/', '/nvim/', '/apps/', '/activity/', '/stack/']
+      : indexPages(dist).map((f) => `/${f}`);
+    assert.ok(pages.length >= 8, 'the build has its pages');
+    const bad = [];
+    for (const page of pages) {
+      const html = await (await fetch(`${B}${page}`)).text();
+      const head = html.slice(html.indexOf('<head>') + 6, html.indexOf('</head>'));
+      const first = [...head.matchAll(/<(meta|link|style|script|title)\b[^>]*>/gi)]
+        .slice(0, 3)
+        .map((m) => m[0].toLowerCase().replace(/ content=.*$/, '>'));
+      const ok =
+        /^<meta charset=/.test(first[0] ?? '') &&
+        /^<meta http-equiv="content-security-policy">/.test(first[1] ?? '') &&
+        /^<meta name="referrer">/.test(first[2] ?? '');
+      const csp = /<meta http-equiv="content-security-policy" content="([^"]*)"/i.exec(head)?.[1];
+      if (!ok || !csp?.includes("require-trusted-types-for 'script'")) bad.push(page);
+    }
+    assert.deepEqual(bad, []);
+  });
+
+  test('robots.txt allows every crawler and names no sitemap the site does not have', async () => {
+    const res = await fetch(`${B}/robots.txt`);
+    assert.equal(res.status, 200);
+    const text = await res.text();
+    assert.match(text, /^User-agent: \*$/m);
+    assert.match(text, /^Allow: \/$/m);
+    assert.doesNotMatch(text, /^Sitemap:/im);
+  });
+
+  test('under Trusted Types the page works: search and the fight load, and no string reaches a script or HTML sink', async () => {
+    await p.send('Page.addScriptToEvaluateOnNewDocument', {
+      source: `window.__csp = [];
+        document.addEventListener('securitypolicyviolation', (e) => window.__csp.push(e.violatedDirective + ' ' + e.blockedURI));`,
+    });
+    await p.goto(`${B}/`);
+    const result = await search('workshop');
+    assert.ok(result.hits.length > 0, 'the search answers, with its worker and its excerpts');
+    const reported = JSON.parse(await p.eval(`JSON.stringify(window.__csp)`));
+    await startMatch();
+    reported.push(...JSON.parse(await p.eval(`JSON.stringify(window.__csp)`)));
+    // The browser enforces the directive: a string in an HTML sink and a foreign script URL are refused.
+    assert.equal(
+      await p.eval(
+        `(() => { try { document.body.innerHTML = 'x'; return 'allowed'; } catch (e) { return e.name; } })()`,
+      ),
+      'TypeError',
+    );
+    assert.equal(
+      await p.eval(
+        `(() => { try { new Worker('https://example.com/w.js'); return 'allowed'; } catch (e) { return e.name; } })()`,
+      ),
+      'TypeError',
+    );
+    assert.deepEqual(reported, [], 'nothing the page itself did was reported');
   });
 
   test('nothing was reported to the console: no error, no CSP violation', () => {
