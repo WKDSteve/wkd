@@ -113,6 +113,24 @@ jobs:
         env:
           WKD_BROWSER_REQUIRED: '1'
 
+      # Core Web Vitals of one page per kind in both skins, 3 runs each, median (lighthouserc.cjs): LCP <= 2.5 s
+      # and CLS <= 0.1 are errors, TBT <= 300 ms a warning. It reads dist/ like the step above and runs in the
+      # runner's Chrome. Informative until a first run on the full content has confirmed the budgets (the values
+      # measured on a build without the plugin checkouts are in the commit message): then the line below goes.
+      - name: Lighthouse CI
+        id: lhci
+        continue-on-error: true
+        run: pnpm lhci
+
+      - name: Lighthouse reports
+        if: always() && steps.lhci.outcome != 'skipped'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci/
+          retention-days: 14
+          if-no-files-found: ignore
+
   deploy:
     needs: build
     runs-on: ubuntu-latest

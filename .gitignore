@@ -1,5 +1,8 @@
 node_modules/
 dist/
+# Lighthouse CI (scripts/lhci.mjs): the folder it serves, and its reports
+.lhci-site/
+.lighthouseci/
 .astro/
 .env
 .env.*
