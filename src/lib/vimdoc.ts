@@ -141,8 +141,13 @@ export function renderVimdoc(text: string, o: RenderOptions): Rendered {
     code = null;
     codeLang = '';
   };
+  // The page has its own h1 above the rendered help. A sub-heading before any section heading would skip a
+  // level (h1 to h3), so it is written as an h2 until a section has been written; its class stays the one of a sub-heading.
+  let lastLevel = 1;
   const heading = (level: 2 | 3, raw: string): void => {
     flushPara();
+    const tag = level === 3 && lastLevel < 2 ? 2 : level;
+    lastLevel = tag;
     const tags = [...raw.matchAll(TAG_RE)].map((m) => m[1] ?? '');
     const textPart = raw.replace(TAG_RE, ' ').replace(/~\s*$/, '').replace(/\s+/g, ' ').trim();
     const id = tags[0] ?? null;
@@ -153,7 +158,7 @@ export function renderVimdoc(text: string, o: RenderOptions): Rendered {
       )
       .join(' ');
     out.push(
-      `<h${level} class="vd-h${level}">${esc(textPart)}${anchors ? ` <span class="vd-tags">${anchors}</span>` : ''}</h${level}>`,
+      `<h${tag} class="vd-h${level}">${esc(textPart)}${anchors ? ` <span class="vd-tags">${anchors}</span>` : ''}</h${tag}>`,
     );
   };
 
