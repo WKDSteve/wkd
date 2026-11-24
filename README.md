@@ -77,6 +77,11 @@ An entry of kind `app` is read for a few things more, located by convention like
   .git        → newest version tag vX.Y.Z
 ```
 
+**Graph pictures.** The pictures of the connections are PNGs (`public/graphs/`, and one per repository copied by the
+loader). `scripts/graph-images.mjs` (part of `pnpm build`, and run by the loader for a copied one) writes AVIF and WebP
+next to each, in the full width and one of 960 px where that saves a quarter or more; `GraphPicture.astro` offers them
+in a `<picture>` and keeps the PNG as the fallback and as the link to the full size. The variants are not committed.
+
 A README written in German (pult, takt) carries one paragraph `**English.** …`; where there is
 one, it is the pitch on this site, for every kind, and the status paragraph of that README is
 not shown (it is in German, this site is English).
