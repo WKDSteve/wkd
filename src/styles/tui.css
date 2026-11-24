@@ -18,6 +18,7 @@
     --red: #f7768e;
     --magenta: #bb9af7;
 
+    -webkit-tap-highlight-color: color-mix(in srgb, var(--yellow) 35%, transparent);
     font-family: var(--font-mono), ui-monospace, monospace;
     font-size: clamp(0.85rem, 0.8rem + 0.25vw, 1rem);
     line-height: 1.5;
@@ -35,7 +36,8 @@
        auto-placement would shift every later child up a row whenever it's
        absent instead of just leaving its own track empty. */
     grid-template-rows: auto auto 1fr auto;
-    min-height: 100dvh;
+    /* The body keeps the safe-area insets as padding (tokens.css): the grid takes what is left. */
+    min-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
   }
 
   /* ---- statusline ------------------------------------------------------- */

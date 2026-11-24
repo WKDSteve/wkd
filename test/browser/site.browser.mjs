@@ -455,6 +455,58 @@ describe('the built site in a browser', { skip }, () => {
     }
   });
 
+  test('the page keeps clear of a notch, and taps act at once', async () => {
+    for (const page of ['/', '/tui/']) {
+      await p.goto(`${B}${page}`);
+      assert.match(await p.eval(`${$('meta[name=viewport]')}.content`), /viewport-fit=cover/);
+      assert.equal(
+        await p.eval(`getComputedStyle(${$('a[href]')}).touchAction`),
+        'manipulation',
+        page,
+      );
+      assert.match(
+        await p.eval(
+          `getComputedStyle(${$('a[href]')}).getPropertyValue('-webkit-tap-highlight-color')`,
+        ),
+        /^color\(srgb [\d. ]+ \/ 0\.35\)$/,
+        `${page}: the tap colour is the skin's accent at 35%`,
+      );
+      // A notch: Chrome can fake the insets of a device (where it knows the command).
+      const faked = await p.send('Emulation.setSafeAreaInsetsOverride', {
+        insets: { top: 40, left: 20, right: 20, bottom: 30 },
+      });
+      assert.equal(faked.error, undefined, 'this Chrome fakes insets');
+      {
+        const pad = JSON.parse(
+          await p.eval(
+            `JSON.stringify((({ paddingTop, paddingRight, paddingBottom, paddingLeft }) => [paddingTop, paddingRight, paddingBottom, paddingLeft])(getComputedStyle(document.body)))`,
+          ),
+        );
+        assert.deepEqual(
+          pad,
+          ['40px', '20px', '30px', '20px'],
+          `${page} body padding follows the insets`,
+        );
+        assert.equal(
+          await p.eval(
+            `document.documentElement.scrollWidth <= document.documentElement.clientWidth`,
+          ),
+          true,
+          'no sideways scroll with insets',
+        );
+        await p.send('Emulation.setSafeAreaInsetsOverride', {
+          insets: { top: 0, left: 0, right: 0, bottom: 0 },
+        });
+      }
+    }
+    // The match pads keep their own touch-action (none: the finger is the controller).
+    await startMatch();
+    assert.equal(
+      await p.eval(`getComputedStyle(${$('.fight-touch-move button')}).touchAction`),
+      'none',
+    );
+  });
+
   test('a bad pairing code is flagged on its own field, not only in the status line', async () => {
     await p.goto(`${B}/play/`);
     await p.until(`!${$('[data-fight-online]')}.hidden`, 'the online block (WebRTC)');

@@ -3,6 +3,8 @@
 @layer skin {
   :root[data-skin="modern"] {
     color-scheme: light dark;
+    /* The flash of a tap on a link or button, in the accent instead of the browser's grey. */
+    -webkit-tap-highlight-color: color-mix(in srgb, var(--acid) 35%, transparent);
     --ink: light-dark(#0b0b0c, #f1efe8);
     --paper: light-dark(#f1efe8, #0b0b0c);
     --muted: light-dark(#5f5e5a, #9c9a93);
@@ -1886,7 +1888,11 @@
     justify-content: center;
     gap: var(--s-2);
     background: var(--ink);
-    padding: var(--s-3);
+    /* Fullscreen leaves the body, so the safe-area insets are added here. */
+    padding: max(var(--s-3), env(safe-area-inset-top, 0px))
+      max(var(--s-3), env(safe-area-inset-right, 0px))
+      max(var(--s-3), env(safe-area-inset-bottom, 0px))
+      max(var(--s-3), env(safe-area-inset-left, 0px));
     box-sizing: border-box;
     max-width: none;
   }
