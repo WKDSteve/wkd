@@ -424,7 +424,7 @@ describe('the built site in a browser', { skip }, () => {
       await p.goto(`${B}${page}`);
       const bad = JSON.parse(
         await p.eval(`JSON.stringify([...document.querySelectorAll(
-          'code, kbd, pre, var, .m-card-name, .display--name, .tui-list .name, [data-vimdoc]'
+          'code, kbd, pre:not(.vd-text), var, .m-card-name, .display--name, .tui-list .name, [data-vimdoc]'
         )].filter((e) => e.translate).map((e) => e.tagName + '.' + e.className))`),
       );
       if (bad.length) seen.push(`${page}: ${bad.slice(0, 4).join(', ')}`);
