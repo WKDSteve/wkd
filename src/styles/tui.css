@@ -854,4 +854,26 @@
     color: var(--fg-dim);
     margin-top: 0.25lh;
   }
+  /* ---- targets of their own, after the rules that style the same links ---- */
+  /* The section links above a help page are targets of their own, not part of a sentence. */
+  .vd-toc a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--target-size);
+  }
+  /* The value of a row that is a link (repository, :help) is a target of its own. */
+  .tui-kv dd > a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--target-size);
+  }
+  .tui-kv dt {
+    align-self: center;
+  }
+  /* A line that is only a link (the docs list) is a target of its own. */
+  .tui-list li > a:only-child {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--target-size);
+  }
 }

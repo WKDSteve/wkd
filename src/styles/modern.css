@@ -1109,6 +1109,12 @@
   .m-list li:last-child {
     border-bottom: 0;
   }
+  /* A line that is only a link (the documentation list) is a target of its own, not part of a sentence. */
+  .m-list li > a:only-child {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--target-size);
+  }
   .m-list a:hover {
     background: var(--acid);
     color: var(--acid-ink);
@@ -1222,6 +1228,12 @@
     font-family: var(--font-mono), monospace;
     font-size: 0.8rem;
     margin-bottom: var(--s-4);
+  }
+  /* The section links above a help page are targets of their own, not part of a sentence. */
+  .vd-toc a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--target-size);
   }
   .vd-files a[aria-current],
   .vd-toc a:hover {

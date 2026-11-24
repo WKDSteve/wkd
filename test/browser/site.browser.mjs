@@ -521,9 +521,14 @@ describe('the built site in a browser', { skip }, () => {
       if (e.matches('.skip-link, .visually-hidden, [tabindex="-1"]')) return [];
       if (e.matches('input[type=radio], input[type=checkbox]') && e.closest('label, .filter')) return [];
       const host = e.parentElement;
+      // The body of a help page (.vd-body) carries tags, references and addresses as links inside its text and headings.
+      if (e.matches('a') && e.closest('.vd-body')) return [];
       if (e.matches('a') && host?.matches('p, li, dd, figcaption') && host.textContent.trim().length > e.textContent.trim().length) return [];
       return [[e.tagName.toLowerCase() + '.' + String(e.className).split(' ')[0] + ' ' + e.textContent.trim().slice(0, 20), Math.round(r.width), Math.round(r.height)]];
     }))`;
+    // Besides the fixed pages, pages of every kind that real content brings: a plugin, an app, a help page, in both
+    // skins (the first and the last of each kind, so a long name and a short one are both measured). The kinds exist
+    // only where the checkouts do (PLUGINS_DIR; always in the deploy build): there the guard below insists on them.
     const pages = [
       '/',
       '/tui/',
@@ -535,6 +540,23 @@ describe('the built site in a browser', { skip }, () => {
       '/tui/nvim/',
       '/tui/activity/',
     ];
+    if (!live) {
+      const addresses = indexPages(dist);
+      const KINDS = {
+        plugin: /^(tui\/)?p\/[^/]+\/$/,
+        app: /^(tui\/)?apps\/[^/]+\/$/,
+        help: /^(tui\/)?p\/[^/]+\/help\/(.+\/)?$/,
+      };
+      const missing = [];
+      for (const [kind, re] of Object.entries(KINDS)) {
+        const of = addresses.filter((a) => re.test(a)).sort();
+        if (of.length === 0) missing.push(kind);
+        for (const a of new Set([of[0], of.at(-1)])) if (a !== undefined) pages.push(`/${a}`);
+      }
+      // The deploy build has the content of every repository; a build without it measures what it has.
+      if (process.env.WKD_BROWSER_REQUIRED)
+        assert.deepEqual(missing, [], 'page kinds in the build');
+    }
     for (const [label, min] of [
       ['pointer', 24],
       ['touch', 44],
@@ -549,7 +571,7 @@ describe('the built site in a browser', { skip }, () => {
         if (label === 'touch')
           assert.equal(await p.eval(`matchMedia('(pointer: coarse)').matches`), true);
         for (const [what, w, h] of JSON.parse(await p.eval(measure)))
-          if (w < min || h < min) small.add(`${what} ${w}x${h}`);
+          if (w < min || h < min) small.add(`${page} ${what} ${w}x${h}`);
       }
       if (label === 'touch') {
         await p.send('Emulation.setTouchEmulationEnabled', { enabled: false });
@@ -864,6 +886,25 @@ describe('the built site in a browser', { skip }, () => {
       if (!ok || !csp?.includes("require-trusted-types-for 'script'")) bad.push(page);
     }
     assert.deepEqual(bad, []);
+  });
+
+  test('the dates of the commit lines are not in the search index', async () => {
+    // A <time> inside an indexed page would put "Nov 21, 2026" into the text a search matches (the lines of
+    // the latest commits are on the plugin and app pages); the search finds names and words, not dates.
+    const pages = live
+      ? ['/p/hover/', '/apps/tasks-desktop/']
+      : indexPages(dist).map((f) => `/${f}`);
+    const bad = [];
+    let indexed = 0;
+    for (const page of pages) {
+      const html = await (await fetch(`${B}${page}`)).text();
+      if (!html.includes('data-pagefind-body')) continue;
+      const times = [...html.matchAll(/<time[\s>][^>]*>/g)].map((m) => m[0]);
+      indexed += times.length;
+      if (times.some((t) => !t.includes('data-pagefind-ignore'))) bad.push(page);
+    }
+    assert.deepEqual(bad, []);
+    if (process.env.WKD_BROWSER_REQUIRED) assert.ok(indexed > 0, 'indexed pages have commit lines');
   });
 
   test('robots.txt allows every crawler and names no sitemap the site does not have', async () => {

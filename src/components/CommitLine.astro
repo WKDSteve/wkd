@@ -21,7 +21,7 @@ const commitUrl = `https://github.com/${registry.owner}/${c.pluginName}/commit/$
 ---
 
 <li data-area={area}>
-  <time datetime={c.date}>{formatDay(c.date)}</time>
+  <time datetime={c.date} data-pagefind-ignore>{formatDay(c.date)}</time>
   {
     showPlugin ? (
       <>
