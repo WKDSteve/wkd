@@ -11,9 +11,23 @@
     -webkit-text-size-adjust: none;
     text-size-adjust: none;
   }
+  /* The page is drawn edge to edge (viewport-fit=cover in Base.astro), so it keeps itself
+     clear of a notch, rounded corners and the home bar. Without insets this is all zero. */
   body {
     margin: 0;
     min-height: 100dvh;
+    padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+      env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+  }
+  /* A tap on a control acts at once: no wait for a possible double-tap zoom. Pinch zoom stays. */
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  label,
+  summary {
+    touch-action: manipulation;
   }
   h1,
   h2,
