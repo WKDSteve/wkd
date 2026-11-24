@@ -3,8 +3,9 @@
 // drawn for a wide screen (the ring is 1420 px); on a phone the page shrinks them
 // to a quarter, so the text is only readable in the file opened on its own,
 // where the phone can zoom. The hint says so only where the picture is shrunk.
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { graphSources } from '../lib/graph-sources';
 import { pngSize } from '../lib/png-size';
 import { BASE } from '../lib/site';
 
@@ -16,6 +17,8 @@ interface Props {
   priority?: boolean;
 }
 const { src, alt, priority = false } = Astro.props;
+// The picture is as wide as the column, up to its own width: a phone takes the narrow file, a wide screen the full one.
+const SIZES = '(min-width: 64rem) 1100px, 100vw';
 
 // The size is read from the file (the build runs in the repository root), so the browser keeps the room before the picture has loaded.
 // A file that is not there (a dev server before the first copy) just has no size.
@@ -23,9 +26,23 @@ let size: { width: number; height: number } | null = null;
 try {
   size = pngSize(readFileSync(join(process.cwd(), 'public', src.slice(BASE.length))));
 } catch {}
+
+// AVIF and WebP next to the PNG (scripts/graph-images.mjs makes them): where they are not there, the
+// plain <img> is the whole picture. The names are relative to public/, like the PNG's.
+const rel = src.slice(BASE.length);
+const sources = size
+  ? graphSources(
+      rel,
+      size.width,
+      (path) => `${BASE}${path}`,
+      (path) => existsSync(join(process.cwd(), 'public', path)),
+    )
+  : [];
 ---
 
 <a class="m-graph-link" href={src}>
+  <picture>
+    {sources.map((s) => <source type={s.type} srcset={s.srcset} sizes={SIZES} />)}
   <img
     src={src}
     alt={alt}
@@ -34,5 +51,6 @@ try {
     loading={priority ? undefined : 'lazy'}
     fetchpriority={priority ? 'high' : undefined}
   />
+  </picture>
 </a>
 <p class="m-graph-hint">Tap the picture to open it at full size.</p>

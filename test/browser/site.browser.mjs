@@ -558,6 +558,39 @@ describe('the built site in a browser', { skip }, () => {
     }
   });
 
+  test('the graph pictures arrive as AVIF or WebP, a fraction of the PNG, with the PNG as fallback and link', async () => {
+    await p.goto(`${B}/`);
+    await p.eval(`${$('.m-graph img')}.scrollIntoView()`);
+    const pic = JSON.parse(
+      await p.eval(`JSON.stringify([...document.querySelectorAll('.m-graph picture')].map((pic) => {
+        const img = pic.querySelector('img');
+        return {
+          types: [...pic.querySelectorAll('source')].map((s) => s.type),
+          png: img.getAttribute('src').endsWith('.png'),
+          link: pic.parentElement.getAttribute('href') === img.getAttribute('src'),
+        };
+      }))`),
+    );
+    assert.ok(pic.length >= 2, 'the start page has graph pictures');
+    for (const g of pic) {
+      assert.deepEqual(g.types, ['image/avif', 'image/webp']);
+      assert.ok(g.png && g.link, 'the img is the PNG and the link opens the PNG');
+    }
+    await p.until(
+      `[...document.querySelectorAll('.m-graph img')].every((i) => i.complete && i.currentSrc)`,
+      'the graphs',
+    );
+    const loaded = JSON.parse(
+      await p.eval(
+        `JSON.stringify([...document.querySelectorAll('.m-graph img')].map((i) => i.currentSrc.split('.').pop()))`,
+      ),
+    );
+    assert.ok(
+      loaded.every((ext) => ext === 'avif' || ext === 'webp'),
+      loaded.join(','),
+    );
+  });
+
   test('a bad pairing code is flagged on its own field, not only in the status line', async () => {
     await p.goto(`${B}/play/`);
     await p.until(`!${$('[data-fight-online]')}.hidden`, 'the online block (WebRTC)');

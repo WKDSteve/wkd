@@ -1,4 +1,4 @@
-import { execFile } from 'node:child_process';
+import { execFile, execFileSync } from 'node:child_process';
 import {
   existsSync,
   lstatSync,
@@ -569,6 +569,15 @@ function copyGraph(dir: string, entry: Entry, logger: Logger): string | null {
   const out = join(outDir, `${entry.slug}.png`);
   const old = lstatSync(out, { throwIfNoEntry: false })?.isFile() ? readFileSync(out) : null;
   if (!old?.equals(bytes)) writeFileSync(out, bytes);
+  // AVIF and WebP next to it (the same script as `pnpm build` runs for the fixed pictures). Without them
+  // the picture is just the PNG, so a failure here is a warning, not a stop.
+  try {
+    execFileSync(process.execPath, [resolve('scripts/graph-images.mjs'), out], { stdio: 'pipe' });
+  } catch (error) {
+    logger.warn(
+      `${entry.name}: no AVIF/WebP for its graph (${(error as Error).message.split('\n')[0]})`,
+    );
+  }
   return `graphs/repo/${entry.slug}.png`;
 }
 

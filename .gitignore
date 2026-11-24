@@ -34,3 +34,7 @@ TESTS/sheets/out/
 # Rust build output of the WASM sim core; the built .wasm itself is
 # committed under src/lib/fight-engine/ (see scripts/build-wasm.mjs)
 wasm/*/target/
+
+# AVIF and WebP variants of the graph pictures: made by scripts/graph-images.mjs on every build
+public/graphs/**/*.avif
+public/graphs/**/*.webp
