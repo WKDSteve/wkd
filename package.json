@@ -17,10 +17,11 @@
     "test": "node --test \"test/*.test.ts\"",
     "test:browser": "node --test test/browser/site.browser.mjs",
     "lhci": "node scripts/lhci.mjs",
+    "budget": "node scripts/budget.mjs",
     "build:wasm": "node scripts/build-wasm.mjs",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "verify": "pnpm lint && pnpm check && pnpm test && pnpm build"
+    "verify": "pnpm lint && pnpm check && pnpm test && pnpm build && pnpm budget"
   },
   "browserslist": [
     "baseline widely available"

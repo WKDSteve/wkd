@@ -12,7 +12,7 @@ content is read from the sibling repositories at build time. Nothing about a plu
 
 ## Checks
 
-`pnpm verify` (= `pnpm lint && pnpm check && pnpm test && pnpm build`), then `pnpm test:browser` against the built
+`pnpm verify` (= `pnpm lint && pnpm check && pnpm test && pnpm build && pnpm budget`; the size budgets of `dist/` are in `budgets.json`), then `pnpm test:browser` against the built
 `dist/`. The test sheets in `TESTS/sheets` run with testing.nvim (`.testing.lua`, engine `browser`). CI:
 `.github/workflows/deploy.yml`.
 

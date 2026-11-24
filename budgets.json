@@ -1,0 +1,30 @@
+{
+  "comment": "Size budgets of the built site, checked by scripts/budget.mjs against dist/ (CI: after the build). Bytes; \"gzip\" rules count the compressed size a visitor downloads, the others the file as it is. A rule limits every file (perFile), all files together (total), or both. Raise a number only with a reason in the commit.",
+  "rules": [
+    { "name": "page (html, gzip)", "ext": [".html"], "measure": "gzip", "perFile": 100000 },
+    {
+      "name": "own scripts (gzip)",
+      "ext": [".js"],
+      "dir": "_astro",
+      "measure": "gzip",
+      "perFile": 24000,
+      "total": 60000
+    },
+    {
+      "name": "styles (gzip)",
+      "ext": [".css"],
+      "measure": "gzip",
+      "perFile": 24000,
+      "total": 40000
+    },
+    { "name": "fonts", "ext": [".woff2"], "measure": "bytes", "perFile": 60000, "total": 100000 },
+    {
+      "name": "images",
+      "ext": [".png", ".webp", ".avif", ".jpg"],
+      "measure": "bytes",
+      "perFile": 1000000,
+      "total": 6000000
+    },
+    { "name": "everything", "ext": [], "measure": "bytes", "total": 16000000 }
+  ]
+}
