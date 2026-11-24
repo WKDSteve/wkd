@@ -36,7 +36,7 @@ const note = d.statusNote ? shortNote(d.statusNote) : null;
 ---
 
 <Shell page={page} title={`${d.name} — wkd`} description={d.tagline} cmd={`edit ${d.id}`}>
-  <h1 class="tui-h1">{d.name}</h1>
+  <h1 class="tui-h1" translate="no">{d.name}</h1>
   <p class="tui-p">{d.description}</p>
 
   <dl class="tui-kv">
@@ -66,7 +66,7 @@ const note = d.statusNote ? shortNote(d.statusNote) : null;
   {d.shots.length > 0 ? <Shots slug={d.id} name={d.name} shots={d.shots} skin="tui" priority /> : null}
 
   {d.install ? <h2 class="tui-h2">install</h2> : null}
-  {d.install ? <pre class="tui-code"><code>{d.install}</code></pre> : null}
+  {d.install ? <pre class="tui-code" translate="no"><code translate="no">{d.install}</code></pre> : null}
 
   {variants.length > 0 ? <h2 class="tui-h2">variants</h2> : null}
   {

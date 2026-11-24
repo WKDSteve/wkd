@@ -414,6 +414,24 @@ describe('the built site in a browser', { skip }, () => {
     }
   });
 
+  test('code, keys and names are not translated by a page translator', async () => {
+    // HTMLElement.translate reflects the attribute with its inheritance: false inside translate="no".
+    const pages = live
+      ? ['/', '/tui/', '/play/', '/nvim/stack/', '/tui/nvim/stack/']
+      : indexPages(dist).map((f) => `/${f}`);
+    const seen = [];
+    for (const page of pages) {
+      await p.goto(`${B}${page}`);
+      const bad = JSON.parse(
+        await p.eval(`JSON.stringify([...document.querySelectorAll(
+          'code, kbd, pre, var, .m-card-name, .display--name, .tui-list .name, [data-vimdoc]'
+        )].filter((e) => e.translate).map((e) => e.tagName + '.' + e.className))`),
+      );
+      if (bad.length) seen.push(`${page}: ${bad.slice(0, 4).join(', ')}`);
+    }
+    assert.deepEqual(seen, []);
+  });
+
   test('a bad pairing code is flagged on its own field, not only in the status line', async () => {
     await p.goto(`${B}/play/`);
     await p.until(`!${$('[data-fight-online]')}.hidden`, 'the online block (WebRTC)');

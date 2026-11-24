@@ -41,7 +41,7 @@ const clock = (t: number): string => {
         {demo.title ? <strong>{demo.title} · </strong> : null}
         {/* the same sentence on every page: not something a search should find */}
         <span data-pagefind-ignore>
-          recorded with VHS from <code>demos/{demo.tape}.tape</code> in a clean Neovim — re-recorded weekly
+          recorded with VHS from <code translate="no">demos/{demo.tape}.tape</code> in a clean Neovim — re-recorded weekly
         </span>
         {demo.needs.length > 0 ? (
           <>

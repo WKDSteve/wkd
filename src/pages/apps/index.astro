@@ -91,7 +91,7 @@ const description = `${apps.length} native apps from one workshop: tools that st
                     ) : (
                       <span class="m-app-icon m-app-noicon" aria-hidden="true">{a.name.charAt(0)}</span>
                     )}
-                    <a class="m-app-link m-card-name" href={href(entryPage(a))} data-nav={entryPage(a)} data-astro-prefetch>
+                    <a class="m-app-link m-card-name" translate="no" href={href(entryPage(a))} data-nav={entryPage(a)} data-astro-prefetch>
                       {a.name}
                     </a>
                   </div>

@@ -61,7 +61,7 @@ const nameOf = (slug: string): string => allPlugins.find((p) => p.id === slug)?.
       </p>
       <div class="m-apppage-title">
         {d.icon ? <img class="m-apppage-icon" src={`${BASE}${d.icon}`} alt="" width="128" height="128" /> : null}
-        <h1 class="display display--name" data-kinetic>
+        <h1 class="display display--name" data-kinetic translate="no">
           {nameBase}<wbr /><span class="m-suffix">{nameSuffix}</span>
         </h1>
       </div>
@@ -98,7 +98,7 @@ const nameOf = (slug: string): string => allPlugins.find((p) => p.id === slug)?.
     <div class="m-cols">
       <section data-pagefind-ignore>
         <h2 class="m-h2">Install</h2>
-        <pre class="code"><code>{lazySnippet(d.owner, d.name)}</code></pre>
+        <pre class="code" translate="no"><code translate="no">{lazySnippet(d.owner, d.name)}</code></pre>
         {d.statusNote ? <p class="m-kicker">{d.statusNote}</p> : null}
       </section>
       <section>
@@ -167,7 +167,7 @@ const nameOf = (slug: string): string => allPlugins.find((p) => p.id === slug)?.
       }
     </div>
 
-    {d.banner ? <pre class="m-banner" aria-hidden="true" tabindex="-1" data-pagefind-ignore>{d.banner}</pre> : null}
+    {d.banner ? <pre class="m-banner" translate="no" aria-hidden="true" tabindex="-1" data-pagefind-ignore>{d.banner}</pre> : null}
   </article>
 </Shell>
 )}

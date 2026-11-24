@@ -36,3 +36,37 @@ test('a sub-heading after a section keeps its level and its class', () => {
   const { html } = renderVimdoc(text, options);
   assert.match(html, /<h3 class="vd-h3">Sub/);
 });
+
+test('code, keys, references and code blocks of a help page are marked as not to be translated', () => {
+  const text = [
+    '==============================================================================',
+    'ONE *x-one*',
+    "Use `:Foo` with <C-w> or <Esc>, set 'wrap', see |x-one| and |elsewhere|, pass {arg}.",
+    'See https://example.com/x.',
+    '',
+    'Example: >lua',
+    '    require("x").setup()',
+  ].join('\n');
+  const { html } = renderVimdoc(text, {
+    ...options,
+    resolve: (t) => (t === 'x-one' ? { page: 'p/x/help' } : null),
+  });
+  // A code block carries the attribute for what is inside it; the prose block (vd-text) stays translatable.
+  const blocks = [...html.matchAll(/<pre class="vd-code"[^>]*>/g)].map((m) => m[0]);
+  assert.ok(blocks.length > 0 && blocks.every((b) => b.includes('translate="no"')));
+  const rest = html.replace(/<pre class="vd-code"[\s\S]*?<\/pre>/g, '');
+  const bare = [...rest.matchAll(/<(code|kbd|var)(?![^>]*translate="no")[^>]*>/g)].map((m) => m[0]);
+  assert.deepEqual(bare, []);
+  for (const needle of [
+    '<kbd',
+    '<var',
+    '<code',
+    'class="vd-ref"',
+    'class="vd-url"',
+    'class="vd-tag"',
+    'vd-code',
+  ])
+    assert.ok(html.includes(needle), `the sample renders ${needle}`);
+  for (const a of html.match(/<a class="vd-(?:ref|url|tag)"[^>]*>/g) ?? [])
+    assert.match(a, /translate="no"/);
+});

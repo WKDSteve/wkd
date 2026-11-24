@@ -70,30 +70,30 @@ function inline(line: string, o: RenderOptions): string {
     last = (m.index ?? 0) + m[0].length;
     const [, tag, ref, code, opt, key, ctrl, url, arg] = m;
     if (tag) {
-      out += `<a class="vd-tag" id="${esc(tag)}" href="#${encodeURIComponent(tag)}">*${esc(tag)}*</a>`;
+      out += `<a class="vd-tag" translate="no" id="${esc(tag)}" href="#${encodeURIComponent(tag)}">*${esc(tag)}*</a>`;
     } else if (ref) {
       const t = o.resolve(ref);
       if (t) {
         const base = t.page === o.self ? '' : o.href(t.page);
-        out += `<a class="vd-ref" href="${esc(base)}#${encodeURIComponent(ref)}">|${esc(ref)}|</a>`;
+        out += `<a class="vd-ref" translate="no" href="${esc(base)}#${encodeURIComponent(ref)}">|${esc(ref)}|</a>`;
       } else {
-        out += `<code class="vd-ref vd-ref--ext">|${esc(ref)}|</code>`;
+        out += `<code class="vd-ref vd-ref--ext" translate="no">|${esc(ref)}|</code>`;
       }
     } else if (code) {
-      out += `<code>${esc(code)}</code>`;
+      out += `<code translate="no">${esc(code)}</code>`;
     } else if (opt) {
-      out += `<code class="vd-opt">'${esc(opt)}'</code>`;
+      out += `<code class="vd-opt" translate="no">'${esc(opt)}'</code>`;
     } else if (key) {
-      out += `<kbd>${esc(key)}</kbd>`;
+      out += `<kbd translate="no">${esc(key)}</kbd>`;
     } else if (ctrl) {
-      out += `<kbd>${esc(ctrl)}</kbd>`;
+      out += `<kbd translate="no">${esc(ctrl)}</kbd>`;
     } else if (url) {
       // Sentence punctuation after a URL belongs to the prose, not the link
       // ("see https://github.com/x/y, which ..."), as in Vim's own helpURL.
       const [, link = url, trail = ''] = url.match(/^(.*?)([.,;:!?"']*)$/) ?? [];
-      out += `<a class="vd-url" href="${esc(link)}" rel="noopener">${esc(link)}</a>${esc(trail)}`;
+      out += `<a class="vd-url" translate="no" href="${esc(link)}" rel="noopener">${esc(link)}</a>${esc(trail)}`;
     } else if (arg) {
-      out += `<var>${esc(arg)}</var>`;
+      out += `<var translate="no">${esc(arg)}</var>`;
     }
   }
   return out + esc(line.slice(last));
@@ -137,7 +137,8 @@ export function renderVimdoc(text: string, o: RenderOptions): Rendered {
     const lang = codeLang ? ` data-lang="${esc(codeLang)}"` : '';
     // `>` directly followed by an unindented line (which ends the block, as in
     // Vim) leaves nothing to show; an empty bordered box would be an artefact.
-    if (code.length) out.push(`<pre class="vd-code"${lang}><code>${code.join('\n')}</code></pre>`);
+    if (code.length)
+      out.push(`<pre class="vd-code" translate="no"${lang}><code>${code.join('\n')}</code></pre>`);
     code = null;
     codeLang = '';
   };
@@ -154,7 +155,8 @@ export function renderVimdoc(text: string, o: RenderOptions): Rendered {
     headings.push({ level, text: textPart, id });
     const anchors = tags
       .map(
-        (t) => `<a class="vd-tag" id="${esc(t)}" href="#${encodeURIComponent(t)}">*${esc(t)}*</a>`,
+        (t) =>
+          `<a class="vd-tag" translate="no" id="${esc(t)}" href="#${encodeURIComponent(t)}">*${esc(t)}*</a>`,
       )
       .join(' ');
     out.push(

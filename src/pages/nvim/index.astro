@@ -125,7 +125,7 @@ const statsPool = [
         <label for="view-orbit">Orbit</label>
       </div>
       <p class="view-hint">
-        <kbd>Esc</kbd> back to grid
+        <kbd translate="no">Esc</kbd> back to grid
       </p>
     </fieldset>
     <div class="m-filter">
@@ -149,7 +149,7 @@ const statsPool = [
               {p.data.icon ? (
                 <img class="m-app-icon" src={`${BASE}${p.data.icon}`} alt="" width="128" height="128" loading="lazy" />
               ) : null}
-              <strong class="m-card-name">{p.data.name}</strong>
+              <strong class="m-card-name" translate="no">{p.data.name}</strong>
             </span>
             <span class="m-card-tag">{p.data.tagline}</span>
             {markOf.get(p.id) ? <span class="m-card-also">also as {markOf.get(p.id)}</span> : null}
