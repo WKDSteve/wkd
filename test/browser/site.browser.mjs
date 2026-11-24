@@ -432,6 +432,29 @@ describe('the built site in a browser', { skip }, () => {
     assert.deepEqual(seen, []);
   });
 
+  test('a list with nothing in it says so, in both skins', async () => {
+    // The build here has no repositories to read, so these lists are really empty. With content they are not.
+    for (const [page, what] of [
+      ['/nvim/', 'plugins'],
+      ['/tui/nvim/', 'plugins'],
+      ['/apps/', 'apps'],
+      ['/tui/apps/', 'apps'],
+      ['/activity/', 'commits'],
+      ['/tui/activity/', 'commits'],
+    ]) {
+      await p.goto(`${B}${page}`);
+      const empty = await p.eval(
+        `!${$('.roster .m-card, .tui-table a, .m-list li, .tui-list li')}`,
+      );
+      if (!empty) continue;
+      assert.match(
+        await p.eval(`${$('p.empty')}?.textContent ?? ''`),
+        new RegExp(`No ${what} yet`),
+        page,
+      );
+    }
+  });
+
   test('a bad pairing code is flagged on its own field, not only in the status line', async () => {
     await p.goto(`${B}/play/`);
     await p.until(`!${$('[data-fight-online]')}.hidden`, 'the online block (WebRTC)');

@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import CategoryFilter from '../../components/CategoryFilter.astro';
+import Empty from '../../components/Empty.astro';
 import GraphPicture from '../../components/GraphPicture.astro';
 import { appMeta, appSections, kits, otherForms } from '../../lib/apps';
 import { approx, categoryLabel } from '../../lib/format';
@@ -52,6 +53,7 @@ const description = `${apps.length} native apps from one workshop: tools that st
   </section>
 
   <div class="home">
+    {apps.length === 0 && foundations.length === 0 ? <Empty what="apps" skin="modern" /> : null}
     <div class="m-filter">
       <CategoryFilter counts={counts} legend="Filter apps by category" />
     </div>

@@ -1,0 +1,14 @@
+---
+// What a list says when it has nothing to list: a line of its own, not a gap.
+// The lists are read from the repositories at build time, so "empty" means
+// the build did not find any.
+interface Props {
+  what: string;
+  skin: 'modern' | 'tui';
+}
+const { what, skin } = Astro.props;
+---
+
+<p class:list={['empty', skin === 'tui' ? 'tui-p tui-dim' : 'm-lede']} role="status">
+  No {what} yet. The list is read from the repositories when the site is built, and none were found.
+</p>
