@@ -57,11 +57,43 @@ if (dl) {
     }
   }
 
-  function loop(): void {
-    swapOnce();
-    const delay = MIN_INTERVAL + Math.random() * (MAX_INTERVAL - MIN_INTERVAL);
-    setTimeout(loop, delay);
+  // The rotation runs only while the tab is visible and the visitor has not paused it.
+  // Under reduced motion it starts paused: the figures stay static unless asked for.
+  let playing = !reduceMotion;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
+  function stop(): void {
+    clearTimeout(timer);
+    timer = undefined;
   }
 
-  if (pool.length > slots.length) loop();
+  function schedule(): void {
+    stop();
+    if (!playing || document.hidden) return;
+    const delay = MIN_INTERVAL + Math.random() * (MAX_INTERVAL - MIN_INTERVAL);
+    timer = setTimeout(() => {
+      swapOnce();
+      schedule();
+    }, delay);
+  }
+
+  if (pool.length > slots.length) {
+    // The pause control exists only with script, like the rotation itself.
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'm-stats-toggle';
+    const sync = (): void => {
+      button.textContent = playing ? 'Pause rotation' : 'Rotate figures';
+    };
+    button.addEventListener('click', () => {
+      playing = !playing;
+      sync();
+      schedule();
+    });
+    sync();
+    dl.after(button);
+
+    document.addEventListener('visibilitychange', schedule);
+    schedule();
+  }
 }

@@ -576,6 +576,24 @@
   .m-stats > div:last-child {
     border-right: 0;
   }
+  /* Pause control of the rotation (src/scripts/stats.ts adds it; no script, no rotation). */
+  .m-stats-toggle {
+    justify-self: start;
+    min-block-size: 1.5rem;
+    padding: 0.2em 0.7em;
+    border: 1px solid var(--muted);
+    color: var(--muted);
+    font-family: var(--font-mono), monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+  }
+  .m-stats-toggle:hover,
+  .m-stats-toggle:focus-visible {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
   .m-stats dt {
     font-family: var(--font-mono), monospace;
     font-size: 0.75rem;

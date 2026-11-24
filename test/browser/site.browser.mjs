@@ -530,6 +530,64 @@ describe('the built site in a browser', { skip }, () => {
     assert.deepEqual(JSON.parse(await state()), { on: false, play: 'running', ring: 'none' });
   });
 
+  test('the figures rotate only while they may: a pause button, a hidden tab and reduced motion stop them', async () => {
+    // The swap delay is 4 to 8 s: make it a tenth of a second, and count what the tiles do.
+    const hook = await p.send('Page.addScriptToEvaluateOnNewDocument', {
+      source: `(() => {
+        const set = window.setTimeout.bind(window);
+        window.setTimeout = (f, d, ...a) => set(f, d >= 4000 && d <= 8000 ? d / 40 : d, ...a);
+        window.__swaps = 0;
+        document.addEventListener('DOMContentLoaded', () => {
+          const dl = document.querySelector('.m-stats');
+          if (dl) new MutationObserver(() => { window.__swaps++; }).observe(dl, { childList: true, characterData: true, subtree: true });
+        });
+      })()`,
+    });
+    const swaps = () => p.eval('window.__swaps');
+    const settle = async () => {
+      await p.sleep(900);
+      const before = await swaps();
+      await p.sleep(900);
+      return (await swaps()) - before;
+    };
+    try {
+      await p.goto(`${B}/`);
+      const btn = $('.m-stats-toggle');
+      assert.ok(await p.eval(`!!${btn}`), 'the pause button exists');
+      assert.ok((await settle()) > 0, 'the figures rotate by default');
+      // Hidden tab: no timer runs, and it goes on when the tab is back.
+      await p.eval(`(() => {
+        Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
+        document.dispatchEvent(new Event('visibilitychange'));
+      })()`);
+      assert.equal(await settle(), 0, 'a hidden tab does not rotate');
+      await p.eval(`(() => {
+        delete document.hidden;
+        document.dispatchEvent(new Event('visibilitychange'));
+      })()`);
+      assert.ok((await settle()) > 0, 'a visible tab rotates again');
+      // The button stops it and starts it again.
+      await p.eval(`${btn}.click()`);
+      assert.equal(await settle(), 0, 'paused by the button');
+      assert.match(await p.eval(`${btn}.textContent`), /Rotate/);
+      await p.eval(`${btn}.click()`);
+      assert.ok((await settle()) > 0, 'resumed by the button');
+      // Reduced motion: static until asked for.
+      await p.send('Emulation.setEmulatedMedia', {
+        features: [{ name: 'prefers-reduced-motion', value: 'reduce' }],
+      });
+      await p.goto(`${B}/`);
+      assert.equal(await settle(), 0, 'reduced motion starts still');
+      await p.eval(`${btn}.click()`);
+      assert.ok((await settle()) > 0, 'and rotates once asked');
+    } finally {
+      await p.send('Emulation.setEmulatedMedia', { features: [] });
+      await p.send('Page.removeScriptToEvaluateOnNewDocument', {
+        identifier: hook.result.identifier,
+      });
+    }
+  });
+
   test('every page opens with the charset, then the CSP, then the referrer policy, before any style or preload', async () => {
     // Every page type of the build (both skins, the moved addresses included); the live site: the fixed pages.
     const pages = live
