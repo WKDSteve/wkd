@@ -2,6 +2,7 @@
 // statistics and the examples behind its two doors. Free of Astro on purpose,
 // so test/start.test.ts runs it under plain `node --test`.
 import { approx } from './approx.ts';
+import { formatCount } from './intl.ts';
 import type { Kind, Stage } from './registry';
 
 /** The fields of an entry this module looks at; a page passes its own richer type through. */
@@ -40,26 +41,26 @@ export function workshopStats(items: readonly StartItem[], playCount: number): M
   const plugins = of('plugin');
   const apps = of('app');
   return [
-    { label: 'plugins', value: String(plugins.length) },
-    { label: 'apps', value: String(apps.length) },
-    { label: 'web variants', value: String(of('web').length) },
+    { label: 'plugins', value: formatCount(plugins.length) },
+    { label: 'apps', value: formatCount(apps.length) },
+    { label: 'web variants', value: formatCount(of('web').length) },
     { label: 'commits', value: approx(sum(items, (i) => i.commitCount)) },
-    { label: 'repositories', value: String(items.length) },
+    { label: 'repositories', value: formatCount(items.length) },
     { label: 'plugin features', value: approx(sum(plugins, (i) => i.featureCount)) },
     { label: 'help topics', value: approx(sum(plugins, (i) => i.helpTagCount)) },
     { label: 'test files', value: approx(sum(items, (i) => i.testFiles)) },
     { label: 'plugin commits', value: approx(sum(plugins, (i) => i.commitCount)) },
     { label: 'app commits', value: approx(sum(apps, (i) => i.commitCount)) },
     // A tag, not a published release: the repositories say which is which.
-    { label: 'apps with a version tag', value: String(apps.filter((a) => a.release).length) },
+    { label: 'apps with a version tag', value: formatCount(apps.filter((a) => a.release).length) },
     {
       label: 'apps ready to show',
-      value: String(apps.filter((a) => a.stage === 'showcase').length),
+      value: formatCount(apps.filter((a) => a.stage === 'showcase').length),
     },
-    { label: 'demos recorded', value: String(sum(items, (i) => i.demos.length)) },
-    { label: 'screenshots', value: String(sum(items, (i) => i.shots.length)) },
-    { label: 'stable', value: String(items.filter((i) => i.status === 'stable').length) },
-    { label: 'experiments', value: String(playCount) },
+    { label: 'demos recorded', value: formatCount(sum(items, (i) => i.demos.length)) },
+    { label: 'screenshots', value: formatCount(sum(items, (i) => i.shots.length)) },
+    { label: 'stable', value: formatCount(items.filter((i) => i.status === 'stable').length) },
+    { label: 'experiments', value: formatCount(playCount) },
   ];
 }
 
