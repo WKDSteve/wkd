@@ -507,6 +507,57 @@ describe('the built site in a browser', { skip }, () => {
     );
   });
 
+  test('everything that is pressed is at least 24px, and 44px on a touch screen', async () => {
+    // Links inside a sentence, the skip link (seen only on keyboard focus) and the radio or checkbox
+    // that a label carries (the label is the target) are not counted.
+    const measure = `JSON.stringify([...document.querySelectorAll(
+      'a[href], button, select, input, textarea, summary, label[for], [tabindex="0"]'
+    )].flatMap((e) => {
+      const cs = getComputedStyle(e);
+      if (cs.display === 'none' || cs.visibility === 'hidden' || e.closest('[hidden]')) return [];
+      const r = e.getBoundingClientRect();
+      if (!r.width || !r.height) return [];
+      if (e.matches('.skip-link, .visually-hidden, [tabindex="-1"]')) return [];
+      if (e.matches('input[type=radio], input[type=checkbox]') && e.closest('label, .filter')) return [];
+      const host = e.parentElement;
+      if (e.matches('a') && host?.matches('p, li, dd, figcaption') && host.textContent.trim().length - e.textContent.trim().length > 12) return [];
+      return [[e.tagName.toLowerCase() + '.' + String(e.className).split(' ')[0] + ' ' + e.textContent.trim().slice(0, 20), Math.round(r.width), Math.round(r.height)]];
+    }))`;
+    const pages = [
+      '/',
+      '/tui/',
+      '/play/',
+      '/tui/play/',
+      '/nvim/',
+      '/apps/',
+      '/activity/',
+      '/tui/nvim/',
+      '/tui/activity/',
+    ];
+    for (const [label, min] of [
+      ['pointer', 24],
+      ['touch', 44],
+    ]) {
+      if (label === 'touch') {
+        await p.viewport(390, 844, true);
+        await p.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
+      }
+      const small = new Set();
+      for (const page of pages) {
+        await p.goto(`${B}${page}`);
+        if (label === 'touch')
+          assert.equal(await p.eval(`matchMedia('(pointer: coarse)').matches`), true);
+        for (const [what, w, h] of JSON.parse(await p.eval(measure)))
+          if (w < min || h < min) small.add(`${what} ${w}x${h}`);
+      }
+      if (label === 'touch') {
+        await p.send('Emulation.setTouchEmulationEnabled', { enabled: false });
+        await p.viewport(1280, 900, false);
+      }
+      assert.deepEqual([...small], [], `${label}: targets under ${min}px`);
+    }
+  });
+
   test('a bad pairing code is flagged on its own field, not only in the status line', async () => {
     await p.goto(`${B}/play/`);
     await p.until(`!${$('[data-fight-online]')}.hidden`, 'the online block (WebRTC)');

@@ -1,6 +1,28 @@
 /* Skin: modern -- editorial brutalism. Hairline grid, one acid accent,
    oversized variable type. Light/dark via light-dark(); the accent stays. */
 @layer skin {
+  /* ---- targets ------------------------------------------------------------
+     Links and labels that were only as tall as their line: at least --target-size
+     (tokens.css) high, the text centred in it. Links inside a sentence are left alone. */
+  .m-brand,
+  .m-nav a,
+  .m-switch,
+  .m-footer a,
+  .m-btn,
+  .m-app-link,
+  .search-label,
+  .m-filter label,
+  .view-tabs label {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--target-size);
+  }
+  .m-nav a,
+  .search-label {
+    min-inline-size: var(--target-size);
+    justify-content: center;
+  }
+
   :root[data-skin="modern"] {
     color-scheme: light dark;
     /* The flash of a tap on a link or button, in the accent instead of the browser's grey. */
@@ -69,6 +91,7 @@
     display: inline-flex;
   }
   .m-select select {
+    min-block-size: var(--target-size);
     font: inherit;
     font-family: var(--font-mono), monospace;
     text-transform: none;
@@ -120,6 +143,7 @@
     color: var(--muted);
   }
   .search-input {
+    min-block-size: var(--target-size);
     flex: 1;
     min-width: 0;
     font: inherit;
@@ -584,7 +608,7 @@
   /* Pause control of the rotation (src/scripts/stats.ts adds it; no script, no rotation). */
   .m-stats-toggle {
     justify-self: start;
-    min-block-size: 1.5rem;
+    min-block-size: var(--target-size);
     padding: 0.2em 0.7em;
     border: 1px solid var(--muted);
     color: var(--muted);
@@ -1824,6 +1848,7 @@
     margin-bottom: var(--s-2);
   }
   .fight-toolbtn {
+    min-block-size: var(--target-size);
     padding: 0.2em 0.7em;
     border: 1px solid var(--muted);
     color: var(--muted);
@@ -2104,6 +2129,8 @@
     gap: var(--s-1);
   }
   .m-demo .demo-chapters button {
+    min-block-size: var(--target-size);
+    min-inline-size: var(--target-size);
     font: inherit;
     color: var(--acid-ink);
     background: none;
