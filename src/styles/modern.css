@@ -744,7 +744,9 @@
     white-space: nowrap;
     display: inline-flex;
     gap: 1ch;
-    align-items: baseline;
+    /* A line of the ticker is a link of its own, not part of a sentence: it gets the height of every target. */
+    min-block-size: var(--target-size);
+    align-items: center;
   }
   .ticker-track > a:hover {
     background: var(--acid);
