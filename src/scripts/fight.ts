@@ -1054,12 +1054,12 @@ class Match {
     const enemyHealth = state[fighterBase(1) + F_HEALTH] as number;
     if (playerHealth !== this.lastPlayerHealth) {
       this.lastPlayerHealth = playerHealth;
-      this.hud.playerBar.style.width = `${playerHealth}%`;
+      this.hud.playerBar.style.transform = `scaleX(${playerHealth / 100})`;
       this.hud.playerBar.toggleAttribute('data-low', playerHealth <= LOW_HEALTH);
     }
     if (enemyHealth !== this.lastEnemyHealth) {
       this.lastEnemyHealth = enemyHealth;
-      this.hud.enemyBar.style.width = `${enemyHealth}%`;
+      this.hud.enemyBar.style.transform = `scaleX(${enemyHealth / 100})`;
       this.hud.enemyBar.toggleAttribute('data-low', enemyHealth <= LOW_HEALTH);
     }
     const frame = state[G_FRAME] as number;

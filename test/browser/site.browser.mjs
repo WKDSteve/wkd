@@ -359,6 +359,20 @@ describe('the built site in a browser', { skip }, () => {
       }))`),
     );
     assert.deepEqual(bars, [100, 100]);
+    // The bars scale (compositor), they do not animate their width; reduced motion makes them jump.
+    const bar = $('[data-fight-health="player"]');
+    const motion = () =>
+      p.eval(
+        `JSON.stringify([getComputedStyle(${bar}).transitionProperty, getComputedStyle(${bar}).transitionDuration])`,
+      );
+    const [prop, dur] = JSON.parse(await motion());
+    assert.equal(prop, 'transform');
+    assert.notEqual(dur, '0s');
+    await p.send('Emulation.setEmulatedMedia', {
+      features: [{ name: 'prefers-reduced-motion', value: 'reduce' }],
+    });
+    assert.equal(JSON.parse(await motion())[1], '0s', 'no transition under reduced motion');
+    await p.send('Emulation.setEmulatedMedia', { features: [] });
     const start = Number(await p.eval(`${$('[data-fight-timer]')}.textContent`));
     assert.equal(start, 60);
     await p.until(`Number(${$('[data-fight-timer]')}.textContent) < 60`, 'the clock to run');

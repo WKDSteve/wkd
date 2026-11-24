@@ -1767,10 +1767,13 @@
     height: 100%;
     width: 100%;
     background: var(--acid);
-    transition: width 120ms linear;
+    /* The health is a scale, not a width: the bar moves on the compositor and
+       does not lay out. --dur is 0ms under reduced motion, so it jumps there. */
+    transform-origin: left center;
+    transition: transform var(--dur) linear;
   }
   .fight-bar-flip .fight-bar-fill {
-    margin-left: auto;
+    transform-origin: right center;
     background: var(--neon-0);
   }
   /* A quarter of the health left: the bar blinks. */
