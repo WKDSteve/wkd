@@ -88,6 +88,11 @@ jobs:
       - name: Install, build and upload
         uses: withastro/action@3eafd002e65cc31b4f0eae0bb05450d521562247 # v6.1.3
 
+      # Size budgets of the built site (budgets.json, scripts/budget.mjs): pages, own scripts, styles, fonts and
+      # images in bytes or gzip. It reads dist/, which the action above has just built, and fails on a violation.
+      - name: Size budget
+        run: node scripts/budget.mjs
+
       # Gate for the deploy job below: the fight engine's tests include the
       # check that the committed fight-sim.wasm still matches sim.ts bit for
       # bit, and nothing else in CI would catch a stale binary. Runs on the
