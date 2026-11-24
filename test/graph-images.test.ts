@@ -60,6 +60,9 @@ test('the converter writes AVIF and WebP, smaller than the PNG, and leaves them 
     assert.equal(small.width, SMALL_WIDTH);
     assert.equal(await convert(png), 0, 'nothing to do the second time');
   } finally {
-    rmSync(dir, { recursive: true });
+    // Windows may still hold a freshly written image for a moment; a leftover in tmp is no failure.
+    try {
+      rmSync(dir, { recursive: true, force: true, maxRetries: 5 });
+    } catch {}
   }
 });
