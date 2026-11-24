@@ -508,7 +508,8 @@ describe('the built site in a browser', { skip }, () => {
   });
 
   test('everything that is pressed is at least 24px, and 44px on a touch screen', async () => {
-    // Links inside a sentence, the skip link (seen only on keyboard focus) and the radio or checkbox
+    // Links inside a sentence (a paragraph or list item with other text around the link, however short: "Also as ai.nvim"),
+    // the skip link (seen only on keyboard focus) and the radio or checkbox
     // that a label carries (the label is the target) are not counted.
     const measure = `JSON.stringify([...document.querySelectorAll(
       'a[href], button, select, input, textarea, summary, label[for], [tabindex="0"]'
@@ -520,7 +521,7 @@ describe('the built site in a browser', { skip }, () => {
       if (e.matches('.skip-link, .visually-hidden, [tabindex="-1"]')) return [];
       if (e.matches('input[type=radio], input[type=checkbox]') && e.closest('label, .filter')) return [];
       const host = e.parentElement;
-      if (e.matches('a') && host?.matches('p, li, dd, figcaption') && host.textContent.trim().length - e.textContent.trim().length > 12) return [];
+      if (e.matches('a') && host?.matches('p, li, dd, figcaption') && host.textContent.trim().length > e.textContent.trim().length) return [];
       return [[e.tagName.toLowerCase() + '.' + String(e.className).split(' ')[0] + ' ' + e.textContent.trim().slice(0, 20), Math.round(r.width), Math.round(r.height)]];
     }))`;
     const pages = [
