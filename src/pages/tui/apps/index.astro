@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import CategoryFilter from '../../../components/CategoryFilter.astro';
+import Empty from '../../../components/Empty.astro';
 import { appMeta, appSections, kits, otherForms } from '../../../lib/apps';
 import { categoryLabel } from '../../../lib/format';
 import { entryPage } from '../../../lib/nav';
@@ -38,6 +39,7 @@ const groups = [
   </p>
 
   <div class="home">
+    {apps.length === 0 && foundations.length === 0 ? <Empty what="apps" skin="tui" /> : null}
     <div class="tui-filter">
       <span class="tui-dim" aria-hidden="true">:filter</span>
       <CategoryFilter counts={counts} legend="Filter apps by category" />

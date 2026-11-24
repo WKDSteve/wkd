@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import CategoryFilter from '../../../components/CategoryFilter.astro';
 import CommitLine from '../../../components/CommitLine.astro';
+import Empty from '../../../components/Empty.astro';
 import { alsoAs, formMark } from '../../../lib/apps';
 import { approx, byDateDesc, categoryLabel, pad2 } from '../../../lib/format';
 import { href } from '../../../lib/site';
@@ -49,6 +50,7 @@ const banner = [
       <span class="tui-dim" aria-hidden="true">:filter</span>
       <CategoryFilter counts={counts} />
     </div>
+    {plugins.length === 0 ? <Empty what="plugins" skin="tui" /> : null}
     <div class="tui-table">
       {
         plugins.map((p, i) => (
