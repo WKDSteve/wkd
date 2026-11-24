@@ -83,6 +83,13 @@
     --gutter: clamp(1rem, 4vw, 3rem);
     --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
     --dur: 180ms;
+    /* The least size of anything that is pressed: 24px for a pointer, 44px for a finger. */
+    --target-size: 24px;
+  }
+  @media (pointer: coarse) {
+    :root {
+      --target-size: 44px;
+    }
   }
 
   /* Cross-document view transitions: pure CSS, no client router, CSP-clean. */

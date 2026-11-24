@@ -2,6 +2,30 @@
    Palette is a 16-colour terminal set (tokyonight-night by default) so a
    colorscheme switcher can swap the whole look by redefining these vars. */
 @layer skin {
+  /* ---- targets ------------------------------------------------------------
+     Rows are one text line (about 21px): at least --target-size (tokens.css) high,
+     24px for a pointer, 44px on a touch screen. */
+  .tui-status a.seg,
+  .tui-status select,
+  .tui-filter label,
+  .search-label,
+  .search-input,
+  .tui-table > a {
+    display: flex;
+    align-items: center;
+    min-block-size: var(--target-size);
+  }
+  .tui-filter label {
+    display: inline-flex;
+  }
+  .search-label {
+    min-inline-size: var(--target-size);
+    justify-content: center;
+  }
+  .tui .tui-side :is(a, .grp-h) {
+    padding-block: max(0px, calc((var(--target-size) - 1lh) / 2));
+  }
+
   :root[data-skin="tui"] {
     color-scheme: dark;
     --bg: #1a1b26;
