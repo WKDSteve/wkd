@@ -391,6 +391,29 @@ describe('the built site in a browser', { skip }, () => {
     assert.ok(area >= 16, `the code field is ${area}px`);
   });
 
+  test('numbers that change are set in tabular figures, and the door titles balance their lines', async () => {
+    await p.goto(`${B}/play/`);
+    for (const sel of ['.fight-timer', '.fight-record']) {
+      assert.match(
+        await p.eval(`getComputedStyle(${$(sel)}).fontVariantNumeric`),
+        /tabular-nums/,
+        sel,
+      );
+    }
+    await p.goto(`${B}/`);
+    assert.match(
+      await p.eval(`getComputedStyle(${$('.search-status')}).fontVariantNumeric`),
+      /tabular-nums/,
+    );
+    // text-wrap is progressive: where the browser knows it, the title uses it.
+    if (await p.eval(`CSS.supports('text-wrap', 'balance')`)) {
+      assert.equal(
+        await p.eval(`getComputedStyle(${$('.m-door-title')}).textWrapStyle`),
+        'balance',
+      );
+    }
+  });
+
   test('a bad pairing code is flagged on its own field, not only in the status line', async () => {
     await p.goto(`${B}/play/`);
     await p.until(`!${$('[data-fight-online]')}.hidden`, 'the online block (WebRTC)');

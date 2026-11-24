@@ -313,6 +313,7 @@
     overflow-y: auto;
   }
   .search-status {
+    font-variant-numeric: tabular-nums;
     color: var(--yellow);
   }
   .search-keys {
