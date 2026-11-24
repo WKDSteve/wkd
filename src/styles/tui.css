@@ -281,6 +281,8 @@
     flex: 1;
     min-width: 0;
     font: inherit;
+    /* 16px at least: iOS zooms the page when a smaller field takes focus. */
+    font-size: max(1rem, 16px);
     color: var(--fg);
     background: transparent;
     border: 0;
