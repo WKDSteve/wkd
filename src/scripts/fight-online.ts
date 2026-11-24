@@ -9,7 +9,6 @@
 // identical initial state from that one message.
 import { FIGHTERS, LEVELS } from '../lib/fight';
 import {
-  BadCodeError,
   type ControlMessage,
   gameSilence,
   invite,
@@ -18,6 +17,7 @@ import {
   type PeerLink,
 } from '../lib/fight-engine/net';
 import { peerDriver } from '../lib/fight-engine/net-driver';
+import { fieldError } from '../lib/fight-engine/pairing-error';
 import { RollbackSession } from '../lib/fight-engine/rollback';
 import { createState } from '../lib/fight-engine/sim';
 import type { OnlineApi } from './fight';
@@ -211,7 +211,8 @@ export function begin(mode: 'invite' | 'join', api: OnlineApi): void {
         say('Connecting…');
         invitation.accept(ui.input.value).then(connected, (error: unknown) => {
           // A typo or a cut-off message does not cost the invitation.
-          if (error instanceof BadCodeError) retry('That reply code is not valid. Check it.');
+          const field = fieldError(error, 'accept-reply');
+          if (field) retry(field.message);
           else failed(error);
         });
       };
@@ -242,7 +243,8 @@ export function begin(mode: 'invite' | 'join', api: OnlineApi): void {
           reply.link.then(connected, failed);
         },
         (error: unknown) => {
-          if (error instanceof BadCodeError) retry('That invitation code is not valid. Check it.');
+          const field = fieldError(error, 'join-invitation');
+          if (field) retry(field.message);
           else failed(error);
         },
       );
