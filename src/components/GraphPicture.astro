@@ -2,7 +2,9 @@
 // A picture of the connections, linked to itself at full size. The pictures are
 // drawn for a wide screen (the ring is 1420 px); on a phone the page shrinks them
 // to a quarter, so the text is only readable in the file opened on its own,
-// where the phone can zoom. The hint says so only where the picture is shrunk.
+// where the phone can zoom. The hint says so only where the picture is shrunk. It stays for as long as the
+// picture is shrunk: a tap on the picture leaves the page for the file, so there is no "after the first use" on
+// this page to hide it at (and a remembered "seen" would hide it from someone who has not yet found the zoom).
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { graphSources } from '../lib/graph-sources';

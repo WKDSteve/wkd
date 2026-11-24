@@ -148,6 +148,24 @@ the workflow runs it against the fresh build, and a red check keeps the site as 
 the live site:
 `WKD_BASE=https://wkdsteve.github.io/wkd pnpm test:browser`.
 
+`pnpm build` and the browser checks read the checkouts under `PLUGINS_DIR`. With none there (a worktree, a
+fresh clone) the build has no plugin, app or help pages, and the checks of those pages have nothing to look at;
+with the real content they run exactly as in the deploy: `PLUGINS_DIR=<folder of the checkouts> pnpm build`, then
+`WKD_BROWSER_REQUIRED=1 pnpm test:browser` (that variable also makes a missing page kind a failure).
+
+### Size budgets
+
+`budgets.json` holds the size budgets of the built site, checked by `scripts/budget.mjs` against `dist/` (`pnpm
+budget`, part of `pnpm verify`, and a step of the deploy right after the build). A rule limits every file of some
+extensions (`perFile`), all of them together (`total`), or both; `gzip` rules count the compressed size a visitor
+downloads, the others the file as it lies in `dist/`. The numbers are measured, not guessed: **the size of the build
+with all plugin checkouts (the deploy build, or a local one with `PLUGINS_DIR` set) plus a tenth**. The totals of the
+images and of the whole site in the file say with which build and on what day they were taken. To raise a budget,
+build with the real content, take the new measurement, put it plus a tenth into `budgets.json` and give the reason
+in the commit; a number raised only to make a red check green is the thing the budgets are there to stop. A
+build without checkouts is far below the totals, so the check can only fail on the per-file limits there; the deploy
+is where it compares for real.
+
 ### Test sheets
 
 What a person once checked by hand on the live site and a machine can check as well is a test
