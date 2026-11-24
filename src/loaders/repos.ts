@@ -1,4 +1,4 @@
-import { execFile, execFileSync } from 'node:child_process';
+import { execFile } from 'node:child_process';
 import {
   existsSync,
   lstatSync,
@@ -16,11 +16,9 @@ import registry from '../data/registry.json';
 import {
   detectTech,
   englishParagraph,
-  GRAPH_MAX_BYTES,
   ICON_MAX_BYTES,
   iconId,
   installSnippet,
-  isPng,
   isPngIcon,
   latestVersionTag,
   leadingQuote,
@@ -29,6 +27,7 @@ import {
   shownStatusNote,
   statusParagraph,
 } from '../lib/app-facts';
+import { copyGraph } from '../lib/graph-copy';
 import { collectRequires } from '../lib/lua-requires';
 import {
   type Entry,
@@ -549,38 +548,6 @@ function copyIcon(dir: string, entry: Entry, logger: Logger): string | null {
   return `app-icons/${entry.slug}.png`;
 }
 
-/**
- * Copies the picture of a repository's connections (`assets/graphs/<name>.png`, written by the
- * app-icons tool of the workshop) to public/graphs/repo/<slug>.png and returns the site-relative
- * path, or null without a usable one. Like an icon it comes from a repository and ends up under the
- * site's origin: a regular file (a symlink is not followed) and a PNG by its content.
- */
-function copyGraph(dir: string, entry: Entry, logger: Logger): string | null {
-  const src = join(dir, 'assets', 'graphs', `${entry.name}.png`);
-  const stat = lstatSync(src, { throwIfNoEntry: false });
-  if (!stat?.isFile() || stat.size > GRAPH_MAX_BYTES) return null;
-  const bytes = readFileSync(src);
-  if (!isPng(bytes, GRAPH_MAX_BYTES)) {
-    logger.warn(`${entry.name}: ${src} is not a PNG -- left out`);
-    return null;
-  }
-  const outDir = resolve('public/graphs/repo');
-  mkdirSync(outDir, { recursive: true });
-  const out = join(outDir, `${entry.slug}.png`);
-  const old = lstatSync(out, { throwIfNoEntry: false })?.isFile() ? readFileSync(out) : null;
-  if (!old?.equals(bytes)) writeFileSync(out, bytes);
-  // AVIF and WebP next to it (the same script as `pnpm build` runs for the fixed pictures). Without them
-  // the picture is just the PNG, so a failure here is a warning, not a stop.
-  try {
-    execFileSync(process.execPath, [resolve('scripts/graph-images.mjs'), out], { stdio: 'pipe' });
-  } catch (error) {
-    logger.warn(
-      `${entry.name}: no AVIF/WebP for its graph (${(error as Error).message.split('\n')[0]})`,
-    );
-  }
-  return `graphs/repo/${entry.slug}.png`;
-}
-
 /** lua/<module>/ directory name -> plugin slug, for directories unique to one plugin. */
 function moduleMap(root: string): Map<string, string> {
   const owners = new Map<string, string[]>();
@@ -660,7 +627,7 @@ async function scanOne(
   const isApp = entry.kind === 'app';
   // A plugin has its icon too, in the same place; a web variant and a kit show none.
   const icon = isApp || entry.kind === 'plugin' ? copyIcon(dir, entry, logger) : null;
-  const graph = copyGraph(dir, entry, logger);
+  const graph = copyGraph(dir, entry, logger, resolve('public/graphs/repo'));
   const tech = isApp ? detectTech(techInput(dir)) : [];
   const install = isApp ? installSnippet(readme) : null;
   const rollingUrl = isApp && mentionsRolling(readme) ? `${url}/releases/tag/latest` : null;
