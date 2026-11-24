@@ -378,6 +378,19 @@ describe('the built site in a browser', { skip }, () => {
     await p.until(`Number(${$('[data-fight-timer]')}.textContent) < 60`, 'the clock to run');
   });
 
+  test('text fields are 16px or more, so iOS does not zoom into them on focus', async () => {
+    for (const page of ['/', '/tui/']) {
+      await p.goto(`${B}${page}`);
+      const px = Number(await p.eval(`parseFloat(getComputedStyle(${$('#search-q')}).fontSize)`));
+      assert.ok(px >= 16, `${page} search field is ${px}px`);
+    }
+    await p.goto(`${B}/play/`);
+    const area = Number(
+      await p.eval(`parseFloat(getComputedStyle(${$('[data-fight-code-in]')}).fontSize)`),
+    );
+    assert.ok(area >= 16, `the code field is ${area}px`);
+  });
+
   test('a bad pairing code is flagged on its own field, not only in the status line', async () => {
     await p.goto(`${B}/play/`);
     await p.until(`!${$('[data-fight-online]')}.hidden`, 'the online block (WebRTC)');
