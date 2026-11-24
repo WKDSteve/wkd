@@ -876,4 +876,14 @@
     align-items: center;
     min-block-size: var(--target-size);
   }
+  /* The chapters of a demo: the summary and every clock are targets of their own. */
+  .tui-demo .demo-chapters summary {
+    display: flex;
+    align-items: center;
+    min-block-size: var(--target-size);
+  }
+  .tui-demo .demo-chapters button {
+    min-block-size: var(--target-size);
+    min-inline-size: var(--target-size);
+  }
 }
