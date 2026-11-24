@@ -29,7 +29,7 @@ const page = doc.main ? `p/${doc.plugin}/help` : `p/${doc.plugin}/help/${doc.fil
   <article class="m-plugin">
     <header class="m-plugin-head">
       <p class="m-kicker">
-        <a href={href(`p/${doc.plugin}`)} data-nav={`p/${doc.plugin}`}><b>{plugin.name}</b></a> ·
+        <a href={href(`p/${doc.plugin}`)} data-nav={`p/${doc.plugin}`}><b translate="no">{plugin.name}</b></a> ·
         <span data-pagefind-filter="category">{categoryLabel(plugin.category)}</span> · vimdoc
       </p>
       <h1 class="display display--name" data-kinetic>:help<wbr /><span class="m-suffix"> {doc.file}</span></h1>

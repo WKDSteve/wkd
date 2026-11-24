@@ -48,7 +48,7 @@ const banner = [
 ---
 
 <Shell page="" title="wkd — Neovim plugins and native apps from one workshop" description="Neovim plugins, native apps and a few experiments from one workshop." cmd="cd">
-  <pre class="banner" aria-hidden="true" tabindex="-1">{banner}</pre>
+  <pre class="banner" translate="no" aria-hidden="true" tabindex="-1">{banner}</pre>
   <h1 class="tui-h1">one workshop · plugins · apps · experiments</h1>
   <p class="tui-p tui-dim">
     Generated from the repositories. Taglines, status and commits are read from source at build time.
@@ -60,7 +60,7 @@ const banner = [
       dirs.map((d) => (
         <a href={href(d.page, 'tui')} data-nav={d.page} data-astro-prefetch>
           <span class="idx">{d.cmd}</span>
-          <span class="name">{d.name}</span>
+          <span class="name" translate="no">{d.name}</span>
           <span class="cat">{d.text}</span>
         </a>
       ))

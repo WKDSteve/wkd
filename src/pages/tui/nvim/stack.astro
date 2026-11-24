@@ -20,8 +20,8 @@ const { bars, tree } = renderTuiStack(nodes, (slug) => href(`p/${slug}`, 'tui'))
   </p>
 
   <h2 class="tui-h2">depended on</h2>
-  <pre class="tui-tree" set:html={bars} />
+  <pre class="tui-tree" translate="no" set:html={bars} />
 
   <h2 class="tui-h2">tree</h2>
-  <pre class="tui-tree" set:html={tree} />
+  <pre class="tui-tree" translate="no" set:html={tree} />
 </Shell>

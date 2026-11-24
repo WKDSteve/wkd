@@ -61,7 +61,7 @@ const note = d.statusNote ? shortNote(d.statusNote) : null;
             <span class="m-apppage-icon m-app-noicon" aria-hidden="true">{d.name.charAt(0)}</span>
           )
         }
-        <h1 class="display display--name" data-kinetic>{d.name}</h1>
+        <h1 class="display display--name" data-kinetic translate="no">{d.name}</h1>
       </div>
       <p class="m-lede">{d.description}</p>
       <p class="m-actions" data-pagefind-ignore>
@@ -94,7 +94,7 @@ const note = d.statusNote ? shortNote(d.statusNote) : null;
             </ul>
           ) : null
         }
-        {d.install ? <pre class="code"><code>{d.install}</code></pre> : null}
+        {d.install ? <pre class="code" translate="no"><code translate="no">{d.install}</code></pre> : null}
         {note ? <p class="m-status-note">{note}</p> : null}
         {!hasGet && !note ? <p class="m-kicker">No build to download yet; the README says how to build it.</p> : null}
       </section>

@@ -54,7 +54,7 @@ const groups = [
               return (
                 <a href={href(entryPage(a), 'tui')} data-nav={entryPage(a)} data-cat={a.category} data-astro-prefetch>
                   <span class="idx">{String(i + 1).padStart(2, '0')}</span>
-                  <span class="name">{a.name}</span>
+                  <span class="name" translate="no">{a.name}</span>
                   <span class="stat" data-status={a.status}>{a.status === 'unknown' ? '-' : a.status}</span>
                   <span class="cat">
                     {categoryLabel(a.category).toLowerCase()} — {a.tagline}

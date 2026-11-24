@@ -37,7 +37,7 @@ const banner = [
 ---
 
 <Shell page="nvim" title="wkd — a family of Neovim plugins" description={`${pluginCount} Neovim plugins, one family.`} cmd="ls">
-  <pre class="banner" aria-hidden="true" tabindex="-1">{banner}</pre>
+  <pre class="banner" translate="no" aria-hidden="true" tabindex="-1">{banner}</pre>
   <h1 class="tui-h1">{pluginCount} plugins · {approx(features)} features · one family</h1>
   <p class="tui-p tui-dim">
     Generated from the repositories. Taglines, status and commits are read from source at build time.
@@ -54,7 +54,7 @@ const banner = [
         plugins.map((p, i) => (
           <a href={href(`p/${p.id}`, 'tui')} data-nav={`p/${p.id}`} data-cat={p.data.category} data-astro-prefetch>
             <span class="idx">{pad2(i + 1)}</span>
-            <span class="name">{p.data.name}</span>
+            <span class="name" translate="no">{p.data.name}</span>
             <span class="stat" data-status={p.data.status}>{p.data.status}</span>
             <span class="cat">
               {categoryLabel(p.data.category).toLowerCase()} — {p.data.tagline}
