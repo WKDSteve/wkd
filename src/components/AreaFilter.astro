@@ -1,5 +1,6 @@
 ---
 import { AREA_LABELS, type EntryArea } from '../lib/areas';
+import { formatCount } from '../lib/intl';
 
 // Pure-CSS filter by area, the twin of CategoryFilter.astro: radio buttons and
 // `:has()` rules in src/styles/filter.css. Without script and before any
@@ -23,7 +24,7 @@ const total = areas.reduce((n, a) => n + counts[a], 0);
       <>
         <input class="visually-hidden" type="radio" name="area" id={`area-${a}`} />
         <label for={`area-${a}`}>
-          {AREA_LABELS[a].toLowerCase()} <span class="filter-n">{counts[a]}</span>
+          {AREA_LABELS[a].toLowerCase()} <span class="filter-n">{formatCount(counts[a])}</span>
         </label>
       </>
     ))

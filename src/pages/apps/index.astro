@@ -4,6 +4,7 @@ import CategoryFilter from '../../components/CategoryFilter.astro';
 import GraphPicture from '../../components/GraphPicture.astro';
 import { appMeta, appSections, kits, otherForms } from '../../lib/apps';
 import { approx, categoryLabel } from '../../lib/format';
+import { formatCount } from '../../lib/intl';
 import { entryPage } from '../../lib/nav';
 import { BASE, href } from '../../lib/site';
 import Shell from '../../skins/modern/Shell.astro';
@@ -19,10 +20,10 @@ const webCount = items.filter((i) => i.kind === 'web').length;
 const counts: Record<string, number> = {};
 for (const a of [...apps, ...foundations]) counts[a.category] = (counts[a.category] ?? 0) + 1;
 const stats = [
-  { label: 'apps', value: String(apps.length) },
-  { label: 'web variants', value: String(webCount) },
+  { label: 'apps', value: formatCount(apps.length) },
+  { label: 'web variants', value: formatCount(webCount) },
   // A tag, not a published release: the repositories say which is which.
-  { label: 'with a version tag', value: String(apps.filter((a) => a.release).length) },
+  { label: 'with a version tag', value: formatCount(apps.filter((a) => a.release).length) },
   { label: 'commits', value: approx(apps.reduce((n, a) => n + a.commitCount, 0)) },
 ];
 const description = `${apps.length} native apps from one workshop: tools that stand on their own, and companions of the Neovim plugins.`;

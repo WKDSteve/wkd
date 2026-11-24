@@ -2,7 +2,7 @@
 import type { CollectionEntry } from 'astro:content';
 import registry from '../data/registry.json';
 import { AREA_MARKS, areaOfSlug, pageOfSlug } from '../lib/entries';
-import { isoDay } from '../lib/format';
+import { formatDay } from '../lib/intl';
 import { href, type Skin } from '../lib/site';
 
 interface Props {
@@ -21,7 +21,7 @@ const commitUrl = `https://github.com/${registry.owner}/${c.pluginName}/commit/$
 ---
 
 <li data-area={area}>
-  <time datetime={c.date}>{isoDay(c.date)}</time>
+  <time datetime={c.date}>{formatDay(c.date)}</time>
   {
     showPlugin ? (
       <>

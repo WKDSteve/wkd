@@ -4,6 +4,7 @@ import AreaFilter from '../../components/AreaFilter.astro';
 import CommitLine from '../../components/CommitLine.astro';
 import { areaOfSlug } from '../../lib/entries';
 import { byDateDesc, isoDay } from '../../lib/format';
+import { formatCount, formatDay } from '../../lib/intl';
 import Shell from '../../skins/tui/Shell.astro';
 
 const activity = (await getCollection('activity')).sort(byDateDesc);
@@ -19,7 +20,7 @@ for (const c of activity) {
 
 <Shell page="activity" title="Activity — wkd" description="Every recent commit across the repositories of the workshop." cmd="activity">
   <h1 class="tui-h1">activity.log</h1>
-  <p class="tui-p tui-dim">{activity.length} commits across all repositories, newest first.</p>
+  <p class="tui-p tui-dim">{formatCount(activity.length)} commits across all repositories, newest first.</p>
   <div class="home">
   <div class="tui-filter">
     <span class="tui-dim" aria-hidden="true">:log</span>
@@ -28,7 +29,7 @@ for (const c of activity) {
   {
     [...days.entries()].map(([day, items]) => (
       <section class="area-group">
-        <h2 class="tui-h2">{day}</h2>
+        <h2 class="tui-h2"><time datetime={day}>{formatDay(day)}</time></h2>
         <ol class="tui-list">
           {items.map((c) => (
             <CommitLine commit={c.data} skin="tui" />

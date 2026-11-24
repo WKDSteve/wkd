@@ -10,6 +10,7 @@ import registry from '../../data/registry.json';
 import { alsoAs, formMark } from '../../lib/apps';
 import { COMBOS, combosFor } from '../../lib/combos';
 import { approx, byDateDesc, CATEGORIES, categoryLabel, pad2 } from '../../lib/format';
+import { formatCount } from '../../lib/intl';
 import { orbitLayout } from '../../lib/orbit';
 import { BASE, href } from '../../lib/site';
 import { buildStack, treeLayout } from '../../lib/stack';
@@ -56,30 +57,33 @@ const markOf = new Map(
   plugins.map((p) => [p.id, formMark(alsoAs(allData, p.data).map((f) => f.item))]),
 );
 const statsPool = [
-  { label: 'plugins', value: String(pluginCount) },
+  { label: 'plugins', value: formatCount(pluginCount) },
   { label: 'features', value: approx(features) },
   { label: 'help topics', value: approx(helpTags) },
   { label: 'test files', value: approx(testFiles) },
   { label: 'commits', value: approx(sum((p) => p.data.commitCount)) },
-  { label: 'require() edges', value: String(stackNodes.reduce((n, p) => n + p.uses.length, 0)) },
+  {
+    label: 'require() edges',
+    value: formatCount(stackNodes.reduce((n, p) => n + p.uses.length, 0)),
+  },
   {
     label: 'optional integrations',
-    value: String(stackNodes.reduce((n, p) => n + p.uses.filter((u) => u.optional).length, 0)),
+    value: formatCount(stackNodes.reduce((n, p) => n + p.uses.filter((u) => u.optional).length, 0)),
   },
-  { label: 'demos recorded', value: String(sum((p) => p.data.demos.length)) },
-  { label: 'screenshots', value: String(sum((p) => p.data.shots.length)) },
-  { label: 'vimdoc pages', value: String(sum((p) => p.data.vimdocs.length)) },
-  { label: 'doc pages', value: String(sum((p) => p.data.docs.length)) },
-  { label: 'stable', value: String(countWhere((p) => p.data.status === 'stable')) },
-  { label: 'beta', value: String(countWhere((p) => p.data.status === 'beta')) },
-  { label: 'alpha', value: String(countWhere((p) => p.data.status === 'alpha')) },
-  { label: 'categories', value: String(Object.keys(counts).length) },
-  { label: 'combos', value: String(COMBOS.length) },
+  { label: 'demos recorded', value: formatCount(sum((p) => p.data.demos.length)) },
+  { label: 'screenshots', value: formatCount(sum((p) => p.data.shots.length)) },
+  { label: 'vimdoc pages', value: formatCount(sum((p) => p.data.vimdocs.length)) },
+  { label: 'doc pages', value: formatCount(sum((p) => p.data.docs.length)) },
+  { label: 'stable', value: formatCount(countWhere((p) => p.data.status === 'stable')) },
+  { label: 'beta', value: formatCount(countWhere((p) => p.data.status === 'beta')) },
+  { label: 'alpha', value: formatCount(countWhere((p) => p.data.status === 'alpha')) },
+  { label: 'categories', value: formatCount(Object.keys(counts).length) },
+  { label: 'combos', value: formatCount(COMBOS.length) },
   {
     label: 'in a combo',
-    value: String(countWhere((p) => (combosByPlugin.get(p.id)?.length ?? 0) > 0)),
+    value: formatCount(countWhere((p) => (combosByPlugin.get(p.id)?.length ?? 0) > 0)),
   },
-  { label: 'standalone', value: String(countWhere((p) => p.data.uses.length === 0)) },
+  { label: 'standalone', value: formatCount(countWhere((p) => p.data.uses.length === 0)) },
 ];
 ---
 

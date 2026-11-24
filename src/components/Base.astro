@@ -3,6 +3,7 @@ import { Font } from 'astro:assets';
 import '../styles/tokens.css';
 import '../styles/filter.css';
 import { BOOT } from '../lib/boot';
+import { SITE_LANG } from '../lib/intl';
 import { BASE, href, MODE_COLORS, otherSkin, type Skin } from '../lib/site';
 
 interface Props {
@@ -20,7 +21,7 @@ const canonical = new URL(href(page), Astro.site);
 ---
 
 <!doctype html>
-<html lang="en" data-skin={skin}>
+<html lang={SITE_LANG} data-skin={skin}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
