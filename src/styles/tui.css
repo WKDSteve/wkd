@@ -17,6 +17,8 @@
   }
   .tui-filter label {
     display: inline-flex;
+    min-inline-size: var(--target-size);
+    justify-content: center;
   }
   .search-label {
     min-inline-size: var(--target-size);

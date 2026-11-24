@@ -18,7 +18,9 @@
     min-block-size: var(--target-size);
   }
   .m-nav a,
-  .search-label {
+  .search-label,
+  .m-filter label,
+  .view-tabs label {
     min-inline-size: var(--target-size);
     justify-content: center;
   }
