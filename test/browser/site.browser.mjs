@@ -378,6 +378,33 @@ describe('the built site in a browser', { skip }, () => {
     await p.until(`Number(${$('[data-fight-timer]')}.textContent) < 60`, 'the clock to run');
   });
 
+  test('a bad pairing code is flagged on its own field, not only in the status line', async () => {
+    await p.goto(`${B}/play/`);
+    await p.until(`!${$('[data-fight-online]')}.hidden`, 'the online block (WebRTC)');
+    await p.eval(`${$('[data-fight-join]')}.click()`);
+    await p.until(shown('[data-fight-code-in-step]'), 'the code field');
+    const field = $('[data-fight-code-in]');
+    assert.equal(await p.eval(`${field}.getAttribute('aria-invalid')`), null);
+    await p.eval(`${field}.value = 'not a code'; ${$('[data-fight-code-submit]')}.click()`);
+    await p.until(`${field}.getAttribute('aria-invalid') === 'true'`, 'the field flagged invalid');
+    const target = await p.eval(
+      `document.getElementById(${field}.getAttribute('aria-describedby'))?.hasAttribute('data-fight-online-status')`,
+    );
+    assert.equal(
+      target,
+      true,
+      'the field is described by the status line that carries the message',
+    );
+    assert.equal(
+      await p.eval(`document.activeElement === ${field}`),
+      true,
+      'focus returns to the field',
+    );
+    // Typing again clears the flag.
+    await p.eval(`${field}.dispatchEvent(new Event('input'))`);
+    assert.equal(await p.eval(`${field}.getAttribute('aria-invalid')`), null);
+  });
+
   test('P pauses a match against the AI: the clock stands, Resume goes on', async () => {
     await startMatch();
     await p.until(`Number(${$('[data-fight-timer]')}.textContent) < 60`, 'the intro to end');

@@ -116,7 +116,20 @@ export function begin(mode: 'invite' | 'join', api: OnlineApi): void {
     busy = false;
     ui.submit.disabled = false;
     say(message);
+    markInvalid(true);
     ui.input.focus();
+  };
+  /** The error is spoken by the status line; tie it to the field it is about. */
+  const markInvalid = (on: boolean): void => {
+    if (on && ui.status.id) {
+      ui.input.setAttribute('aria-invalid', 'true');
+      ui.input.setAttribute('aria-describedby', ui.status.id);
+      ui.input.oninput = () => markInvalid(false);
+    } else {
+      ui.input.removeAttribute('aria-invalid');
+      ui.input.removeAttribute('aria-describedby');
+      ui.input.oninput = null;
+    }
   };
 
   /** Back to how the page was before, optionally leaving a last word. */
@@ -135,6 +148,7 @@ export function begin(mode: 'invite' | 'join', api: OnlineApi): void {
     ui.cancel.textContent = 'Cancel';
     ui.out.value = '';
     ui.input.value = '';
+    markInvalid(false);
     show('out', false);
     show('in', false);
     show('cancel', false);
@@ -193,6 +207,7 @@ export function begin(mode: 'invite' | 'join', api: OnlineApi): void {
         if (busy) return;
         busy = true;
         ui.submit.disabled = true;
+        markInvalid(false);
         say('Connecting…');
         invitation.accept(ui.input.value).then(connected, (error: unknown) => {
           // A typo or a cut-off message does not cost the invitation.
@@ -211,6 +226,7 @@ export function begin(mode: 'invite' | 'join', api: OnlineApi): void {
       if (busy) return;
       busy = true;
       ui.submit.disabled = true;
+      markInvalid(false);
       say('Creating a reply…');
       join(ui.input.value).then(
         (reply) => {
