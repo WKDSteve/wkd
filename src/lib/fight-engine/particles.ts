@@ -1,4 +1,3 @@
-/// <reference types="@webgpu/types" />
 // Hit sparks and landing dust as GPU particles. The particles live in one
 // storage buffer; a WGSL compute shader integrates them every frame and a
 // second pipeline draws them as instanced pixel squares, additively, into
@@ -9,6 +8,8 @@
 // Loaded with a dynamic import() on the first match only. No WebGPU, no
 // adapter, a lost device: createParticles() resolves to null or draw()
 // turns into a no-op, and the match simply has no particles.
+
+/// <reference types="@webgpu/types" />
 
 const MAX_PARTICLES = 2048;
 const FLOATS_PER_PARTICLE = 8; // pos.xy, vel.xy, life, maxLife, size, kind

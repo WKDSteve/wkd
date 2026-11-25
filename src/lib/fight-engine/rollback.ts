@@ -15,6 +15,7 @@
 // The transport may drop, delay and reorder packets (it is meant to run over
 // an unreliable WebRTC data channel): every packet repeats all inputs the
 // peer has not acknowledged yet.
+
 import { cloneState, copyState, G_OVER, hashState, type SimState, step } from './sim.ts';
 
 export interface Transport {

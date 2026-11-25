@@ -1,16 +1,16 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join, relative, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import type { AstroIntegration } from 'astro';
-import { builtAreas, MOVED, movedEntries, routeProblems } from '../lib/nav';
-import { type RawRegistry, validateRegistry } from '../lib/registry';
-
 // The last step of every build: the addresses that are already out in the
 // world must be in the output, or the build fails and nothing is deployed.
 // Those are the plugin pages (the READMEs of the plugins link to them), the
 // areas the navigation shows and the addresses that moved (among them the old
 // p/<slug>/ of every app, web variant and kit). The rules are in
 // routeProblems() (src/lib/nav.ts), where test/nav.test.ts covers them.
+
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { join, relative, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import type { AstroIntegration } from 'astro';
+import { builtAreas, MOVED, movedEntries, routeProblems } from '../lib/nav';
+import { type RawRegistry, validateRegistry } from '../lib/registry';
 
 /** Every .astro file under a directory, as paths relative to it with forward slashes. */
 function astroFiles(dir: string): string[] {

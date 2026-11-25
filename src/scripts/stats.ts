@@ -3,6 +3,7 @@
 // correct and final. With it, a slot swaps to a different metric from the
 // pool every few seconds, one at a time so the page stays legible instead
 // of flashing all four at once.
+
 interface Metric {
   label: string;
   value: string;

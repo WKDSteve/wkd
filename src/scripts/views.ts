@@ -3,6 +3,7 @@
 // Escape back to Grid, and revealing a non-Grid view once, after the
 // visitor has sat idle a while without ever touching the switcher. Both are
 // additions on top of a page that already works without this file.
+
 import { areaOfHash } from '../lib/areas';
 
 // The area filter of the activity page is CSS too. An address can name the

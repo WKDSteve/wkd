@@ -1,3 +1,13 @@
+// Visitor preferences, all client-side and all optional:
+//  - skin:  remembered on an explicit switch; on later visits internal links are
+//           rewritten to the preferred skin (no redirect, no flash). The hint
+//           bar offers both ways out: follow the link, or "stay here", which
+//           re-points the links and stores the current skin instead.
+//  - theme: TUI colorscheme, applied as data-theme on <html>.
+//  - mode:  modern skin light/dark override, applied as data-mode on <html>.
+// The inline bootstrap (src/lib/boot.ts) applies theme/mode before first
+// paint; this module wires the controls and cleans up stale stored values.
+
 import {
   href,
   MODE_COLORS,
@@ -11,15 +21,6 @@ import {
   THEMES,
 } from '../lib/site';
 
-// Visitor preferences, all client-side and all optional:
-//  - skin:  remembered on an explicit switch; on later visits internal links are
-//           rewritten to the preferred skin (no redirect, no flash). The hint
-//           bar offers both ways out: follow the link, or "stay here", which
-//           re-points the links and stores the current skin instead.
-//  - theme: TUI colorscheme, applied as data-theme on <html>.
-//  - mode:  modern skin light/dark override, applied as data-mode on <html>.
-// The inline bootstrap (src/lib/boot.ts) applies theme/mode before first
-// paint; this module wires the controls and cleans up stale stored values.
 const root = document.documentElement;
 const currentSkin = root.dataset.skin as Skin;
 const otherSkin = document.body.dataset.otherSkin as Skin;

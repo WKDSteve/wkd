@@ -8,6 +8,7 @@
 // This file is the shell around the match: DOM, sprites, audio, HUD and
 // input collection. The rules themselves -- physics, hits, clock, outcome
 // -- are the deterministic core in src/lib/fight-engine/sim.ts.
+
 import {
   type AnimKey,
   CANVAS,

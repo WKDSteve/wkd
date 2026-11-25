@@ -1,3 +1,5 @@
+// The CSS of the fighter pick-card sprite previews of the fight minigame, as a pure function of the base path.
+
 import { FIGHTERS, FRAME } from './fight';
 
 const PREVIEW = 100;

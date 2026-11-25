@@ -1,11 +1,11 @@
-import combosData from '../data/combos.json';
-import registry from '../data/registry.json';
-
 // Cross-category groupings, distinct from src/data/registry.json's one
 // category per plugin: a plugin can be in several of these, or none. Colour
 // identity is deliberately its own (see modern.css) rather than reusing the
 // category neons -- the whole point here is a second, visibly different
 // system, not a restyled category.
+
+import combosData from '../data/combos.json';
+import registry from '../data/registry.json';
 
 export interface Combo {
   id: string;

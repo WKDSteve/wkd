@@ -7,6 +7,7 @@
 //
 // Relative imports carry their .ts extension and the file sticks to erasable
 // TypeScript so plain `node --test` can run it.
+
 import {
   type AnimKey,
   CANVAS,

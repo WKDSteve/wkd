@@ -1,5 +1,6 @@
 // The checked registry, once per build, for the components that need to know
 // what an entry is (a plugin or an app) from its slug alone, e.g. a commit.
+
 import registry from '../data/registry.json';
 import { areaOfKind, type EntryArea } from './areas';
 import { entryPage } from './nav';

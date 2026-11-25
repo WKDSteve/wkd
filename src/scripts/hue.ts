@@ -2,6 +2,7 @@
 // modern skin. The colours themselves are CSS (--neon-N in modern.css); this
 // only picks which one an element shows the next time it is hovered, via
 // data-hue -- an attribute, so it stays clear of the style-src policy.
+
 const HUES = 5;
 const TARGET = '.m-card, .m-filter label, .m-filter input';
 

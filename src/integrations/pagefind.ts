@@ -1,3 +1,8 @@
+// Static search index. After `astro build` Pagefind indexes dist/ (only pages
+// carrying data-pagefind-body) and writes dist/pagefind/. In dev the same
+// bundle is served from dist/ if a build exists, so search can be tried
+// without deploying; otherwise the client shows a hint.
+
 import { existsSync } from 'node:fs';
 import { readFile, rm } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
@@ -5,10 +10,6 @@ import { fileURLToPath } from 'node:url';
 import type { AstroIntegration } from 'astro';
 import * as pagefind from 'pagefind';
 
-// Static search index. After `astro build` Pagefind indexes dist/ (only pages
-// carrying data-pagefind-body) and writes dist/pagefind/. In dev the same
-// bundle is served from dist/ if a build exists, so search can be tried
-// without deploying; otherwise the client shows a hint.
 const UNUSED_UI = [
   'pagefind-ui.js',
   'pagefind-ui.css',

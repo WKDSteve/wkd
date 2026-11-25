@@ -1,7 +1,3 @@
-import { AREA_KINDS, type EntryArea, hitLabel, parseSearch } from '../lib/areas';
-import { BASE, href, pageOf, readPref, SKIN_KEY, SKINS, type Skin } from '../lib/site';
-import { trustedTypes } from '../lib/trusted-types';
-
 // Static full-text search over the pages of the plugins, the apps and the
 // play area. The index is produced by
 // Pagefind after the build (src/integrations/pagefind.ts) and loaded lazily on
@@ -11,6 +7,10 @@ import { trustedTypes } from '../lib/trusted-types';
 // twice); result URLs are mapped back onto the skin the visitor is in. A hit
 // says whether it is a plugin or an app, and `app:` or `plugin:` in front of
 // the query keeps the search in one area (the `kind` filter of the index).
+
+import { AREA_KINDS, type EntryArea, hitLabel, parseSearch } from '../lib/areas';
+import { BASE, href, pageOf, readPref, SKIN_KEY, SKINS, type Skin } from '../lib/site';
+import { trustedTypes } from '../lib/trusted-types';
 
 interface PagefindData {
   url: string;

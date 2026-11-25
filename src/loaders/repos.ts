@@ -1,3 +1,7 @@
+// Both collections (plugins + activity) come from one scan of the plugin
+// checkouts. Locally that is the sibling directory of this repo; in CI the
+// deploy workflow clones every registry entry into PLUGINS_DIR first.
+
 import { execFile } from 'node:child_process';
 import {
   existsSync,
@@ -39,9 +43,6 @@ import {
 } from '../lib/registry';
 import { collectTags } from '../lib/vimdoc';
 
-// Both collections (plugins + activity) come from one scan of the plugin
-// checkouts. Locally that is the sibling directory of this repo; in CI the
-// deploy workflow clones every registry entry into PLUGINS_DIR first.
 const OWNER = registry.owner;
 const RECENT_PER_REPO = 12;
 // The registry is checked once, when this module loads: an unknown kind, a

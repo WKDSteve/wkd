@@ -6,6 +6,7 @@
 // innerHTML, eval and the like stay blocked.
 //
 // A browser without Trusted Types has no `trustedTypes` and does not enforce the directive either: nothing to do.
+
 import { trustedTypes } from '../lib/trusted-types';
 
 const tt = trustedTypes();

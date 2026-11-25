@@ -1,3 +1,6 @@
+// The Astro content collections of the site: the plugins, the activity feed and the vimdocs,
+// each filled by a loader from src/loaders/repos.ts.
+
 import { defineCollection } from 'astro:content';
 import {
   activityLoader,

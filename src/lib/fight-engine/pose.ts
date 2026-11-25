@@ -3,6 +3,7 @@
 // frame of the knockout -- so the last animation is the view's to play, from
 // a frame counter of its own: the loser goes down, the winner finishes the
 // swing and settles.
+
 import type { AnimDef, AnimKey } from '../fight.ts';
 import {
   F_ANIM_FRAME,

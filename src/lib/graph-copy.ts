@@ -1,5 +1,6 @@
 // Copies the picture of a repository's connections into what the site serves, and has AVIF and WebP made for
 // it. Free of Astro (the content loader passes its logger in), so `pnpm test` covers it with folders in tmp.
+
 import { execFileSync } from 'node:child_process';
 import { lstatSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';

@@ -1,6 +1,7 @@
 // Which failures of the pairing step belong to the code field. A failure that is about what the person
 // typed or pasted stays at the field (flagged invalid, focus back, same attempt again); one about the
 // connection itself ends the attempt and is only spoken by the status line.
+
 import { BadCodeError, LinkFailedError } from './net.ts';
 
 export type PairingStep = 'accept-reply' | 'join-invitation';

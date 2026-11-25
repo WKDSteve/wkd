@@ -7,6 +7,7 @@
 // seed and arena; the guest plays fighter 1. Both announce their fighter
 // with `hello`, the host answers with `start`, and each side builds the
 // identical initial state from that one message.
+
 import { FIGHTERS, LEVELS } from '../lib/fight';
 import {
   type ControlMessage,

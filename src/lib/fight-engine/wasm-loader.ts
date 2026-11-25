@@ -4,6 +4,7 @@
 //
 // no-inline for the same reason as the audio worklet: inlined as a data:
 // URL the fetch would be refused by the deployed CSP (connect-src 'self').
+
 import wasmUrl from './fight-sim.wasm?url&no-inline';
 
 export { instantiateSim } from './wasm.ts';

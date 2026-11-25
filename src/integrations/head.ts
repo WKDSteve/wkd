@@ -1,11 +1,11 @@
+// After the build, before the checks of routes.ts read the pages: the CSP <meta> and the referrer policy move to
+// the top of every <head> (see src/lib/head.ts for why).
+
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { AstroIntegration } from 'astro';
 import { hoistPolicyMetas } from '../lib/head';
-
-// After the build, before the checks of routes.ts read the pages: the CSP <meta> and the referrer policy move to
-// the top of every <head> (see src/lib/head.ts for why).
 
 function htmlFiles(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((e) => {

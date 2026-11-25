@@ -3,6 +3,7 @@
 // Its three words of memory (next decision frame, walk direction, the button
 // it means to hold) and its randomness live in the sim state, so it replays and rolls back
 // with the match.
+
 import {
   ATTACK_RANGE,
   ATTACK_W,

@@ -1,6 +1,7 @@
 // Gamepad as one more input source: a controller snapshot in, the same
 // IN_* bitmask out that keyboard and touch produce. Kept free of
 // `navigator` so it can be tested with plain objects.
+
 import { IN_ATTACK1, IN_ATTACK2, IN_JUMP, IN_LEFT, IN_RIGHT, IN_SPECIAL } from './sim.ts';
 
 /** The subset of the Gamepad interface this needs. */

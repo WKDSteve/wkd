@@ -1,3 +1,6 @@
+// Small display and data helpers shared by the pages: category labels, UTC days, date ordering, two-digit
+// padding and the lazy.nvim install snippet.
+
 import registry from '../data/registry.json';
 
 export { approx } from './approx.ts';

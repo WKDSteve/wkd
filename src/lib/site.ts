@@ -1,6 +1,7 @@
 // Shared by server components and the client scripts -- keep it free of node
 // imports. Every internal URL goes through href() so the base path and the
 // skin prefix live in exactly one place.
+
 export type Skin = 'modern' | 'tui';
 export const SKINS: readonly Skin[] = ['modern', 'tui'];
 

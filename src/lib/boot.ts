@@ -1,5 +1,3 @@
-import { THEMES } from './themes';
-
 // The inline bootstrap that runs as the first child of <body>, before any
 // page markup is parsed. It is emitted verbatim by src/components/Base.astro
 // (set:html) and hashed into the CSP by astro.config.ts, so the string must be
@@ -12,6 +10,9 @@ import { THEMES } from './themes';
 // - theme: TUI colorscheme, allow-listed (github.io shares localStorage across
 //   every Pages project of the account, so never trust a stored value).
 // - mode: modern light/dark override.
+
+import { THEMES } from './themes';
+
 const themeTest = THEMES.slice(1)
   .map((t) => `t==="${t}"`)
   .join('||');

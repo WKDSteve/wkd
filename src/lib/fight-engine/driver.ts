@@ -2,6 +2,7 @@
 // a remote peer, or the AI behind a simulated network. fight.ts renders
 // `state`, feeds `tick` the local player's input once per 60 Hz step and
 // stops when `outcome` turns non-zero -- it does not know which one it has.
+
 import type { FighterConfig, LevelConfig } from '../fight.ts';
 import { type AiProfile, aiInput } from './ai.ts';
 import { G_OVER, type SimState } from './sim.ts';

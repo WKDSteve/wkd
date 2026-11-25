@@ -1,6 +1,7 @@
 // The fixed-timestep accumulator behind the match loop, kept free of the DOM
 // so its arithmetic can be tested: however fast the display refreshes, the
 // sim advances in whole 60 Hz steps.
+
 import { SIM_HZ } from './sim.ts';
 
 export const STEP_MS = 1000 / SIM_HZ;

@@ -1,10 +1,10 @@
-import { getCollection } from 'astro:content';
-import { href, type Skin } from './site';
-import { collectTags, type Rendered, renderVimdoc, type TagTarget } from './vimdoc';
-
 // Shared by both skins' help routes: the tag index across every plugin's
 // doc/*.txt (so |lib.nvim-async| in cascade's help links to lib.nvim's page)
 // and the page path of a given help file.
+
+import { getCollection } from 'astro:content';
+import { href, type Skin } from './site';
+import { collectTags, type Rendered, renderVimdoc, type TagTarget } from './vimdoc';
 
 export function helpPage(plugin: string, file: string, main: boolean): string {
   return main ? `p/${plugin}/help` : `p/${plugin}/help/${file}`;

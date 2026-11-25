@@ -10,6 +10,7 @@
 // no-inline matters: the module is small enough that Vite would otherwise
 // hand back a data: URL, which the site's CSP (script-src 'self') refuses
 // -- only in the deployed build, the dev server enforces no CSP.
+
 import workletUrl from './audio.worklet.js?url&no-inline';
 
 export type Sfx = 'hit' | 'stinger' | 'blip' | 'special';

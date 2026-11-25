@@ -3,6 +3,7 @@
 // memory; the Int32Array handed back is a view of it, so everything that
 // reads or writes sim state from JS -- the AI, the renderer, hashState --
 // works on it unchanged.
+
 import { type SimState, STATE_LEN } from './sim.ts';
 
 export interface WasmSim {

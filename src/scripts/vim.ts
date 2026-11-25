@@ -1,6 +1,3 @@
-import { AREA_LABELS, areaOfArg } from '../lib/areas';
-import { href, pageOf, SKIN_KEY, type Skin, THEMES } from '../lib/site';
-
 // Vim-style operation of the TUI skin. Everything here is progressive: the
 // links, the search field and the selects work without it.
 //
@@ -13,6 +10,9 @@ import { href, pageOf, SKIN_KEY, type Skin, THEMES } from '../lib/site';
 //
 // The command line reuses the search form's input and result panel; while
 // data-mode="cmd" is set, search.ts stays out of the way.
+
+import { AREA_LABELS, areaOfArg } from '../lib/areas';
+import { href, pageOf, SKIN_KEY, type Skin, THEMES } from '../lib/site';
 
 type ModeName = 'NORMAL' | 'INSERT' | 'COMMAND';
 

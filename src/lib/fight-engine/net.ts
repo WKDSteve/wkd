@@ -7,6 +7,7 @@
 // unordered on purpose (a late input packet is worthless, the next one
 // repeats its content anyway); `ctl` is reliable and carries the handful of
 // messages that set a match up.
+
 import type { Transport } from './rollback.ts';
 
 // Empty: no STUN server is contacted, which limits this to peers that can

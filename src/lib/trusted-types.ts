@@ -1,5 +1,6 @@
 // The part of the Trusted Types API the site uses (TypeScript's DOM library does not carry it yet). Absent in a
 // browser without the feature, which then does not enforce `require-trusted-types-for` either.
+
 export interface PolicyOptions {
   createHTML?: (input: string) => string;
   createScriptURL?: (input: string) => string;

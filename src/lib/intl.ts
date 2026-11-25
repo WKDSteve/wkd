@@ -1,5 +1,6 @@
 // Display of dates and numbers. One language for the whole build, the one the
 // pages declare in <html lang>, so the figures and the page agree.
+
 export const SITE_LANG = 'en';
 
 const day = new Intl.DateTimeFormat(SITE_LANG, { dateStyle: 'medium', timeZone: 'UTC' });

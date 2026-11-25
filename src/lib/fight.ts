@@ -3,6 +3,7 @@
 // copied from $REPOS_DIR/FightingGame (a from-scratch tutorial project) --
 // only the sprite sheets and the one arena background came from there, the
 // game code itself is new, written for this canvas/engine.
+
 export type AnimKey =
   | 'idle'
   | 'run'
